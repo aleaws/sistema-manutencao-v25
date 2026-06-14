@@ -1,0 +1,19 @@
+00_Planejamento_Prioridades.html permissão ok não pode 
+00_Sistema_Manutencao_V25.html
+01_Liberacoes.html permissão ok não pode
+03_Manutencao.html permissões ok PCP PODE
+04_Maquinas.html    permissões ok PCP PODE engenharia
+05_Dispositivos.html    permissões ok PCP PODE engenharia
+06_Melhorias.html   07_OS_Dispositivos.html 
+07_OS_Dispositivos.html    OS DE DISPOSITIVOS 07_OS_Dispositivos.html
+08_Pauta.html      ok não pode
+09_Nao_Conformidades.html   ok não pode
+15_Indicadores.html   ok não pode
+19_Lubrificacao.html   ok não pode
+20_Diario_Simples.html   ok não pode
+21_Diario_Inspecao.html  ok não pode
+22_Ferramentas_Materiais.html   ok não pode
+23_Visao_Geral.html    ok não pode
+24_Indicadores_01_Equipamentos.html   ok não pode
+26_Controle_Tempo_Producao_PRO.html  ok não pode
+99_Backup_Geral.html

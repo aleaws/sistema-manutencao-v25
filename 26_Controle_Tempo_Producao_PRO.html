@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>
+26_Controle_Tempo_Producao_PRO
+</title>
+
+<style>
+
+body{
+font-family:Segoe UI;
+background:#eef2f7;
+margin:20px;
+position:relative;
+overflow-x:hidden;
+}
+
+h1{
+color:#1f4e79;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:12px;
+box-shadow:0 2px 8px rgba(0,0,0,.1);
+margin-bottom:20px;
+position:relative;
+overflow:hidden;
+}
+
+.logoMarcaDagua{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+opacity:0.06;
+pointer-events:none;
+z-index:0;
+}
+
+.logoMarcaDagua img{
+width:850px;
+}
+
+.logoFundo{
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+opacity:0.05;
+z-index:-1;
+pointer-events:none;
+}
+
+.logoFundo img{
+width:900px;
+max-width:80vw;
+}
+
+.cardPrincipal{
+width:620px;
+}
+
+.linha{
+display:flex;
+gap:20px;
+flex-wrap:wrap;
+position:relative;
+z-index:1;
+}
+
+input,select{
+
+padding:8px;
+border:1px solid #ccc;
+border-radius:6px;
+width:180px;
+
+}
+
+button{
+
+padding:10px 15px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold;
+
+}
+
+#btIniciar{
+background:#28a745;
+color:white;
+}
+
+#btPausar{
+background:#ffc107;
+}
+
+#btRetomar{
+background:#17a2b8;
+color:white;
+}
+
+#btEncerrar{
+background:#dc3545;
+color:white;
+}
+
+#tempoProducao,
+#tempoParado{
+
+font-size:30px;
+font-weight:bold;
+color:#1f4e79;
+
+}
+
+#tabelaHistoricoOPs{
+width:100%;
+border-collapse:collapse;
+background:white;
+}
+
+#tabelaHistoricoOPs th{
+border:1px solid #ccc;
+padding:8px;
+background:#1f4e79;
+color:white;
+text-align:center;
+}
+
+#tabelaHistoricoOPs td{
+border:1px solid #ccc;
+padding:6px;
+text-align:center;
+}
+
+#tabelaHistoricoOPs tr:nth-child(even){
+background:#f5f5f5;
+}
+
+</style>
+
+<script src="permissoes.js"></script>
+
+</head>
+
+<body>
+
+
+<h1>
+Controle de Tempo Produção PRO
+</h1>
+
+<div class="card cardPrincipal">
+
+<div class="logoMarcaDagua">
+<img src="Bonier_logo2.png">
+</div>
+
+
+<div class="linha">
+
+<div>
+<p>Máquina</p>
+<input id="maquina">
+</div>
+
+<div>
+<p>OP</p>
+<input id="op">
+</div>
+
+<div>
+<p>Produto</p>
+<input id="produto">
+</div>
+
+</div>
+
+<br>
+
+<button id="btIniciar">
+▶ Iniciar
+</button>
+
+<button id="btPausar">
+⏸ Pausar
+</button>
+
+<button id="btRetomar">
+▶ Retomar
+</button>
+
+<button id="btEncerrar">
+■ Encerrar
+</button>
+
+<br><br>
+
+<button id="btRelatorio">
+📄 Gerar Relatório
+</button>
+
+<br><br>
+
+<button id="btImprimir">
+🖨 Imprimir
+</button>
+
+<button id="btPDF">
+📥 Salvar PDF
+</button>
+
+</div>
+
+<div class="linha" style="margin-top:-500px; margin-left:780px;">
+
+<div class="card">
+
+<h3>Tempo Produzindo</h3>
+
+<div id="tempoProducao">
+00:00:00
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>Tempo Parado</h3>
+
+<div id="tempoParado">
+00:00:00
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>Motivo da Parada</h3>
+
+<select id="motivoParada">
+
+<option value="">
+Selecione
+</option>
+
+<option>
+Troca de Ferramenta
+</option>
+
+<option>
+Falta de Material
+</option>
+
+<option>
+Quebra de Ferramenta
+</option>
+
+<option>
+Setup
+</option>
+
+<option>
+Manutenção
+</option>
+
+<option>
+Aguardando Qualidade
+</option>
+
+<option>
+Outros
+</option>
+
+</select>
+
+<br><br>
+
+<button id="btRegistrarParada">
+Registrar Parada
+</button>
+
+</div>
+
+<div class="card">
+
+<h3>Histórico de Paradas</h3>
+
+<div id="historicoParadas">
+
+Nenhuma parada registrada.
+
+</div>
+
+</div>
+
+<div class="card" style="margin-top:-165px; margin-left:320px;">
+
+<h2>
+RELATÓRIO DE PRODUÇÃO
+</h2>
+
+<div id="relatorio">
+
+Nenhum relatório gerado.
+
+</div>
+
+</div>
+
+<div class="card" style="margin-top:55px; margin-left:-780px; width:950px;">
+
+<h2>
+HISTÓRICO DE OPs ENCERRADAS
+</h2>
+
+<div id="historicoOPsDiv" style="max-height:300px;overflow:auto;">
+
+<table id="tabelaHistoricoOPs"> 
+
+<thead>
+
+<tr>
+
+<th>Data</th>
+
+<th>OP</th>
+
+<th>Máquina</th>
+
+<th width="300">Produto</th>
+
+<th>Produção</th>
+
+<th>Parado</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<script>
+
+verificarPermissao(
+"26_Controle_Tempo_Producao_PRO.html"
+);
+
+let estado = "encerrado";
+
+let inicioProducao = null;
+
+let inicioParada = null;
+
+let acumuladoProducao = 0;
+
+let acumuladoParado = 0;
+
+let historico = [];
+
+let listaParadas = [];
+
+let historicoOPs = [];
+
+let dadosSalvos =
+
+JSON.parse(
+localStorage.getItem(
+"controleTempoPRO"
+)
+);
+
+if(dadosSalvos){
+
+estado =
+dadosSalvos.estado || "encerrado";
+
+inicioProducao =
+dadosSalvos.inicioProducao;
+
+inicioParada =
+dadosSalvos.inicioParada;
+
+acumuladoProducao =
+dadosSalvos.acumuladoProducao || 0;
+
+acumuladoParado =
+dadosSalvos.acumuladoParado || 0;
+
+listaParadas =
+dadosSalvos.listaParadas || [];
+
+historicoOPs =
+dadosSalvos.historicoOPs || [];
+
+}
+
+
+function salvarSistema(){
+
+localStorage.setItem(
+
+"controleTempoPRO",
+
+JSON.stringify({
+
+estado,
+
+inicioProducao,
+
+inicioParada,
+
+acumuladoProducao,
+
+acumuladoParado,
+
+listaParadas,
+
+historicoOPs,
+
+maquina: maquina.value,
+
+op: op.value,
+
+produto: produto.value
+
+})
+
+);
+
+}
+
+function formatar(segundos){
+
+let horas =
+String(Math.floor(segundos/3600))
+.padStart(2,'0');
+
+let minutos =
+String(Math.floor((segundos%3600)/60))
+.padStart(2,'0');
+
+let seg =
+String(segundos%60)
+.padStart(2,'0');
+
+return horas+":"+minutos+":"+seg;
+
+}
+
+function atualizarTela(){
+
+let producaoAtual =
+acumuladoProducao;
+
+if(
+estado==="produzindo" &&
+inicioProducao !== null
+){
+
+producaoAtual =
+(Date.now()-inicioProducao)
+/1000;
+
+}
+
+let paradaAtual =
+acumuladoParado;
+
+if(
+estado==="parado" &&
+inicioParada !== null
+){
+
+paradaAtual =
+acumuladoParado +
+(
+(Date.now()-inicioParada)
+/1000
+);
+
+}
+
+tempoProducao.innerHTML =
+formatar(
+Math.floor(producaoAtual)
+);
+
+tempoParado.innerHTML =
+formatar(
+Math.floor(paradaAtual)
+);
+
+}
+
+atualizarTela();
+
+if(dadosSalvos){
+
+maquina.value =
+dadosSalvos.maquina || "";
+
+op.value =
+dadosSalvos.op || "";
+
+produto.value =
+dadosSalvos.produto || "";
+
+historicoParadas.innerHTML =
+listaParadas.length
+?
+listaParadas.join("<br>")
+:
+"Nenhuma parada registrada.";
+
+}
+
+if(historicoOPs.length){
+
+let linhas = "";
+
+historicoOPs.forEach(op => {
+
+linhas +=
+
+"<tr>" +
+
+"<td>" + op.data + "</td>" +
+
+"<td>" + op.op + "</td>" +
+
+"<td>" + op.maquina + "</td>" +
+
+"<td>" + op.produto + "</td>" +
+
+"<td>" + op.tempoProduzido + "</td>" +
+
+"<td>" + op.tempoParado + "</td>" +
+
+"</tr>";
+
+});
+
+document.querySelector(
+"#tabelaHistoricoOPs tbody"
+).innerHTML = linhas;
+
+}
+
+console.log("Sistema PRO carregado");
+
+btIniciar.onclick = function(){
+
+if(
+estado==="produzindo" ||
+estado==="parado"
+)
+return;
+
+estado = "produzindo";
+
+inicioProducao = Date.now();
+
+};
+
+setInterval(()=>{
+
+atualizarTela();
+
+salvarSistema();
+
+},1000);
+
+atualizarTela();
+
+btPausar.onclick = function(){
+
+if(estado!=="produzindo")
+return;
+
+acumuladoProducao =
+(Date.now()-inicioProducao)
+/1000;
+
+inicioParada = Date.now();
+
+estado = "parado";
+
+atualizarTela();
+
+};
+
+btRetomar.onclick = function(){
+
+if(estado!=="parado")
+return;
+
+acumuladoParado =
+acumuladoParado +
+(
+(Date.now()-inicioParada)
+/1000
+);
+
+inicioParada = null;
+
+inicioProducao =
+Date.now() - (acumuladoProducao*1000);
+
+estado = "produzindo";
+
+atualizarTela();
+
+};
+
+btRegistrarParada.onclick = function(){
+
+if(
+motivoParada.value === ""
+){
+alert("Selecione um motivo.");
+return;
+}
+
+let agora = new Date();
+
+let hora =
+String(agora.getHours())
+.padStart(2,"0");
+
+let minuto =
+String(agora.getMinutes())
+.padStart(2,"0");
+
+let segundo =
+String(agora.getSeconds())
+.padStart(2,"0");
+
+let registro =
+hora + ":" +
+minuto + ":" +
+segundo +
+" - " +
+motivoParada.value;
+
+listaParadas.push(registro);
+
+historicoParadas.innerHTML =
+listaParadas.join("<br>");
+
+};
+
+btRelatorio.onclick = function(){
+
+let totalSegundos =
+acumuladoProducao +
+acumuladoParado;
+
+let eficiencia = 0;
+
+if(totalSegundos > 0){
+
+eficiencia =
+(
+(acumuladoProducao / totalSegundos)
+* 100
+).toFixed(1);
+
+}
+
+relatorio.innerHTML =
+
+"<b>Máquina:</b> " +
+maquina.value +
+
+"<br><br>" +
+
+"<b>OP:</b> " +
+op.value +
+
+"<br><br>" +
+
+"<b>Produto:</b> " +
+produto.value +
+
+"<br><br>" +
+
+"<b>Tempo Produzido:</b> " +
+tempoProducao.innerHTML +
+
+"<br><br>" +
+
+"<b>Tempo Parado:</b> " +
+tempoParado.innerHTML +
+
+"<br><br>" +
+
+"<b>Tempo Total:</b> " +
+formatar(
+Math.floor(totalSegundos)
+) +
+
+"<br><br>" +
+
+"<b>Eficiência:</b> " +
+eficiencia +
+"%" +
+
+"<br><br>" +
+
+"<b>Quantidade de Paradas:</b> " +
+listaParadas.length +
+
+"<br><br>" +
+
+"<hr>" +
+
+"<b>Histórico de Paradas</b>" +
+
+"<br><br>" +
+
+listaParadas.join("<br>");
+
+};
+
+btImprimir.onclick = function(){
+
+window.print();
+
+};
+
+btPDF.onclick = function(){
+
+window.print();
+
+};
+
+btEncerrar.onclick = function(){
+
+let agora = new Date();
+
+let registroOP = {
+
+data:
+agora.toLocaleString(),
+
+maquina:
+maquina.value,
+
+op:
+op.value,
+
+produto:
+produto.value,
+
+tempoProduzido:
+tempoProducao.innerHTML,
+
+tempoParado:
+tempoParado.innerHTML
+
+};
+
+historicoOPs.push(registroOP);
+
+let linhas = "";
+
+historicoOPs.forEach(op => {
+
+linhas +=
+
+"<tr>" +
+
+"<td>" + op.data + "</td>" +
+
+"<td>" + op.op + "</td>" +
+
+"<td>" + op.maquina + "</td>" +
+
+"<td>" + op.produto + "</td>" +
+
+"<td>" + op.tempoProduzido + "</td>" +
+
+"<td>" + op.tempoParado + "</td>" +
+
+"</tr>";
+
+});
+
+document.querySelector(
+"#tabelaHistoricoOPs tbody"
+).innerHTML = linhas;
+
+estado = "encerrado";
+
+acumuladoProducao = 0;
+
+acumuladoParado = 0;
+
+inicioProducao = null;
+
+inicioParada = null;
+
+historico = [];
+
+listaParadas = [];
+
+historicoParadas.innerHTML =
+"Nenhuma parada registrada.";
+
+atualizarTela();
+
+alert("OP Encerrada");
+
+};
+
+</script>
+
+</body>
+
+</html>
