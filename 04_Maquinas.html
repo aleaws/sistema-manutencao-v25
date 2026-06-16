@@ -466,11 +466,23 @@ aviso("Dados salvos com sucesso.");
 
 async function carregar(){
 
-let d = JSON.parse(
-localStorage.getItem('cadastro_maquinas_v24') || '[]'
-);
+const { data, error } =
+await bancoSupabase
+.from('maquinas')
+.select('*');
 
-d.sort((a,b)=>
+if(error){
+
+    console.error(error);
+    alert('Erro ao carregar máquinas');
+
+    return;
+
+}
+
+tb.tBodies[0].innerHTML = '';
+
+data.sort((a,b)=>
 (a.codigo||'').localeCompare(
 (b.codigo||''),
 undefined,
@@ -478,11 +490,7 @@ undefined,
 )
 );
 
-if(d.length){
-
-d.forEach(x=>novo(x));
-
-}
+data.forEach(x=>novo(x));
 
 indicadores();
 
