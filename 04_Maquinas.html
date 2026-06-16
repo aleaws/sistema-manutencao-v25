@@ -58,6 +58,8 @@ padding:3px;
 
 <script src="permissoes.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 </head>
 
 <body>
@@ -148,6 +150,14 @@ Total de Máquinas
 
 <button id="btSalvarMaquina" class="b2" onclick="salvarManual()">Salvar</button>
 
+<button
+id="btSupabase"
+class="b2"
+onclick="enviarParaSupabase()"
+style="display:none;">
+📤 Enviar para Supabase
+</button>
+
 <button id="btDuplicados" class="b3" onclick="verificarDuplicados()">
 🔍 Verificar Duplicados
 </button>
@@ -184,6 +194,30 @@ Total de Máquinas
 </div>
 
 <script>
+
+const SUPABASE_URL = 'https://wzcrqzbwcsmfwenzcxkf.supabase.co';
+
+const SUPABASE_KEY = 'sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu';
+
+const bancoSupabase = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+async function testeSupabase() {
+
+    const { data, error } = await bancoSupabase
+        .from('maquinas')
+        .select('*');
+
+    console.log('DADOS DO SUPABASE:', data);
+
+    if (error) {
+        console.error(error);
+    }
+}
+
+testeSupabase();
 
 verificarPermissao(
 "04_Maquinas.html"
@@ -228,6 +262,12 @@ btSalvarMaquina.style.display =
 
 btDuplicados.style.display =
 "none";
+
+}
+
+if(usuarioLogado==="Alexandre"){
+
+    btSupabase.style.display = "inline-block";
 
 }
 
@@ -422,10 +462,12 @@ aviso("Dados salvos com sucesso.");
 
 }
 
-function carregar(){
 
-let d=JSON.parse(
-localStorage.getItem('cadastro_maquinas_v24')||'[]'
+
+async function carregar(){
+
+let d = JSON.parse(
+localStorage.getItem('cadastro_maquinas_v24') || '[]'
 );
 
 d.sort((a,b)=>
@@ -442,7 +484,10 @@ d.forEach(x=>novo(x));
 
 }
 
+indicadores();
+
 }
+
 function indicadores(){
 
 tot.innerText=dados().length;
@@ -636,6 +681,38 @@ alert(
 );
 
 }
+
+}
+
+async function enviarParaSupabase(){
+
+if(
+!confirm(
+'Enviar todas as máquinas para o Supabase?'
+)
+){
+    return;
+}
+
+const lista = dados();
+
+const { error } = await bancoSupabase
+.from('maquinas')
+.insert(lista);
+
+if(error){
+
+    console.error(error);
+    alert('Erro ao enviar');
+
+    return;
+
+}
+
+alert(
+lista.length +
+' máquinas enviadas com sucesso'
+);
 
 }
 

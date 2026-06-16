@@ -59,6 +59,8 @@ padding:3px;
 
 <script src="permissoes.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 </head>
 
 <body>
@@ -169,6 +171,14 @@ Manutenção
 
 <button id="btSalvarDispositivo" class="b2" onclick="salvarManual()">Salvar</button>
 
+<button
+id="btSupabase"
+class="b2"
+onclick="enviarParaSupabase()"
+style="display:none;">
+📤 Enviar para Supabase
+</button>
+
 <button id="btDuplicados" class="b3" onclick="verificarDuplicados()">
 🔍 Verificar Duplicados
 </button>
@@ -207,9 +217,30 @@ Manutenção
 
 <script>
 
+const SUPABASE_URL = 'https://wzcrqzbwcsmfwenzcxkf.supabase.co';
+
+const SUPABASE_KEY = 'sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu';
+
+const bancoSupabase = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
 verificarPermissao(
 "05_Dispositivos.html"
 );
+
+let usuarioLogado =
+localStorage.getItem(
+"usuarioLogado"
+);
+
+if(usuarioLogado==="Alexandre"){
+
+    btSupabase.style.display =
+    "inline-block";
+
+}
 
 function aviso(t){
 msg.innerText=t;
@@ -651,6 +682,38 @@ alert(
 );
 
 }
+
+}
+
+async function enviarParaSupabase(){
+
+if(
+!confirm(
+'Enviar todos os dispositivos para o Supabase?'
+)
+){
+    return;
+}
+
+const lista = dados();
+
+const { error } = await bancoSupabase
+.from('dispositivos')
+.insert(lista);
+
+if(error){
+
+    console.error(error);
+    alert('Erro ao enviar');
+
+    return;
+
+}
+
+alert(
+lista.length +
+' dispositivos enviados com sucesso'
+);
 
 }
 

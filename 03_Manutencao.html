@@ -67,6 +67,8 @@ padding:3px;
 
 <script src="permissoes.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 </head>
 
 <body>
@@ -177,6 +179,15 @@ font-weight:bold;
 
 <button id="btNovaOS" class="b1" onclick="novo()">Nova OS</button>
 <button id="btSalvar" class="b2" onclick="salvarManual()">Salvar</button>
+
+<button
+id="btSupabase"
+class="b2"
+onclick="enviarParaSupabase()"
+style="display:inline-block;">
+📤 Enviar para Supabase
+</button>
+
 <button id="btExcel" class="b3" onclick="exportarExcel()">📊 Exportar Excel</button>
 <button id="btImprimir" class="b4" onclick="window.print()">Imprimir</button>
 
@@ -233,9 +244,20 @@ X
 
 <script>
 
+const SUPABASE_URL = 'https://wzcrqzbwcsmfwenzcxkf.supabase.co';
+
+const SUPABASE_KEY = 'sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu';
+
+const bancoSupabase = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
 verificarPermissao(
 "03_Manutencao.html"
 );
+
+
 
 function aviso(t){
 msg.innerText=t;
@@ -674,6 +696,41 @@ wb,
 );
 
 aviso("Excel exportado com sucesso.");
+
+}
+
+async function enviarParaSupabase(){
+
+if(
+!confirm(
+'Enviar as manutenções para o Supabase?'
+)
+){
+    return;
+}
+
+const lista = dados();
+
+const { error } = await bancoSupabase
+.from('manutencao')
+.insert(lista);
+
+if(error){
+
+    console.error(error);
+    alert(
+        'Erro ao enviar: ' +
+        error.message
+    );
+
+    return;
+
+}
+
+alert(
+lista.length +
+' registros enviados com sucesso'
+);
 
 }
 

@@ -51,6 +51,8 @@ padding:3px;
 
 <script src="permissoes.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 </head>
 
 <body>
@@ -154,6 +156,14 @@ font-weight:bold;
 
 <button class="b2" onclick="salvarManual()">Salvar</button>
 
+<button
+id="btSupabase"
+class="b2"
+onclick="enviarParaSupabase()"
+style="display:none;">
+📤 Enviar para Supabase
+</button>
+
 <button class="b3" onclick="exportarExcel()">
 📊 Exportar Excel
 </button>
@@ -202,9 +212,30 @@ font-weight:bold;
 
 <script>
 
+const SUPABASE_URL = 'https://wzcrqzbwcsmfwenzcxkf.supabase.co';
+
+const SUPABASE_KEY = 'sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu';
+
+const bancoSupabase = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
 verificarPermissao(
 "21_Diario_Inspecao.html"
 );
+
+let usuarioLogado =
+localStorage.getItem(
+"usuarioLogado"
+);
+
+if(usuarioLogado==="Alexandre"){
+
+    btSupabase.style.display =
+    "inline-block";
+
+}
 
 const tipos=[
 "Manutenção",
@@ -620,6 +651,39 @@ wb,
 aviso("Excel exportado com sucesso.");
 
 }
+
+async function enviarParaSupabase(){
+
+if(
+!confirm(
+'Enviar todos os registros para o Supabase?'
+)
+){
+    return;
+}
+
+const lista = dados();
+
+const { error } = await bancoSupabase
+.from('diario_inspecao')
+.insert(lista);
+
+if(error){
+
+    console.error(error);
+    alert('Erro ao enviar');
+
+    return;
+
+}
+
+alert(
+lista.length +
+' registros enviados com sucesso'
+);
+
+}
+
 buscaOP.oninput=filtrar;
 pesquisa.oninput=filtrar;
 fPrioridade.onchange=filtrar;
