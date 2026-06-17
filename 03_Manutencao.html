@@ -719,7 +719,7 @@ async function enviarParaSupabase(){
 
 if(
 !confirm(
-'Enviar as manutenções para o Supabase?'
+'Sincronizar manutenções com o Supabase?'
 )
 ){
     return;
@@ -727,16 +727,36 @@ if(
 
 const lista = dados();
 
-const { error } = await bancoSupabase
+const { error: erroDelete } =
+await bancoSupabase
+.from('manutencao')
+.delete()
+.neq('id',0);
+
+if(erroDelete){
+
+    console.error(erroDelete);
+
+    alert(
+    'Erro ao limpar tabela'
+    );
+
+    return;
+
+}
+
+const { error } =
+await bancoSupabase
 .from('manutencao')
 .insert(lista);
 
 if(error){
 
     console.error(error);
+
     alert(
-        'Erro ao enviar: ' +
-        error.message
+    'Erro ao enviar: ' +
+    error.message
     );
 
     return;
@@ -745,7 +765,7 @@ if(error){
 
 alert(
 lista.length +
-' registros enviados com sucesso'
+' registros sincronizados com sucesso'
 );
 
 }

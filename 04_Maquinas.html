@@ -696,7 +696,7 @@ async function enviarParaSupabase(){
 
 if(
 !confirm(
-'Enviar todas as máquinas para o Supabase?'
+'Sincronizar máquinas com o Supabase?'
 )
 ){
     return;
@@ -704,14 +704,36 @@ if(
 
 const lista = dados();
 
-const { error } = await bancoSupabase
+const { error: erroDelete } =
+await bancoSupabase
+.from('maquinas')
+.delete()
+.neq('id',0);
+
+if(erroDelete){
+
+    console.error(erroDelete);
+
+    alert(
+    'Erro ao limpar tabela'
+    );
+
+    return;
+
+}
+
+const { error } =
+await bancoSupabase
 .from('maquinas')
 .insert(lista);
 
 if(error){
 
     console.error(error);
-    alert('Erro ao enviar');
+
+    alert(
+    'Erro ao enviar'
+    );
 
     return;
 
@@ -719,7 +741,7 @@ if(error){
 
 alert(
 lista.length +
-' máquinas enviadas com sucesso'
+' máquinas sincronizadas com sucesso'
 );
 
 }

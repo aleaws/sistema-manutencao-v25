@@ -669,7 +669,7 @@ async function enviarParaSupabase(){
 
 if(
 !confirm(
-'Enviar todos os registros para o Supabase?'
+'Sincronizar diário com o Supabase?'
 )
 ){
     return;
@@ -677,14 +677,36 @@ if(
 
 const lista = dados();
 
-const { error } = await bancoSupabase
+const { error: erroDelete } =
+await bancoSupabase
+.from('diario_inspecao')
+.delete()
+.neq('id',0);
+
+if(erroDelete){
+
+    console.error(erroDelete);
+
+    alert(
+    'Erro ao limpar tabela'
+    );
+
+    return;
+
+}
+
+const { error } =
+await bancoSupabase
 .from('diario_inspecao')
 .insert(lista);
 
 if(error){
 
     console.error(error);
-    alert('Erro ao enviar');
+
+    alert(
+    'Erro ao enviar'
+    );
 
     return;
 
@@ -692,7 +714,7 @@ if(error){
 
 alert(
 lista.length +
-' registros enviados com sucesso'
+' registros sincronizados com sucesso'
 );
 
 }
