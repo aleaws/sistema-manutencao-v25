@@ -474,15 +474,31 @@ aviso("Dados salvos com sucesso.");
 
 }
 
-function carregar(){
+async function carregar(){
 
-let d=JSON.parse(
-localStorage.getItem('manutencao_v24')||'[]'
-);
+const { data, error } =
+await bancoSupabase
+.from('manutencao')
+.select('*');
 
-if(d.length){
-d.forEach(x=>novo(x));
+if(error){
+
+    console.error(error);
+    alert('Erro ao carregar manutenções');
+
+    return;
+
 }
+
+tb.tBodies[0].innerHTML = '';
+
+if(data.length){
+
+    data.forEach(x=>novo(x));
+
+}
+
+indicadores();
 
 }
 
