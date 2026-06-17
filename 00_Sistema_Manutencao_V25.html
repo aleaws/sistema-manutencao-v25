@@ -160,6 +160,8 @@ font-weight:bold;
 
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 </head>
 
 <body>
@@ -444,6 +446,18 @@ Dashboard • Rankings • Status
 
 <script>
 
+const SUPABASE_URL =
+'https://wzcrqzbwcsmfwenzcxkf.supabase.co';
+
+const SUPABASE_KEY =
+'sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu';
+
+const bancoSupabase =
+window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
+
 
 let usuarioLogado =
 localStorage.getItem(
@@ -547,16 +561,22 @@ return [];
 
 }
 
-function atualizar(){
+async function atualizar(){
 
-let maqs=
-ler('cadastro_maquinas_v24');
+const { data: maqs } =
+await bancoSupabase
+.from('maquinas')
+.select('*');
 
-let disps=
-ler('cadastro_dispositivos_v24');
+const { data: disps } =
+await bancoSupabase
+.from('dispositivos')
+.select('*');
 
-let os=
-ler('manutencao_v24');
+const { data: os } =
+await bancoSupabase
+.from('manutencao')
+.select('*');
 
 let nc=
 ler('nao_conformidades_v24');
@@ -580,8 +600,10 @@ ler('planejamento_prioridades');
 let liberacoes=
 ler('liberacoes_v24');
 
-let insp=
-ler('diario_inspecao_v24');
+const { data: insp } =
+await bancoSupabase
+.from('diario_inspecao')
+.select('*');
 
 let simples=
 ler('diario_simples_v24');
