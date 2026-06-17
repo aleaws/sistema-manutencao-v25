@@ -453,20 +453,33 @@ aviso("Dados salvos com sucesso.");
 
 }
 
-function carregar(){
+async function carregar(){
 
-let d=JSON.parse(
-localStorage.getItem('diario_inspecao_v24')||'[]'
-);
+const { data, error } =
+await bancoSupabase
+.from('diario_inspecao')
+.select('*');
 
-if(d.length){
+if(error){
 
-d.forEach(x=>novo(x));
+    console.error(error);
+    alert('Erro ao carregar diário');
+
+    return;
 
 }
 
+tb.tBodies[0].innerHTML = '';
+
+if(data.length){
+
+    data.forEach(x=>novo(x));
+
 }
 
+indicadores();
+
+}
 function indicadores(){
 
 let d=dados();
