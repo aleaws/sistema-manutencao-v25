@@ -203,7 +203,15 @@ usuario.value.toLowerCase();
 let pass =
 senha.value;
 
-console.log("Usuário:", user);
+console.log("USER:", user);
+console.log("PASS:", pass);
+
+const teste =
+await bancoSupabase
+.from('usuarios')
+.select('*');
+
+console.log(teste);
 
 const { data, error } =
 await bancoSupabase
@@ -246,110 +254,6 @@ return;
 
 }
 
-if(
-user==="alexandre" &&
-pass==="1234"
-){
-
-localStorage.setItem(
-"usuarioLogado",
-"Alexandre"
-);
-
-localStorage.setItem(
-"sessaoValida",
-"SIM"
-);
-
-registrarLog(
-"Login realizado"
-);
-
-window.location.href=
-"00_Sistema_Manutencao_V25.html";
-
-return;
-
-}
-
-if(
-user==="diretoria" &&
-pass==="5678"
-){
-
-localStorage.setItem(
-"usuarioLogado",
-"Diretoria"
-);
-
-localStorage.setItem(
-"sessaoValida",
-"SIM"
-);
-
-registrarLog(
-"Login realizado"
-);
-
-window.location.href=
-"00_Sistema_Manutencao_V25.html";
-
-return;
-
-}
-
-if(
-user==="pcp" &&
-pass==="1111"
-){
-
-localStorage.setItem(
-"usuarioLogado",
-"PCP"
-);
-
-localStorage.setItem(
-"sessaoValida",
-"SIM"
-);
-
-registrarLog(
-"Login realizado"
-);
-
-window.location.href=
-"00_Sistema_Manutencao_V25.html";
-
-return;
-
-}
-
-
-if(
-user==="engenharia" &&
-pass==="2222"
-){
-
-localStorage.setItem(
-"usuarioLogado",
-"Engenharia"
-);
-
-localStorage.setItem(
-"sessaoValida",
-"SIM"
-);
-
-registrarLog(
-"Login realizado"
-);
-
-window.location.href=
-"00_Sistema_Manutencao_V25.html";
-
-return;
-
-}
 
 
 
