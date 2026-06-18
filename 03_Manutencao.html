@@ -395,7 +395,6 @@ e.disabled = true;
 });
 
 renum();
-salvar();
 
 }
 
@@ -456,12 +455,49 @@ obs:r.cells[10].querySelector('textarea').value
 
 }
 
-function salvar(){
+async function salvar(){
+
+const lista = dados();
 
 localStorage.setItem(
 'manutencao_v24',
-JSON.stringify(dados())
+JSON.stringify(lista)
 );
+
+const { error: erroDelete } =
+await bancoSupabase
+.from('manutencao')
+.delete()
+.neq('id',0);
+
+if(erroDelete){
+
+console.error(erroDelete);
+
+alert(
+'Erro ao sincronizar'
+);
+
+return;
+
+}
+
+const { error } =
+await bancoSupabase
+.from('manutencao')
+.insert(lista);
+
+if(error){
+
+console.error(error);
+
+alert(
+'Erro ao sincronizar'
+);
+
+return;
+
+}
 
 indicadores();
 
@@ -476,25 +512,32 @@ aviso("Dados salvos com sucesso.");
 
 async function carregar(){
 
+tb.tBodies[0].innerHTML = '';
+
 const { data, error } =
 await bancoSupabase
 .from('manutencao')
 .select('*');
 
-if(error){
+if(
+!error &&
+data &&
+data.length > 0
+){
 
-    console.error(error);
-    alert('Erro ao carregar manutenções');
-
-    return;
+data.forEach(x=>novo(x));
 
 }
+else
+{
 
-tb.tBodies[0].innerHTML = '';
+let local = JSON.parse(
+localStorage.getItem(
+'manutencao_v24'
+) || '[]'
+);
 
-if(data.length){
-
-    data.forEach(x=>novo(x));
+local.forEach(x=>novo(x));
 
 }
 
@@ -790,6 +833,15 @@ btNovaOS.style.display =
 "none";
 
 btSalvar.style.display =
+"none";
+
+}
+
+if(
+usuarioLogado !== "Alexandre"
+){
+
+btSupabase.style.display =
 "none";
 
 }
