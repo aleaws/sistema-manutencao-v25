@@ -135,7 +135,21 @@ Alexandre Willian - Manutenção
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
+
+const supabaseUrl =
+'https://wzcrqzbwcsmfwenzcxkf.supabase.co';
+
+const supabaseKey =
+'sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu';
+
+const bancoSupabase =
+supabase.createClient(
+supabaseUrl,
+supabaseKey
+);
 
 function registrarLog(acao){
 
@@ -167,13 +181,70 @@ JSON.stringify(logs)
 
 }
 
-function entrar(){
+function mostrarSenha(){
+
+if(verSenha.checked){
+
+senha.type = "text";
+
+}else{
+
+senha.type = "password";
+
+}
+
+}
+
+async function entrar(){
 
 let user =
 usuario.value.toLowerCase();
 
 let pass =
 senha.value;
+
+console.log("Usuário:", user);
+
+const { data, error } =
+await bancoSupabase
+.from('usuarios')
+.select('*')
+.eq('usuario', user)
+.eq('senha', pass)
+.eq('ativo', 'true');
+
+if(error){
+
+console.error(error);
+
+erro.style.display="block";
+
+return;
+
+}
+
+if(data && data.length){
+
+localStorage.setItem(
+"usuarioLogado",
+data[0].perfil
+);
+
+localStorage.setItem(
+"sessaoValida",
+"SIM"
+);
+
+registrarLog(
+"Login realizado"
+);
+
+window.location.href=
+"00_Sistema_Manutencao_V25.html";
+
+return;
+
+}
 
 if(
 user==="alexandre" &&
