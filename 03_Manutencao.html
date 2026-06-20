@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>03_Manutencao</title>
+
+<style>
+body{font-family:Arial,sans-serif;background:#f4f6f8;margin:0;padding:0}
+header{background:#1f4e79;color:#fff;padding:12px;text-align:center}
+.container{padding:10px}
+.card{background:#fff;padding:10px;margin-bottom:10px;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.15);overflow-x:auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}
+.ind{font-size:22px;font-weight:bold}
+button{padding:10px 14px;border:none;border-radius:6px;color:#fff;font-weight:bold;cursor:pointer}
+.b1{background:#1f4e79}
+.b2{background:#198754}
+.b3{background:#fd7e14}
+.b4{background:#343a40}
+.b5{background:#dc3545}
+
+.msg{
+display:none;
+padding:8px;
+background:#d1e7dd;
+color:#0f5132;
+border-radius:6px;
+margin-top:8px
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+table-layout:auto;
+}
+
+th,td{
+border:1px solid #ccc;
+padding:3px;
+font-size:11px;
+}
+
+th{
+background:#1f4e79;
+color:#fff;
+}
+
+input,select,textarea{
+width:100%;
+box-sizing:border-box;
+font-size:11px;
+border:none;
+padding:3px;
+}
+
+.critica{background:#f8d7da}
+.alta{background:#fff3cd}
+.concluida{background:#d1e7dd}
+
+.cDefeito{min-width:280px}
+.cServico{min-width:350px}
+.cObs{min-width:250px}
+.cExc{width:35px}
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script src="permissoes.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+</head>
+
+<body>
+
+
+<header style="position:relative;">
+
+<div style="
+position:absolute;
+left:10px;
+top:50%;
+transform:translateY(-50%);
+display:flex;
+gap:8px;
+">
+
+<button
+onclick="window.location.href='00_Sistema_Manutencao_V25.html'"
+style="
+background:#28a745;
+color:white;
+border:none;
+padding:8px 14px;
+border-radius:6px;
+cursor:pointer;
+font-weight:bold;
+">
+⬅ Menu
+</button>
+
+<button
+onclick="location.reload()"
+style="
+background:#17a2b8;
+color:white;
+border:none;
+padding:8px 14px;
+border-radius:6px;
+cursor:pointer;
+font-weight:bold;
+">
+🔄 Atualizar
+</button>
+
+</div>
+
+<span style="
+font-size:30px;
+font-weight:bold;
+">
+🔧 CADASTRO DE MANUTENÇÃO
+</span>
+
+</header>
+</header>
+
+<div class="container">
+
+<div class="card">
+<div class="grid">
+
+<div>Total<div class="ind" id="tot">0</div></div>
+<div>Críticas<div class="ind" id="crit">0</div></div>
+<div>Abertas<div class="ind" id="abertas">0</div></div>
+<div>Andamento<div class="ind" id="andamento">0</div></div>
+<div>Concluídas<div class="ind" id="concluidas">0</div></div>
+
+</div>
+</div>
+
+<div class="card">
+
+<div class="grid">
+
+<div>
+<label>Pesquisa</label>
+<input id="pesquisa">
+</div>
+
+<div>
+<label>Status</label>
+<select id="fStatus">
+<option value="">Todos</option>
+<option>Aberta</option>
+<option>Em Andamento</option>
+<option>Aguardando Peça</option>
+<option>Concluída</option>
+<option>Cancelada</option>
+</select>
+</div>
+
+<div>
+<label>Prioridade</label>
+<select id="fPrioridade">
+<option value="">Todas</option>
+<option>Crítica</option>
+<option>Alta</option>
+<option>Normal</option>
+<option>Baixa</option>
+</select>
+</div>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<button id="btNovaOS" class="b1" onclick="novo()">Nova OS</button>
+<button id="btSalvar" class="b2" onclick="salvarManual()">Salvar</button>
+
+<button
+id="btSupabase"
+class="b2"
+onclick="enviarParaSupabase()"
+style="display:inline-block;">
+📤 Enviar para Supabase
+</button>
+
+<button id="btExcel" class="b3" onclick="exportarExcel()">📊 Exportar Excel</button>
+<button id="btImprimir" class="b4" onclick="window.print()">Imprimir</button>
+
+<div id="msg" class="msg"></div>
+
+</div>
+
+<div class="card">
+
+<table id="tb">
+
+<thead>
+
+<tr>
+
+<th>Nº</th>
+<th>Data</th>
+<th>OS</th>
+<th>Prioridade</th>
+<th>Máquina</th>
+<th>Dispositivo</th>
+
+<th class="cDefeito">
+Defeito / Solicitação
+</th>
+
+<th>Responsável</th>
+
+<th>Status</th>
+
+<th class="cServico">
+Serviço Executado
+</th>
+
+<th class="cObs">
+Observação
+</th>
+
+<th class="cExc">
+X
+</th>
+
+</tr>
+
+</thead>
+
+<tbody></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<script>
+
+const SUPABASE_URL = 'https://wzcrqzbwcsmfwenzcxkf.supabase.co';
+
+const SUPABASE_KEY = 'sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu';
+
+const bancoSupabase = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+verificarPermissao(
+"03_Manutencao.html"
+);
+
+
+
+function aviso(t){
+msg.innerText=t;
+msg.style.display='block';
+setTimeout(()=>msg.style.display='none',2500);
+}
+
+function maquinas(){
+return JSON.parse(
+localStorage.getItem('cadastro_maquinas_v24')||'[]'
+);
+}
+
+function dispositivos(){
+return JSON.parse(
+localStorage.getItem('cadastro_dispositivos_v24')||'[]'
+);
+}
+
+function comboMaquinas(sel=""){
+
+let html="<option></option>";
+
+maquinas().forEach(m=>{
+html+=`<option ${m.maquina==sel?'selected':''}>${m.maquina}</option>`;
+});
+
+return html;
+}
+
+function comboDispositivos(sel=""){
+
+let html="<option></option>";
+
+dispositivos().forEach(d=>{
+html+=`<option ${d.dispositivo==sel?'selected':''}>${d.dispositivo}</option>`;
+});
+
+return html;
+}
+
+function novo(d={}){
+
+let r=tb.tBodies[0].insertRow();
+
+r.innerHTML=`
+
+<td></td>
+
+<td>
+<input type="date" value="${d.data||''}">
+</td>
+
+<td>
+<input value="${d.os||''}">
+</td>
+
+<td>
+<select>
+<option ${d.prioridade=="Crítica"?"selected":""}>Crítica</option>
+<option ${d.prioridade=="Alta"?"selected":""}>Alta</option>
+<option ${d.prioridade=="Normal"?"selected":""}>Normal</option>
+<option ${d.prioridade=="Baixa"?"selected":""}>Baixa</option>
+</select>
+</td>
+
+<td>
+<select>
+${comboMaquinas(d.maquina)}
+</select>
+</td>
+
+<td>
+<select>
+${comboDispositivos(d.dispositivo)}
+</select>
+</td>
+
+<td class="cDefeito">
+<textarea rows="3">${d.defeito||''}</textarea>
+</td>
+
+<td>
+<input value="${d.responsavel||''}">
+</td>
+
+<td>
+<select>
+<option ${d.status=="Aberta"?"selected":""}>Aberta</option>
+<option ${d.status=="Em Andamento"?"selected":""}>Em Andamento</option>
+<option ${d.status=="Aguardando Peça"?"selected":""}>Aguardando Peça</option>
+<option ${d.status=="Concluída"?"selected":""}>Concluída</option>
+<option ${d.status=="Cancelada"?"selected":""}>Cancelada</option>
+</select>
+</td>
+
+<td class="cServico">
+<textarea rows="3">${d.servico||''}</textarea>
+</td>
+
+<td class="cObs">
+<textarea rows="3">${d.obs||''}</textarea>
+</td>
+
+<td>
+<button class="b5" onclick="excluir(this)"
+style="padding:2px 6px;font-size:10px">
+X
+</button>
+</td>
+
+`;
+
+r.querySelectorAll("input,select,textarea").forEach(e=>{
+
+e.oninput=()=>{
+salvar();
+filtrar();
+};
+
+let usuarioLogado =
+localStorage.getItem(
+"usuarioLogado"
+);
+
+if(
+usuarioLogado !== "Alexandre" &&
+usuarioLogado !== "Diretoria"
+){
+
+e.disabled = true;
+
+}
+
+});
+
+renum();
+
+}
+
+function excluir(btn){
+
+let usuarioLogado =
+localStorage.getItem(
+"usuarioLogado"
+);
+
+if(
+usuarioLogado !== "Alexandre"
+){
+
+alert(
+"Somente Alexandre pode excluir OS."
+);
+
+return;
+
+}
+
+if(!confirm("Excluir OS?")) return;
+
+btn.closest("tr").remove();
+
+renum();
+salvar();
+
+}
+
+function renum(){
+
+[...tb.tBodies[0].rows].forEach((r,i)=>{
+r.cells[0].innerText=i+1;
+});
+
+indicadores();
+
+}
+
+function dados(){
+
+return [...tb.tBodies[0].rows].map(r=>({
+
+data:r.cells[1].querySelector('input').value,
+os:r.cells[2].querySelector('input').value,
+prioridade:r.cells[3].querySelector('select').value,
+maquina:r.cells[4].querySelector('select').value,
+dispositivo:r.cells[5].querySelector('select').value,
+defeito:r.cells[6].querySelector('textarea').value,
+responsavel:r.cells[7].querySelector('input').value,
+status:r.cells[8].querySelector('select').value,
+servico:r.cells[9].querySelector('textarea').value,
+obs:r.cells[10].querySelector('textarea').value
+
+}));
+
+}
+
+async function salvar(){
+
+const lista = dados();
+
+localStorage.setItem(
+'manutencao_v24',
+JSON.stringify(lista)
+);
+
+const { error: erroDelete } =
+await bancoSupabase
+.from('manutencao')
+.delete()
+.neq('id',0);
+
+if(erroDelete){
+
+console.error(erroDelete);
+
+alert(
+'Erro ao sincronizar'
+);
+
+return;
+
+}
+
+const { error } =
+await bancoSupabase
+.from('manutencao')
+.insert(lista);
+
+if(error){
+
+console.error(error);
+
+alert(
+'Erro ao sincronizar'
+);
+
+return;
+
+}
+
+indicadores();
+
+}
+
+function salvarManual(){
+
+salvar();
+aviso("Dados salvos com sucesso.");
+
+}
+
+async function carregar(){
+
+tb.tBodies[0].innerHTML = '';
+
+const { data, error } =
+await bancoSupabase
+.from('manutencao')
+.select('*');
+
+if(
+!error &&
+data &&
+data.length > 0
+){
+
+data.forEach(x=>novo(x));
+
+}
+else
+{
+
+let local = JSON.parse(
+localStorage.getItem(
+'manutencao_v24'
+) || '[]'
+);
+
+local.forEach(x=>novo(x));
+
+}
+
+indicadores();
+
+}
+
+function indicadores(){
+
+let d=dados();
+
+tot.innerText=d.length;
+
+crit.innerText=
+d.filter(x=>x.prioridade=="Crítica").length;
+
+abertas.innerText=
+d.filter(x=>x.status=="Aberta").length;
+
+andamento.innerText=
+d.filter(x=>x.status=="Em Andamento").length;
+
+concluidas.innerText=
+d.filter(x=>x.status=="Concluída").length;
+
+[...tb.tBodies[0].rows].forEach(r=>{
+
+r.classList.remove("critica","alta","concluida");
+
+let prioridade=
+r.cells[3].querySelector('select').value;
+
+let status=
+r.cells[8].querySelector('select').value;
+
+if(prioridade=="Crítica"){
+r.classList.add("critica");
+}
+
+if(prioridade=="Alta"){
+r.classList.add("alta");
+}
+
+if(status=="Concluída"){
+r.classList.add("concluida");
+}
+
+});
+
+}
+
+function filtrar(){
+
+let txt=
+pesquisa.value.toLowerCase();
+
+[...tb.tBodies[0].rows].forEach(r=>{
+
+let textoBusca =
+
+r.cells[2].querySelector('input').value + " " +
+r.cells[4].querySelector('select').value + " " +
+r.cells[5].querySelector('select').value + " " +
+r.cells[8].querySelector('select').value + " " +
+r.cells[6].querySelector('textarea').value + " " +
+r.cells[7].querySelector('input').value + " " +
+r.cells[9].querySelector('textarea').value;
+
+let ok =
+textoBusca.toLowerCase().includes(txt);
+
+if(fStatus.value){
+
+ok &= r.cells[8]
+.querySelector('select')
+.value===fStatus.value;
+
+}
+
+if(fPrioridade.value){
+
+ok &= r.cells[3]
+.querySelector('select')
+.value===fPrioridade.value;
+
+}
+
+r.style.display=ok?'':'none';
+
+});
+
+}
+
+function exportarCSV(){
+
+let linhas=[[
+"N",
+"Data",
+"OS",
+"Prioridade",
+"Máquina",
+"Dispositivo",
+"Defeito",
+"Responsável",
+"Status",
+"Serviço",
+"Observação"
+]];
+
+dados().forEach((d,i)=>{
+
+linhas.push([
+i+1,
+d.data,
+d.os,
+d.prioridade,
+d.maquina,
+d.dispositivo,
+d.defeito,
+d.responsavel,
+d.status,
+d.servico,
+d.obs
+]);
+
+});
+
+let csv=
+linhas.map(r=>
+r.map(c=>`"${c}"`).join(";")
+).join("\n");
+
+let a=document.createElement("a");
+
+a.href=
+URL.createObjectURL(
+new Blob([csv],{type:"text/csv"})
+);
+
+a.download="Manutencao.csv";
+
+a.click();
+
+aviso("CSV exportado com sucesso.");
+
+}
+
+function exportarExcel(){
+
+let linhas=[[
+"N",
+"Data",
+"OS",
+"Prioridade",
+"Máquina",
+"Dispositivo",
+"Defeito",
+"Responsável",
+"Status",
+"Serviço",
+"Observação"
+]];
+
+dados().forEach((d,i)=>{
+
+linhas.push([
+i+1,
+d.data,
+d.os,
+d.prioridade,
+d.maquina,
+d.dispositivo,
+d.defeito,
+d.responsavel,
+d.status,
+d.servico,
+d.obs
+]);
+
+});
+
+let ws =
+XLSX.utils.aoa_to_sheet(linhas);
+
+ws['!autofilter'] = {
+ref:"A1:K1"
+};
+
+ws['!cols'] = [
+{wch:6},
+{wch:12},
+{wch:12},
+{wch:12},
+{wch:20},
+{wch:20},
+{wch:30},
+{wch:20},
+{wch:15},
+{wch:40},
+{wch:50}
+];
+
+let wb =
+XLSX.utils.book_new();
+
+XLSX.utils.book_append_sheet(
+wb,
+ws,
+"Manutencao"
+);
+
+XLSX.writeFile(
+wb,
+"Manutencao.xlsx"
+);
+
+aviso("Excel exportado com sucesso.");
+
+}
+
+async function enviarParaSupabase(){
+
+if(
+!confirm(
+'Sincronizar manutenções com o Supabase?'
+)
+){
+    return;
+}
+
+const lista = dados();
+
+const { error: erroDelete } =
+await bancoSupabase
+.from('manutencao')
+.delete()
+.neq('id',0);
+
+if(erroDelete){
+
+    console.error(erroDelete);
+
+    alert(
+    'Erro ao limpar tabela'
+    );
+
+    return;
+
+}
+
+const { error } =
+await bancoSupabase
+.from('manutencao')
+.insert(lista);
+
+if(error){
+
+    console.error(error);
+
+    alert(
+    'Erro ao enviar: ' +
+    error.message
+    );
+
+    return;
+
+}
+
+alert(
+lista.length +
+' registros sincronizados com sucesso'
+);
+
+}
+
+pesquisa.oninput=filtrar;
+fStatus.onchange=filtrar;
+fPrioridade.onchange=filtrar;
+
+carregar();
+
+let usuarioLogado =
+localStorage.getItem(
+"usuarioLogado"
+);
+
+if(
+usuarioLogado !== "Alexandre" &&
+usuarioLogado !== "Diretoria"
+){
+
+btNovaOS.style.display =
+"none";
+
+btSalvar.style.display =
+"none";
+
+}
+
+if(
+usuarioLogado !== "Alexandre"
+){
+
+btSupabase.style.display =
+"none";
+
+}
+
+</script>
+
+</body>
+</html>
