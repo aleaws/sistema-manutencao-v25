@@ -95,6 +95,8 @@ background:white;
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script src="permissoes.js"></script>
 
 </head>
@@ -238,6 +240,34 @@ Este Mês
 
 <script>
 
+const SUPABASE_URL =
+'https://wzcrqzbwcsmfwenzcxkf.supabase.co';
+
+const SUPABASE_KEY =
+'sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu';
+
+const bancoSupabase =
+window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
+
+async function testarSupabase(){
+
+const { data, error } =
+await bancoSupabase
+.from('diario_simples')
+.select('*')
+.limit(1);
+
+console.log(
+'Supabase OK',
+error,
+data
+);
+
+}
+
 verificarPermissao(
 "20_Diario_Simples.html"
 );
@@ -333,26 +363,80 @@ nome:r.cells[4].querySelector('input').value
 }));
 
 }
-function salvar(){
+async function salvar(){
+
+const lista = dados();
 
 localStorage.setItem(
 'diario_simples_v24',
-JSON.stringify(dados())
+JSON.stringify(lista)
 );
 
 indicadores();
 
 }
 
-function salvarManual(){
+async function salvarManual(){
 
 salvar();
 
-aviso("Dados salvos com sucesso.");
+const lista = dados();
+
+const { errorDelete } =
+await bancoSupabase
+.from('diario_simples')
+.delete()
+.neq('id',0);
+
+if(errorDelete){
+
+console.error(errorDelete);
+
+alert('Erro ao limpar tabela');
+
+return;
 
 }
 
-function carregar(){
+const { error } =
+await bancoSupabase
+.from('diario_simples')
+.insert(lista);
+
+if(error){
+
+console.error(error);
+
+alert('Erro ao gravar');
+
+return;
+
+}
+
+aviso("Dados sincronizados com Supabase.");
+
+}
+
+async function carregar(){
+
+tb.tBodies[0].innerHTML='';
+
+const { data, error } =
+await bancoSupabase
+.from('diario_simples')
+.select('*');
+
+if(
+!error &&
+data &&
+data.length > 0
+){
+
+data.forEach(x=>novo(x));
+
+}
+else
+{
 
 let d=JSON.parse(
 localStorage.getItem('diario_simples_v24')||'[]'
@@ -361,6 +445,8 @@ localStorage.getItem('diario_simples_v24')||'[]'
 if(d.length){
 
 d.forEach(x=>novo(x));
+
+}
 
 }
 
@@ -543,7 +629,37 @@ aviso("Excel exportado com sucesso.");
 }
 pesquisa.oninput=filtrar;
 
+async function enviar27ParaSupabase(){
+
+const lista = dados();
+
+const { error } =
+await bancoSupabase
+.from('diario_simples')
+.insert(lista);
+
+if(error){
+
+console.error(error);
+
+alert('Erro ao enviar');
+
+return;
+
+}
+
+alert(
+lista.length +
+' registros enviados'
+);
+
+}
+
+
 carregar();
+
+window.enviar27ParaSupabase =
+enviar27ParaSupabase;
 
 function imprimirTabela(){
 
