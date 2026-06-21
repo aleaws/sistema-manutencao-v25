@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>01_Liberacoes</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f4f6f8;margin:0;padding:0}
+header{background:#1f4e79;color:#fff;padding:12px;text-align:center}
+.container{padding:10px}
+.card{background:#fff;padding:10px;margin-bottom:10px;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.15);overflow-x:auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}
+.ind{
+font-size:16px;
+font-weight:bold
+}
+button{padding:10px 14px;border:none;border-radius:6px;color:#fff;font-weight:bold;cursor:pointer}
+.b1{background:#1f4e79}.b2{background:#198754}.b3{background:#fd7e14}.b4{background:#343a40}.b5{background:#dc3545}
+.msg{
+display:none;
+padding:8px;
+background:#d1e7dd;
+color:#0f5132;
+border-radius:6px;
+margin-top:8px
+}
+th,td{border:1px solid #ccc;padding:3px;font-size:11px}
+table{width:100%;border-collapse:collapse}
+th{
+background:#1f4e79;
+color:#fff;
+position:sticky;
+top:0;
+z-index:100;
+}
+input,select,textarea{
+width:100%;
+box-sizing:border-box;
+font-size:11px;
+border:none;
+padding:3px;
+min-height:60px;
+}
+
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="permissoes.js"></script>
+
+</head>
+<body>
+<header>
+<div style="position:absolute;left:10px;top:10px;display:flex;gap:8px">
+<button style="background:#28a745" onclick="window.location.href='00_Sistema_Manutencao_V25.html'">⬅ Menu</button>
+<button style="background:#17a2b8" onclick="location.reload()">🔄 Atualizar</button>
+</div>
+<span style="font-size:30px;font-weight:bold">✅ LIBERAÇÕES</span>
+</header>
+<div class="container">
+<div class="card" style="padding:6px">
+<div style="
+display:grid;
+grid-template-columns:
+140px
+140px
+140px
+120px
+320px;
+align-items:center;
+gap:10px;
+">
+<div style="min-width:120px">
+Total
+<div class="ind" id="tot">0</div>
+</div>
+<div style="min-width:120px">
+Conforme
+<div class="ind" id="conf">0</div>
+</div>
+<div style="min-width:120px">
+Não Conforme
+<div class="ind" id="nconf">0</div>
+</div>
+
+<div>
+Exibindo
+<div class="ind" id="exibindo">0</div>
+</div>
+
+<div style="
+display:flex;
+justify-content:flex-start;
+align-items:center;
+gap:15px;
+margin-left:30px;
+">
+
+<canvas
+id="graficoLiberacoes"
+width="90"
+height="90">
+</canvas>
+
+<div style="
+margin-left:360px;
+width:280px;
+">
+
+<label style="
+font-size:12px;
+font-weight:bold;
+">
+Pesquisa
+</label>
+
+<input
+id="pesquisa"
+placeholder="Digite OP, Máquina, Dispositivo ou Responsável"
+style="
+width:300px;
+height:28px;
+font-size:12px;
+border:1px solid #cfd6dc;
+border-radius:4px;
+padding-left:8px;
+outline:none;
+background:#ffffff;
+">
+
+</div>
+
+</div>
+
+
+
+</div></div>
+
+
+
+<div class="card">
+<button
+id="btNovaLiberacao"
+class="b1"
+onclick="novo()">
+Nova Liberação
+</button>
+<button id="btSalvarLiberacao" class="b2" onclick="salvarManual()">Salvar</button>
+<button id="btExcelLiberacao" class="b3" onclick="exportarExcel()">📊 Exportar Excel</button>
+<button class="b4" onclick="window.print()">Imprimir</button>
+
+<div id="msg" class="msg"></div>
+</div>
+
+<div class="card">
+
+<div style="
+max-height:600px;
+overflow:auto;
+">
+
+<table id="tb">
+<thead><tr>
+
+<th>Nº</th><th>Data</th><th>OP</th><th>Máquina</th><th>Dispositivo</th>
+<th>Serviço</th><th>Responsável</th><th>Operador</th>
+<th>Conforme</th><th>Orientado</th><th>Observação</th><th>X</th>
+</tr></thead><tbody>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<script>
+
+const SUPABASE_URL =
+'https://wzcrqzbwcsmfwenzcxkf.supabase.co';
+
+const SUPABASE_KEY =
+'sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu';
+
+const bancoSupabase =
+window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
+
+async function testarSupabase(){
+
+const { data, error } =
+await bancoSupabase
+.from('liberacoes')
+.select('*')
+.limit(1);
+
+console.log(
+'Supabase OK',
+error,
+data
+);
+
+}
+
+let graficoLiberacoes;
+
+
+
+function maquinas(){try{return JSON.parse(localStorage.getItem('cadastro_maquinas_v24')||'[]')}catch(e){return []}}
+function dispositivos(){try{return JSON.parse(localStorage.getItem('cadastro_dispositivos_v24')||'[]')}catch(e){return []}}
+function comboM(v=''){let h='<option></option>';maquinas().forEach(x=>h+=`<option ${x.maquina==v?'selected':''}>${x.maquina||''}</option>`);return h;}
+function comboD(v=''){let h='<option></option>';dispositivos().forEach(x=>h+=`<option ${x.dispositivo==v?'selected':''}>${x.dispositivo||''}</option>`);return h;}
+
+function novo(d={}){
+
+let r=tb.tBodies[0].insertRow();
+r.innerHTML=`<td></td><td><input type=date value="${d.data||''}"></td><td><input value="${d.op||''}"></td>
+<td><select>${comboM(d.maquina)}</select></td><td><select>${comboD(d.dispositivo)}</select></td>
+<td><textarea>${d.servico||''}</textarea></td><td><input value="${d.responsavel||''}"></td>
+<td><input value="${d.operador||''}"></td><td><select><option>Sim</option><option ${d.conforme=='Não'?'selected':''}>Não</option></select></td>
+<td><select><option>Sim</option><option ${d.orientado=='Não'?'selected':''}>Não</option></select></td>
+<td><textarea>${d.obs||''}</textarea></td>
+<td>
+<button
+class="b5"
+onclick="exc(this)"
+style="
+display:${
+localStorage.getItem('usuarioLogado')==='Alexandre'
+? 'inline-block'
+: 'none'
+};
+">
+X
+</button>
+</td>
+
+`;
+r.querySelectorAll('input,select,textarea').forEach(e=>{
+
+e.oninput=()=>{
+
+salvarAuto();
+
+let status =
+r.cells[8]
+.querySelector('select')
+.value;
+
+if(status==="Não"){
+
+r.style.background=
+"#ffe5e5";
+
+}else{
+
+r.style.background=
+"";
+
+}
+
+};
+
+});
+
+let status =
+r.cells[8]
+.querySelector('select')
+.value;
+
+if(status==="Não"){
+
+r.style.background=
+"#ffe5e5";
+
+}
+
+renum();
+}
+function exc(b){
+
+let usuarioLogado =
+localStorage.getItem(
+"usuarioLogado"
+);
+
+if(
+usuarioLogado !== "Alexandre"
+){
+
+registrarLog(
+"Tentou excluir liberação"
+);
+
+alert(
+"Somente Alexandre pode excluir registros."
+);
+
+return;
+
+}
+
+if(
+!confirm(
+"Excluir registro?"
+)
+){
+return;
+}
+
+registrarLog(
+"Excluiu liberação"
+);
+
+b.closest('tr').remove();
+
+
+renum();
+
+salvar();
+
+
+}
+function renum(){[...tb.rows].slice(1).forEach((r,i)=>r.cells[0].innerText=i+1);ind();}
+function dados(){return [...tb.tBodies[0].rows].map(r=>({data:r.cells[1].querySelector('input').value,op:r.cells[2].querySelector('input').value,maquina:r.cells[3].querySelector('select').value,dispositivo:r.cells[4].querySelector('select').value,servico:r.cells[5].querySelector('textarea').value,responsavel:r.cells[6].querySelector('input').value,operador:r.cells[7].querySelector('input').value,conforme:r.cells[8].querySelector('select').value,orientado:r.cells[9].querySelector('select').value,obs:r.cells[10].querySelector('textarea').value}))}
+
+async function salvar(){
+
+localStorage.setItem(
+'liberacoes_v24',
+JSON.stringify(dados())
+);
+
+await bancoSupabase
+.from('liberacoes')
+.delete()
+.neq('id',0);
+
+await bancoSupabase
+.from('liberacoes')
+.insert(
+dados()
+);
+
+ind();
+
+}
+
+function salvarManual(){
+
+salvar();
+
+msg.innerText =
+"Dados salvos com sucesso.";
+
+msg.style.display =
+"block";
+
+setTimeout(()=>{
+
+msg.style.display =
+"none";
+
+},2500);
+
+}
+
+function salvarAuto(){salvar();}
+
+function atualizarGrafico(){
+
+let sim =
+dados().filter(
+x=>x.conforme=="Sim"
+).length;
+
+let nao =
+dados().filter(
+x=>x.conforme=="Não"
+).length;
+
+let total = sim + nao;
+
+let percentual = total > 0
+? Math.round((sim / total) * 100)
+: 0;
+
+let ctx =
+document.getElementById(
+'graficoLiberacoes'
+);
+
+if(!ctx) return;
+
+if(graficoLiberacoes){
+
+graficoLiberacoes.destroy();
+
+}
+
+graficoLiberacoes =
+new Chart(ctx,{
+
+type:'doughnut',
+
+data:{
+
+labels:[
+'Conforme',
+'Não Conforme'
+],
+
+datasets:[{
+
+data:[
+sim,
+nao
+],
+
+backgroundColor:[
+'#198754',
+'#dc3545'
+]
+
+}]
+
+},
+
+options:{
+
+responsive:false,
+
+plugins:{
+
+legend:{
+position:'bottom'
+}
+
+}
+
+}
+
+});
+
+}
+
+async function carregar(){
+
+tb.tBodies[0].innerHTML='';
+
+const { data, error } =
+await bancoSupabase
+.from('liberacoes')
+.select('*');
+
+if(
+!error &&
+data &&
+data.length > 0
+){
+
+data.forEach(x=>novo(x));
+
+}
+else
+{
+
+let d=JSON.parse(
+localStorage.getItem('liberacoes_v24')||'[]'
+);
+
+if(d.length){
+
+d.forEach(x=>novo(x));
+
+}else{
+
+novo();
+
+}
+
+}
+
+}
+function ind(){
+let d=dados();
+
+tot.innerText=d.length;
+
+conf.innerText=
+d.filter(x=>x.conforme=='Sim').length;
+
+nconf.innerText=
+d.filter(x=>x.conforme=='Não').length;
+
+exibindo.innerText =
+d.length;
+
+atualizarGrafico();
+
+}
+
+function filtrar(){
+
+let txt =
+pesquisa.value.toLowerCase();
+
+[...tb.tBodies[0].rows].forEach(r=>{
+
+let texto =
+
+r.cells[2].querySelector('input').value + " " +
+r.cells[3].querySelector('select').value + " " +
+r.cells[4].querySelector('select').value + " " +
+r.cells[5].querySelector('textarea').value + " " +
+r.cells[6].querySelector('input').value + " " +
+r.cells[7].querySelector('input').value;
+
+if(
+texto.toLowerCase().includes(txt)
+){
+r.style.display='';
+}else{
+r.style.display='none';
+}
+
+});
+
+let visiveis =
+[...tb.tBodies[0].rows]
+.filter(r=>r.style.display!=='none')
+.length;
+
+exibindo.innerText =
+visiveis;
+
+}
+
+function exportarExcel(){
+
+let linhas=[[
+"N",
+"Data",
+"OP",
+"Máquina",
+"Dispositivo",
+"Serviço",
+"Responsável",
+"Operador",
+"Conforme",
+"Orientado",
+"Observação"
+]];
+
+dados().forEach((d,i)=>{
+
+linhas.push([
+i+1,
+d.data,
+d.op,
+d.maquina,
+d.dispositivo,
+d.servico,
+d.responsavel,
+d.operador,
+d.conforme,
+d.orientado,
+d.obs
+]);
+
+});
+
+let ws =
+XLSX.utils.aoa_to_sheet(linhas);
+
+ws['!autofilter'] = {
+ref:"A1:K1"
+};
+
+let wb =
+XLSX.utils.book_new();
+
+XLSX.utils.book_append_sheet(
+wb,
+ws,
+"Liberacoes"
+);
+
+XLSX.writeFile(
+wb,
+"Liberacoes.xlsx"
+);
+
+msg.innerText =
+"Excel exportado com sucesso.";
+
+msg.style.display =
+"block";
+
+setTimeout(()=>{
+
+msg.style.display =
+"none";
+
+},2500);
+
+}
+
+pesquisa.oninput = filtrar;
+
+
+
+carregar();
+
+testarSupabase();
+
+let usuarioLogado =
+localStorage.getItem(
+"usuarioLogado"
+);
+
+if(
+usuarioLogado !== "Alexandre" &&
+usuarioLogado !== "Diretoria"
+){
+
+alert(
+"Acesso negado."
+);
+
+window.location.href =
+"00_Sistema_Manutencao_V25.html";
+
+}
+
+if(
+usuarioLogado !== "Alexandre"
+){
+
+btNovaLiberacao.style.display =
+"none";
+
+}
+
+let u=localStorage.getItem('usuarioLogado');
+if(u && u!=='Alexandre' && u!=='Diretoria'){btNova.style.display='none';btSalvar.style.display='none';document.querySelectorAll('input,select,textarea').forEach(e=>e.disabled=true);}
+</script>
+</body></html>
