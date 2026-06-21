@@ -180,9 +180,9 @@ style="display:none;">
 <th class="c2">Código</th>
 <th class="c3">Máquina</th>
 <th class="c4">Setor</th>
-<th class="c5">Observação</th>
-<th class="c6">Excluir</th>
-</tr>
+<th style="width:40%">Observação</th>
+<th style="width:30px">QR</th>
+<th style="width:30px">Excluir</th></tr>
 </thead>
 
 <tbody></tbody>
@@ -287,8 +287,27 @@ novo();
 
 }
 
-function novo(d={}){
+function gerarQR(botao){
 
+const linha =
+botao.parentNode.parentNode;
+
+const maquina =
+linha.cells[2]
+.querySelector('input')
+.value;
+
+window.open(
+'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' +
+encodeURIComponent(
+'31_QR_Registro.html?id=' + maquina
+),
+'_blank'
+);
+
+}
+
+function novo(d={}){
 let r=tb.tBodies[0].insertRow();
 
 r.innerHTML=`
@@ -311,6 +330,18 @@ r.innerHTML=`
 </td>
 
 <td>
+
+<button
+class="b2"
+onclick="gerarQR(this)"
+>
+QR
+</button>
+
+</td>
+
+<td>
+
 <button
 class="b5"
 onclick="excluir(this)"
@@ -324,6 +355,7 @@ usuarioLogado==="Alexandre"
 ">
 X
 </button>
+
 </td>
 `;
 

@@ -196,7 +196,8 @@ Manutenção
 <th class="c4">Máquina Vinculada</th>
 <th class="c5">Status</th>
 <th class="c6">Observação</th>
-<th class="c7">Excluir</th>
+<th style="width:50px">QR</th>
+<th style="width:30px">Excluir</th>
 </tr>
 </thead>
 
@@ -300,7 +301,31 @@ ${selectMaquinas(d.maquina||'')}
 </td>
 
 <td>
-<button class="b5" onclick="excluir(this)">X</button>
+
+<button
+class="b2"
+onclick="gerarQR(this)"
+style="
+width:40px;
+padding:6px;
+text-align:center;
+"
+>
+QR
+</button>
+
+</td>
+
+<td>
+
+<button
+class="b5"
+onclick="excluir(this)"
+style="width:30px;"
+>
+X
+</button>
+
 </td>
 
 `;
@@ -361,6 +386,31 @@ e.disabled = true;
 }
 
 renum();
+
+}
+
+function gerarQR(botao){
+
+const linha =
+botao.parentNode.parentNode;
+
+const dispositivo =
+linha.cells[2]
+.querySelector('input')
+.value;
+
+const maquina =
+linha.cells[3]
+.querySelector('select')
+.value;
+
+window.open(
+'31_QR_Registro.html?id=' +
+encodeURIComponent(dispositivo) +
+'&maq=' +
+encodeURIComponent(maquina),
+'_blank'
+);
 
 }
 
