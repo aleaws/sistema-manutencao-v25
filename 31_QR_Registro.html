@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QR Registro</title>
+</head>
+
+<body>
+
+<h1>Registro via QR</h1>
+
+<div id="equipamento"></div>
+
+<br>
+
+<label>Defeito</label><br>
+<textarea id="defeito"
+style="width:300px;height:80px"></textarea>
+
+<br><br>
+
+<label>Responsável</label><br>
+
+<input
+id="responsavel"
+readonly
+>
+
+<br><br>
+
+<button onclick="abrirChamado()">
+Abrir Chamado
+</button>
+
+<script>
+
+const parametros =
+new URLSearchParams(
+window.location.search
+);
+
+const id =
+parametros.get('id');
+
+const maquina =
+parametros.get('maq');
+
+const dispositivo = id;
+
+if(!id){
+
+alert('QR inválido');
+
+throw new Error('Sem ID');
+
+}
+
+const usuarioLogado =
+localStorage.getItem(
+'usuarioLogado'
+) || '';
+
+if(!usuarioLogado){
+
+alert(
+'Faça login primeiro'
+);
+
+window.location.href =
+'index.html';
+
+}
+
+console.log(
+'ID recebido:',
+id
+);
+
+console.log(
+'Máquina recebida:',
+maquina
+);
+
+document.getElementById(
+'equipamento'
+).innerHTML =
+'<h2>Equipamento: ' + id + '</h2>' +
+'<h3>Máquina: ' + maquina + '</h3>';
+
+document.getElementById(
+'responsavel'
+).value =
+usuarioLogado;
+
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<script>
+
+const SUPABASE_URL = 'https://wzcrqzbwcsmfwenzcxkf.supabase.co';
+
+const SUPABASE_KEY = 'sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu';
+
+const bancoSupabase=
+supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
+
+async function testeSupabase(){
+
+const { data, error } =
+await bancoSupabase
+.from('manutencao')
+.select('*')
+.limit(1);
+
+console.log(data);
+console.log(error);
+
+}
+
+testeSupabase();
+
+async function abrirChamado(){
+
+const defeito =
+document.getElementById('defeito').value;
+
+const responsavel =
+document.getElementById('responsavel').value;
+
+console.log('MÁQUINA:', maquina);
+console.log('DISPOSITIVO:', dispositivo);
+
+let tipo='';
+
+const { data: maq } =
+await bancoSupabase
+.from('maquinas')
+.select('*')
+.eq('maquina', id);
+
+if(maq && maq.length){
+
+tipo='maquina';
+
+maquina=id;
+
+}
+
+const { data: disp } =
+await bancoSupabase
+.from('dispositivos')
+.select('*')
+.eq('dispositivo', id);
+
+if(disp && disp.length){
+
+tipo='dispositivo';
+
+}
+
+if(!defeito.trim()){
+alert('Descreva o defeito');
+return;
+}
+
+const { error } =
+await bancoSupabase
+.from('manutencao')
+.insert([{
+data:new Date().toISOString().split('T')[0],
+os:'0000',
+prioridade:'Normal',
+maquina:maquina,
+
+dispositivo:dispositivo,
+
+defeito:defeito,
+responsavel:responsavel,
+status:'Aberta',
+servico:'',
+obs:'Aberto via QR'
+}]);
+
+if(error){
+alert('Erro: '+error.message);
+return;
+}
+
+alert('OS aberta para ' + id + ' com sucesso');
+document.getElementById('defeito').value = '';
+document.getElementById('responsavel').value = '';
+
+}
+
+
+</script>
+
+</body>
+</html>
