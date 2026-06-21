@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sistema de Manutenção V25</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial,sans-serif;
+background:#f4f6f8;
+}
+
+header{
+background:#1f4e79;
+color:white;
+padding:15px;
+text-align:center;
+font-size:24px;
+font-weight:bold;
+}
+
+.dashboard{
+
+display:grid;
+
+grid-template-columns:
+repeat(auto-fit,minmax(160px,1fr));
+
+gap:6px;
+
+padding:4px;
+
+}
+
+.ind{
+
+background:white;
+
+padding:8px;
+
+border-radius:8px;
+
+box-shadow:0 1px 6px rgba(0,0,0,.15);
+
+text-align:center;
+
+}
+
+.ind .num{
+
+font-size:18px;
+
+font-weight:bold;
+
+color:#1f4e79;
+
+}
+
+.alerta{
+
+background:#dc3545;
+color:white;
+padding:10px;
+margin:10px;
+border-radius:8px;
+font-weight:bold;
+
+}
+
+.grid{
+
+display:grid;
+
+grid-template-columns:
+repeat(auto-fit,minmax(220px,1fr));
+
+gap:15px;
+
+padding:15px;
+
+}
+
+.card{
+    background: linear-gradient(145deg, #ffffff, #f3f6fa);
+    border-radius: 16px;
+    padding: 10px;
+    text-align: center;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    transition: 0.25s;
+    cursor: pointer;
+}
+
+.card:hover{
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+}
+
+.icone{
+    font-size: 24px;
+    margin-bottom: 4px;
+    padding: 6px;
+    border-radius: 10px;
+    display: inline-block;
+    background: #eef3ff;
+}
+
+.titulo{
+    font-weight: 600;
+    font-size: 13px;
+    margin-top: 2px;
+}
+
+.info{
+    font-size: 11px;
+    color: #666;
+}
+
+iframe{
+
+width:100%;
+
+height:calc(100vh - 60px);
+
+border:none;
+
+display:none;
+
+}
+
+.topo{
+
+padding:10px;
+
+background:#e9ecef;
+
+display:none;
+
+}
+
+button{
+
+padding:10px 15px;
+
+border:none;
+
+border-radius:6px;
+
+cursor:pointer;
+
+background:#1f4e79;
+
+color:white;
+
+font-weight:bold;
+
+}
+
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+</head>
+
+<body>
+
+<div
+id="usuarioAtual"
+style="
+position:fixed;
+top:30px;
+right:1050px;
+z-index:9999;
+font-weight:bold;
+color:#1f4e79;
+background:white;
+padding:8px 12px;
+border-radius:8px;
+box-shadow:0 2px 8px rgba(0,0,0,.15);
+"
+>
+👤 Usuário
+</div>
+
+<div
+id="usuarioAtual"
+...
+>
+👤 Usuário
+</div>
+
+<button
+onclick="sair()"
+style="
+position:fixed;
+top:30px;
+right:980px;
+z-index:9999;
+background:linear-gradient(
+135deg,
+#1f4e79,
+#0d3b8e
+);
+color:white;
+border:none;
+box-shadow:0 4px 12px rgba(0,0,0,.25);
+
+transition:.3s;
+padding:10px 15px;
+border-radius:80px;
+cursor:pointer;
+font-weight:bold;
+">
+Sair
+</button>
+
+<header style="
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:12px 20px;
+">
+
+<div>
+<input
+id="pesquisaGlobal"
+placeholder="🔎 Pesquisa Global"
+style="
+width:260px;
+padding:8px;
+border-radius:6px;
+border:none;
+font-size:14px;">
+</div>
+
+<div style="
+font-size:24px;
+font-weight:bold;
+">
+🏭 SISTEMA DE MANUTENÇÃO V25
+</div>
+
+<div style="
+font-size:12px;
+text-align:right;
+line-height:1.3;
+color:#d9e2ec;
+">
+Desenvolvido por<br>
+<b>Alexandre Willian</b>
+</div>
+
+</header>
+
+<div id="menu">
+
+<div id="alertas"></div>
+
+<div class="card">
+
+<div id="resultadoPesquisa"
+style="margin-top:10px"></div>
+
+</div>
+<div class="dashboard" style="margin-top:0">
+
+<div class="ind">
+<div class="num" id="maq">0</div>
+Máquinas
+</div>
+
+<div class="ind">
+<div class="num" id="disp">0</div>
+Dispositivos
+</div>
+
+<div class="ind">
+<div class="num" id="osabertas">0</div>
+OS Abertas
+</div>
+
+<div class="ind">
+<div class="num" id="ncabertas">0</div>
+NC Abertas
+</div>
+
+<div class="ind">
+<div class="num" id="lubvenc">0</div>
+Lubrificações Vencidas
+</div>
+
+<div class="ind">
+<div class="num" id="melh">0</div>
+Melhorias Implantadas
+</div>
+
+<div class="ind">
+<div class="num" id="osdisp">0</div>
+OS Dispositivos
+</div>
+
+</div>
+
+
+
+<div class="grid">
+
+<div
+id="cardManutencao"
+class="card"
+onclick="abrir('03_Manutencao.html')">
+<div class="icone">🔧</div>
+<div class="titulo">Manutenção</div>
+<div class="info" id="infoOS"></div>
+</div>
+
+<div class="card" onclick="abrir('07_OS_Dispositivos.html')">
+<div class="icone">🛠</div>
+<div class="titulo">Manutenção dos Dispositivos</div>
+<div class="info" id="infoOSDisp"></div>
+</div>
+
+<div
+id="cardMaquinas"
+class="card"
+onclick="abrir('04_Maquinas.html')">
+<div class="icone">🏭</div>
+<div class="titulo">Cadastro de Máquinas</div>
+<div class="info" id="infoMaq"></div>
+</div>
+
+<div
+id="cardDispositivos"
+class="card"
+onclick="abrir('05_Dispositivos.html')">
+<div class="icone">🛠</div>
+<div class="titulo">Cadastro de Dispositivos</div>
+<div class="info" id="infoDisp"></div>
+</div>
+
+<div class="card" onclick="abrir('19_Lubrificacao.html')">
+<div class="icone">🛢</div>
+<div class="titulo">Lubrificação</div>
+<div class="info" id="infoLub"></div>
+</div>
+
+<div class="card" onclick="abrir('21_Diario_Inspecao.html')">
+<div class="icone">📋</div>
+<div class="titulo">Diário Inspeção</div>
+<div class="info" id="infoInsp"></div>
+</div>
+
+<div class="card" onclick="abrir('20_Diario_Simples.html')">
+<div class="icone">🏭</div>
+<div class="titulo">Diário de Manutenção / Produção</div>
+<div class="info" id="infoSimples"></div>
+</div>
+
+<div class="card" onclick="abrir('09_Nao_Conformidades.html')">
+<div class="icone">⚠️</div>
+<div class="titulo">Não Conformidades</div>
+<div class="info" id="infoNC"></div>
+</div>
+
+<div
+id="cardMelhorias"
+class="card"
+onclick="abrir('06_Melhorias.html')"
+>
+<div class="icone">💡</div>
+<div class="titulo">Melhorias</div>
+<div class="info" id="infoMel"></div>
+</div>
+
+<div class="card" onclick="abrir('08_Pauta.html')">
+<div class="icone">📝</div>
+<div class="titulo">Pauta</div>
+<div class="info" id="infoPauta"></div>
+</div>
+
+<div class="card" onclick="abrir('15_Indicadores.html')">
+<div class="icone">📊</div>
+<div class="titulo">Indicadores</div>
+</div>
+
+<div class="card" onclick="abrir('00_Planejamento_Prioridades.html')">
+<div class="icone">🎯</div>
+<div class="titulo">Planejamento</div>
+<div class="info" id="infoPrioridades"></div>
+</div>
+
+<div
+id="cardLiberacoes"
+class="card"
+onclick="abrir('01_Liberacoes.html')"
+>
+<div class="icone">✅</div>
+<div class="titulo">Liberações</div>
+<div class="info" id="infoLiberacoes"></div>
+</div>
+
+<div
+id="cardBackup"
+class="card"
+onclick="abrir('99_Backup_Geral.html')">
+<div class="icone">💾</div>
+<div class="titulo">Backup Geral</div>
+</div>
+
+<div class="card" onclick="abrir('22_Ferramentas_Materiais.html')">
+<div class="icone">🧰</div>
+<div class="titulo">Ferramentas e Materiais</div>
+<div class="info" id="infoFerr"></div>
+</div>
+
+<div class="card" onclick="abrir('24_Indicadores_01_Equipamentos.html')">
+<div class="icone">🏭</div>
+<div class="titulo">Indicadores de Equipamentos</div>
+<div class="info">
+Dashboard • Rankings • Status
+</div>
+</div>
+
+</div>
+
+<div id="barra" class="topo">
+
+<button onclick="voltar()">
+⬅ Voltar ao Menu
+</button>
+
+<button onclick="atualizar()">
+🔄 Atualizar
+</button>
+
+</div>
+
+<iframe id="frame"></iframe>
+
+<script>
+
+const SUPABASE_URL =
+'https://wzcrqzbwcsmfwenzcxkf.supabase.co';
+
+const SUPABASE_KEY =
+'sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu';
+
+const bancoSupabase =
+window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
+
+
+let usuarioLogado =
+localStorage.getItem(
+"usuarioLogado"
+);
+
+document.addEventListener(
+"DOMContentLoaded",
+function(){
+
+document.getElementById(
+"usuarioAtual"
+).innerHTML =
+
+"👤 " +
+
+usuarioLogado;
+
+}
+);
+
+
+if(!usuarioLogado){
+
+alert(
+"Faça login"
+);
+
+window.location.href =
+"index.html";
+
+}
+
+
+
+if(
+usuarioLogado==="PCP"
+){
+
+document.querySelectorAll(
+".card"
+).forEach(card => {
+
+card.style.display =
+"none";
+
+});
+
+cardMaquinas.style.display =
+"block";
+
+cardDispositivos.style.display =
+"block";
+
+cardManutencao.style.display =
+"block";
+
+cardBackup.style.display =
+"none";
+
+}
+
+if(
+usuarioLogado==="Engenharia"
+){
+
+document.querySelectorAll(
+".card"
+).forEach(card => {
+
+card.style.display =
+"none";
+
+});
+
+cardMaquinas.style.display =
+"block";
+
+cardDispositivos.style.display =
+"block";
+
+cardMelhorias.style.display =
+"block";
+
+cardBackup.style.display =
+"none";
+
+}
+
+
+function ler(chave){
+
+try{
+return JSON.parse(
+localStorage.getItem(chave)||'[]'
+);
+}
+catch{
+return [];
+}
+
+}
+
+async function atualizar(){
+
+const { data: maqs } =
+await bancoSupabase
+.from('maquinas')
+.select('*');
+
+const { data: disps } =
+await bancoSupabase
+.from('dispositivos')
+.select('*');
+
+const { data: os } =
+await bancoSupabase
+.from('manutencao')
+.select('*');
+
+let nc=
+ler('nao_conformidades_v24');
+
+let lub=
+ler('lubrificacao_v24');
+
+let mel=
+ler('melhorias_v24');
+
+let ferramentas=
+ler('ferramentas_materiais_v24');
+
+let osDispositivos=
+ler('os_dispositivos_v24');
+
+
+let prioridades=
+ler('planejamento_prioridades');
+
+let liberacoes=
+ler('liberacoes_v24');
+
+const { data: insp } =
+await bancoSupabase
+.from('diario_inspecao')
+.select('*');
+
+const { data: simples } =
+await bancoSupabase
+.from('diario_simples')
+.select('*');
+let pauta=
+ler('pauta_v24');
+
+maq.innerText=maqs.length;
+disp.innerText=disps.length;
+
+let abertas=
+os.filter(x=>
+x.status=='Aberta' ||
+x.status=='Em Andamento'
+).length;
+
+osabertas.innerText=abertas;
+
+let ncAbertas=
+nc.filter(x=>
+x.status=='Aberta' ||
+x.status=='Em Andamento'
+).length;
+
+ncabertas.innerText=ncAbertas;
+
+let implantadas=
+mel.filter(x=>
+x.status=='Implantada'
+).length;
+
+melh.innerText=implantadas;
+
+osdisp.innerText=
+osDispositivos.length;
+
+let vencidas=0;
+
+let hoje=new Date();
+
+hoje.setHours(0,0,0,0);
+
+lub.forEach(x=>{
+
+if(!x.proxima) return;
+
+let d=new Date(x.proxima);
+
+d.setHours(0,0,0,0);
+
+if(d<hoje){
+vencidas++;
+}
+
+});
+
+lubvenc.innerText=vencidas;
+
+infoOS.innerHTML=
+abertas+" abertas";
+
+infoMaq.innerHTML=
+maqs.length+" cadastradas";
+
+infoDisp.innerHTML=
+disps.length+" cadastrados";
+
+infoNC.innerHTML=
+ncAbertas+" abertas";
+
+infoLub.innerHTML=
+vencidas+" vencidas";
+
+infoMel.innerHTML=
+implantadas+" implantadas";
+
+infoOSDisp.innerHTML=
+osDispositivos.length+" abertas";
+
+osdisp.innerText=
+osDispositivos.length;
+
+infoFerr.innerHTML=
+ferramentas.length+" itens";
+
+infoInsp.innerHTML=
+insp.length+" registros";
+
+infoSimples.innerHTML=
+simples.length+" registros";
+
+infoPauta.innerHTML=
+pauta.length+" pendências";
+
+infoPrioridades.innerHTML=
+prioridades.length+" itens";
+
+infoLiberacoes.innerHTML=
+liberacoes.length+" liberações";
+
+let alertas=[];
+
+if(abertas>0)
+alertas.push("🔧 "+abertas+" OS abertas");
+
+if(ncAbertas>0)
+alertas.push("⚠ "+ncAbertas+" NC abertas");
+
+if(vencidas>0)
+alertas.push("🛢 "+vencidas+" lubrificações vencidas");
+
+alertasDiv=
+document.getElementById('alertas');
+
+if(alertas.length){
+
+alertasDiv.innerHTML=
+'<div class="alerta">'+
+alertas.join(' | ')+
+'</div>';
+
+}else{
+
+alertasDiv.innerHTML='';
+
+}
+
+}
+
+function abrir(arq){
+    window.open(arq, '_self');
+}
+
+function voltar(){
+
+frame.src='';
+
+frame.style.display='none';
+
+barra.style.display='none';
+
+menu.style.display='block';
+
+atualizar();
+
+}
+
+function pesquisarGlobal(){
+
+let txt =
+document.getElementById("pesquisaGlobal")
+.value
+.toLowerCase()
+.trim();
+
+let html = "";
+
+if(!txt){
+
+document.getElementById(
+"resultadoPesquisa"
+).innerHTML =
+html + historicoHTML;
+
+return;
+
+}
+
+let maquinas =
+JSON.parse(
+localStorage.getItem(
+"cadastro_maquinas_v24"
+)||"[]"
+);
+
+let dispositivos =
+JSON.parse(
+localStorage.getItem(
+"cadastro_dispositivos_v24"
+)||"[]"
+);
+
+let manutencao =
+JSON.parse(
+localStorage.getItem(
+"manutencao_v24"
+)||"[]"
+);
+
+let diario =
+JSON.parse(
+localStorage.getItem(
+"diario_inspecao_v24"
+)||"[]"
+);
+
+let naoConformidades =
+JSON.parse(
+localStorage.getItem(
+"nao_conformidades_v24"
+)||"[]"
+);
+
+let ferramentas =
+JSON.parse(
+localStorage.getItem(
+"ferramentas_materiais_v24"
+)||"[]"
+);
+
+let historicoHTML = "";
+html += "<h4>Máquinas</h4>";
+
+maquinas.forEach(m=>{
+
+if(
+(m.codigo||"")
+.toLowerCase()
+.includes(txt)
+
+||
+
+(m.maquina||"")
+.toLowerCase()
+.includes(txt)
+
+){
+
+html += `
+<div
+style="cursor:pointer;
+padding:5px;
+border-bottom:1px solid #ddd"
+onclick="abrir('04_Maquinas.html')">
+
+🏭 ${m.codigo} - ${m.maquina}
+
+</div>
+`;
+}
+
+});
+
+html += "<h4>Dispositivos</h4>";
+
+dispositivos.forEach(d=>{
+
+if(
+
+(d.codigo||"")
+.toLowerCase()
+.includes(txt)
+
+||
+
+(d.dispositivo||"")
+.toLowerCase()
+.includes(txt)
+
+){
+
+html += `
+<div
+style="cursor:pointer;
+padding:5px;
+border-bottom:1px solid #ddd"
+onclick="abrir('05_Dispositivos.html')">
+
+🛠 ${d.codigo} - ${d.dispositivo}
+
+</div>
+`;
+
+}
+
+});
+
+html += "<h4>🔧 Manutenção</h4>";manutencao.forEach(m=>{
+
+if(
+
+(m.os||"")
+.toLowerCase()
+.includes(txt)
+
+||
+
+(m.maquina||"")
+.toLowerCase()
+.includes(txt)
+
+||
+
+(m.dispositivo||"")
+.toLowerCase()
+.includes(txt)
+
+){
+
+html += `
+<div
+style="cursor:pointer;
+padding:5px;
+border-bottom:1px solid #ddd"
+onclick="abrir('03_Manutencao.html')">
+
+🔧 OS ${m.os} - ${m.maquina}
+
+</div>
+`;
+
+}
+
+});
+
+html += "<h4>📋 Diário de Inspeção</h4>";
+
+diario.forEach(d=>{
+
+if(
+
+(d.op||"")
+.toLowerCase()
+.includes(txt)
+
+||
+
+(d.produto||"")
+.toLowerCase()
+.includes(txt)
+
+||
+
+(d.dispositivo||"")
+.toLowerCase()
+.includes(txt)
+
+){
+
+html += `
+<div
+style="cursor:pointer;
+padding:5px;
+border-bottom:1px solid #ddd"
+onclick="abrir('21_Diario_Inspecao.html')">
+
+📋 OP ${d.op} - ${d.produto}
+
+</div>
+`;
+
+}
+
+});
+
+
+html += "<h4>🧰 Ferramentas e Materiais</h4>";
+
+ferramentas.forEach(f=>{
+
+if(
+
+(f.codigo||"")
+.toLowerCase()
+.includes(txt)
+
+||
+
+(f.descricao||"")
+.toLowerCase()
+.includes(txt)
+
+||
+
+(f.categoria||"")
+.toLowerCase()
+.includes(txt)
+
+||
+
+(f.fornecedor||"")
+.toLowerCase()
+.includes(txt)
+
+){
+
+html += `
+<div
+style="cursor:pointer;
+padding:5px;
+border-bottom:1px solid #ddd"
+onclick="abrir('22_Ferramentas_Materiais.html')">
+
+🧰 ${f.codigo} - ${f.descricao}
+
+</div>
+`;
+
+}
+
+});
+
+
+document.getElementById(
+"resultadoPesquisa"
+).innerHTML = html;
+
+}
+document
+.getElementById("pesquisaGlobal")
+.addEventListener(
+"input",
+pesquisarGlobal
+);
+atualizar();
+
+function sair(){
+
+localStorage.removeItem(
+"usuarioLogado"
+);
+
+window.location.href =
+"index.html";
+
+}
+
+
+
+</script>
+<div style="
+text-align:center;
+padding:15px;
+font-size:12px;
+color:#777;
+margin-top:20px;
+">
+
+Sistema de Manutenção V25<br>
+
+Desenvolvido por Alexandre Willian
+
+</div>
+</body>
+</html>
