@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>25 - Gestão da Manutenção</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f5f5f5;
+padding:20px;
+}
+
+h1{
+margin-bottom:20px;
+}
+
+.cards{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+gap:15px;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 2px 5px rgba(0,0,0,.15);
+text-align:center;
+}
+
+.numero{
+font-size:30px;
+font-weight:bold;
+margin-top:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>📈 Gestão da Manutenção</h1>
+
+<div class="cards">
+
+<div class="card">
+<div>Total de OS</div>
+<div id="totalOS" class="numero">0</div>
+</div>
+
+<div class="card">
+<div>Abertas</div>
+<div id="osAbertas" class="numero">0</div>
+</div>
+
+<div class="card">
+<div>Em Andamento</div>
+<div id="osAndamento" class="numero">0</div>
+</div>
+
+<div class="card">
+<div>Aguardando Peça</div>
+<div id="osPeca" class="numero">0</div>
+</div>
+
+<div class="card">
+<div>Concluídas</div>
+<div id="osConcluidas" class="numero">0</div>
+</div>
+
+<div class="card">
+<div>Canceladas</div>
+<div id="osCanceladas" class="numero">0</div>
+</div>
+
+<div class="card">
+<div>Críticas</div>
+<div id="osCriticas" class="numero">0</div>
+</div>
+
+</div>
+
+<script>
+
+const SUPABASE_URL =
+'https://wzcrqzbwcsmfwenzcxkf.supabase.co';
+
+const SUPABASE_KEY =
+'sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu';
+
+const bancoSupabase =
+window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
+
+console.log(
+'Conectado ao Supabase'
+);
+
+async function carregarIndicadores(){
+
+const { data: lista, error } =
+await bancoSupabase
+.from('ordens_servico')
+.select('*');
+
+document.getElementById(
+'totalOS'
+).innerText =
+lista.length;
+
+document.getElementById(
+'osAbertas'
+).innerText =
+lista.filter(x =>
+x.status === 'Aberta'
+).length;
+
+document.getElementById(
+'osAndamento'
+).innerText =
+lista.filter(x =>
+x.status === 'Em Andamento'
+).length;
+
+document.getElementById(
+'osPeca'
+).innerText =
+lista.filter(x =>
+x.status === 'Aguardando Peça'
+).length;
+
+document.getElementById(
+'osConcluidas'
+).innerText =
+lista.filter(x =>
+x.status === 'Concluída'
+).length;
+
+document.getElementById(
+'osCanceladas'
+).innerText =
+lista.filter(x =>
+x.status === 'Cancelada'
+).length;
+
+document.getElementById(
+'osCriticas'
+).innerText =
+lista.filter(x =>
+x.prioridade === 'Crítica'
+).length;
+
+let ranking = {};
+
+lista.forEach(os=>{
+
+if(!os.maquina) return;
+
+ranking[os.maquina] =
+(ranking[os.maquina] || 0) + 1;
+
+});
+
+let ordenado =
+Object.entries(ranking)
+.sort((a,b)=>b[1]-a[1]);
+
+let tbody =
+document.querySelector(
+'#tbRanking tbody'
+);
+
+tbody.innerHTML='';
+
+ordenado.forEach((item,i)=>{
+
+tbody.innerHTML += `
+<tr>
+<td>${i+1}</td>
+<td>${item[0]}</td>
+<td>${item[1]}</td>
+</tr>
+`;
+
+});
+
+let rankingDisp = {};
+
+lista.forEach(os=>{
+
+if(!os.dispositivo) return;
+
+rankingDisp[os.dispositivo] =
+(rankingDisp[os.dispositivo] || 0) + 1;
+
+});
+
+let ordenadoDisp =
+Object.entries(rankingDisp)
+.sort((a,b)=>b[1]-a[1]);
+
+let tbodyDisp =
+document.querySelector(
+'#tbRankingDisp tbody'
+);
+
+tbodyDisp.innerHTML='';
+
+ordenadoDisp.forEach((item,i)=>{
+
+tbodyDisp.innerHTML += `
+<tr>
+<td>${i+1}</td>
+<td>${item[0]}</td>
+<td>${item[1]}</td>
+</tr>
+`;
+
+});
+
+}
+
+carregarIndicadores();
+
+</script>
+
+<div style="
+display:flex;
+gap:30px;
+align-items:flex-start;
+flex-wrap:wrap;
+">
+
+<div>
+
+<h2>🏭 Ranking de Máquinas</h2>
+
+<table id="tbRanking" border="1" cellpadding="8" cellspacing="0">
+<thead>
+<tr>
+<th>Posição</th>
+<th>Máquina</th>
+<th>OS</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+
+</div>
+
+<div>
+
+<h2>🛠 Ranking de Dispositivos</h2>
+
+<table id="tbRankingDisp" border="1" cellpadding="8" cellspacing="0">
+<thead>
+<tr>
+<th>Posição</th>
+<th>Dispositivo</th>
+<th>OS</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+
+</div>
+
+</div>
+<br><br>
+
+</body>
+</html>

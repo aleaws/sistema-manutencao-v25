@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>22_Ferramentas_Materiais</title>
+
+<style>
+body{font-family:Arial,sans-serif;background:#f4f6f8;margin:0;padding:0}
+header{background:#1f4e79;color:#fff;padding:12px;text-align:center}
+.container{padding:10px}
+.card{background:#fff;padding:10px;margin-bottom:10px;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.15);overflow-x:auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}
+.ind{font-size:22px;font-weight:bold}
+button{padding:10px 14px;border:none;border-radius:6px;color:#fff;font-weight:bold;cursor:pointer}
+.b1{background:#1f4e79}
+.b2{background:#198754}
+.b3{background:#fd7e14}
+.b4{background:#343a40}
+.b5{background:#dc3545}
+
+.msg{
+display:none;
+padding:8px;
+background:#d1e7dd;
+color:#0f5132;
+border-radius:6px;
+margin-top:8px
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+table-layout:auto;
+}
+
+th,td{
+border:1px solid #ccc;
+padding:3px;
+font-size:11px;
+}
+
+th{
+background:#1f4e79;
+color:#fff;
+}
+
+input,select,textarea{
+width:100%;
+box-sizing:border-box;
+font-size:11px;
+border:none;
+padding:3px;
+}
+
+.atrasada{
+background:#f8d7da;
+}
+
+.cDesc{min-width:300px}
+.cCausa{min-width:250px}
+.cAcao{min-width:350px}
+.cObs{min-width:250px}
+.cExc{width:35px}
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script src="permissoes.js"></script>
+
+</head>
+
+<body>
+
+<header style="position:relative;">
+
+<div style="
+position:absolute;
+left:10px;
+top:50%;
+transform:translateY(-50%);
+display:flex;
+gap:8px;
+">
+
+<button
+onclick="window.location.href='00_Sistema_Manutencao_V25.html'"
+style="
+background:#28a745;
+color:white;
+border:none;
+padding:8px 14px;
+border-radius:6px;
+cursor:pointer;
+font-weight:bold;
+">
+⬅ Menu
+</button>
+
+<button
+onclick="location.reload()"
+style="
+background:#17a2b8;
+color:white;
+border:none;
+padding:8px 14px;
+border-radius:6px;
+cursor:pointer;
+font-weight:bold;
+">
+🔄 Atualizar
+</button>
+
+</div>
+
+<span style="
+font-size:30px;
+font-weight:bold;
+">
+🧰 FERRAMENTAS E MATERIAIS
+
+</header>
+
+<div class="container">
+
+<div class="card">
+
+<div class="grid">
+
+<div>Total Itens<div class="ind" id="tot">0</div></div>
+<div>Estoque Baixo<div class="ind" id="abertas">0</div></div>
+<div>Sem Estoque<div class="ind" id="andamento">0</div></div>
+<div>Solicitados<div class="ind" id="concluidas">0</div></div>
+<div>Comprados<div class="ind" id="atrasadas">0</div></div>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="grid">
+
+<div>
+<label>Pesquisa</label>
+<input id="pesquisa">
+</div>
+
+<div>
+<label>Categoria</label>
+<select id="fStatus">
+<option value="">Todas</option>
+<option>Ferramentas de Corte</option>
+<option>Matéria-prima</option>
+<option>Parafusos/Fixadores</option>
+<option>Componentes</option>
+<option>Ferramentas para Manutenção</option>
+</select>
+</div>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<button class="b1" onclick="novo()">Novo Item</button>
+<button class="b2" onclick="salvarManual()">Salvar</button>
+<button class="b3" onclick="exportarExcel()">📊 Exportar Excel</button>
+<button class="b4" onclick="window.print()">Imprimir</button>
+
+<div id="msg" class="msg"></div>
+
+</div>
+
+<div class="card">
+
+<table id="tb">
+
+<thead>
+
+<tr>
+
+<th>Nº</th>
+<th>Data</th>
+<th>Código</th>
+<th>Descrição</th>
+<th>Categoria</th>
+<th>Quantidade</th>
+<th>Mínimo</th>
+<th>Localização</th>
+<th>Fornecedor</th>
+<th>Status</th>
+<th>Observação</th>
+<th>X</th>
+</thead>
+
+<tbody></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<script>
+
+verificarPermissao(
+"22_Ferramentas_Materiais.html"
+);
+
+function aviso(t){
+msg.innerText=t;
+msg.style.display='block';
+setTimeout(()=>msg.style.display='none',2500);
+}
+
+function novo(d={}){
+
+let r=tb.tBodies[0].insertRow();
+
+r.innerHTML=`
+
+<td></td>
+
+<td><input type="date" value="${d.data||''}"></td>
+
+<td><input value="${d.codigo||''}"></td>
+
+<td><input value="${d.descricao||''}"></td>
+
+<td>
+<select>
+<option ${d.categoria=="Ferramentas de Corte"?"selected":""}>Ferramentas de Corte</option>
+<option ${d.categoria=="Matéria-prima"?"selected":""}>Matéria-prima</option>
+<option ${d.categoria=="Parafusos/Fixadores"?"selected":""}>Parafusos/Fixadores</option>
+<option ${d.categoria=="Componentes"?"selected":""}>Componentes</option>
+<option ${d.categoria=="Ferramentas para Manutenção"?"selected":""}>Ferramentas para Manutenção</option>
+</select>
+</td>
+
+<td>
+<input type="number" value="${d.quantidade||0}">
+</td>
+
+<td>
+<input type="number" value="${d.minimo||0}">
+</td>
+
+<td>
+<input value="${d.localizacao||''}">
+</td>
+
+<td>
+<input value="${d.fornecedor||''}">
+</td>
+
+<td>
+<select>
+<option ${d.status=="Em Estoque"?"selected":""}>Em Estoque</option>
+<option ${d.status=="Baixo Estoque"?"selected":""}>Baixo Estoque</option>
+<option ${d.status=="Sem Estoque"?"selected":""}>Sem Estoque</option>
+<option ${d.status=="Solicitado"?"selected":""}>Solicitado</option>
+<option ${d.status=="Comprado"?"selected":""}>Comprado</option>
+</select>
+</td>
+
+<td>
+<textarea rows="2">${d.obs||''}</textarea>
+</td>
+
+<td>
+<button class="b5" onclick="excluir(this)" style="padding:2px 6px;font-size:10px">
+X
+</button>
+</td>`;
+
+r.querySelectorAll("input,select,textarea").forEach(e=>{
+e.oninput=()=>{
+salvar();
+filtrar();
+};
+});
+
+renum();
+salvar();
+
+}
+
+function excluir(btn){
+
+if(!confirm("Excluir NC?")) return;
+
+btn.closest("tr").remove();
+
+renum();
+salvar();
+
+}
+
+function renum(){
+
+[...tb.tBodies[0].rows].forEach((r,i)=>{
+r.cells[0].innerText=i+1;
+});
+
+indicadores();
+
+}
+
+function dados(){
+
+return [...tb.tBodies[0].rows].map(r=>({
+
+data:r.cells[1].querySelector('input').value,
+
+codigo:r.cells[2].querySelector('input').value,
+
+descricao:r.cells[3].querySelector('input').value,
+
+categoria:r.cells[4].querySelector('select').value,
+
+quantidade:r.cells[5].querySelector('input').value,
+
+minimo:r.cells[6].querySelector('input').value,
+
+localizacao:r.cells[7].querySelector('input').value,
+
+fornecedor:r.cells[8].querySelector('input').value,
+
+status:r.cells[9].querySelector('select').value,
+
+obs:r.cells[10].querySelector('textarea').value
+
+}));
+
+}
+function salvar(){
+
+localStorage.setItem(
+'ferramentas_materiais_v24',
+JSON.stringify(dados())
+);
+
+indicadores();
+
+}
+function salvarManual(){
+
+salvar();
+aviso("Dados salvos com sucesso.");
+
+}
+
+function carregar(){
+
+let d=JSON.parse(
+localStorage.getItem(
+'ferramentas_materiais_v24'
+)||'[]'
+);
+
+if(d.length){
+d.forEach(x=>novo(x));
+}
+
+}
+function indicadores(){
+
+let d=dados();
+
+let estoqueBaixo=0;
+let semEstoque=0;
+let solicitados=0;
+let comprados=0;
+
+let hoje=new Date();
+hoje.setHours(0,0,0,0);
+
+[...tb.tBodies[0].rows].forEach(r=>{
+
+r.classList.remove("atrasada");
+
+let qtd =
+Number(
+r.cells[5]
+.querySelector('input')
+.value || 0
+);
+
+let minimo =
+Number(
+r.cells[6]
+.querySelector('input')
+.value || 0
+);
+
+let status =
+r.cells[9]
+.querySelector('select')
+.value;
+
+if(qtd===0){
+semEstoque++;
+}
+
+if(qtd<=minimo){
+estoqueBaixo++;
+}
+
+if(status==="Solicitado"){
+solicitados++;
+}
+
+if(status==="Comprado"){
+comprados++;
+}
+});
+
+tot.innerText=d.length;
+abertas.innerText=estoqueBaixo;
+andamento.innerText=semEstoque;
+concluidas.innerText=solicitados;
+atrasadas.innerText=comprados;
+}
+
+function filtrar(){
+
+let txt=pesquisa.value.toLowerCase();
+
+[...tb.tBodies[0].rows].forEach(r=>{
+
+let ok=
+r.innerText.toLowerCase().includes(txt);
+
+if(fStatus.value){
+
+ok = ok &&
+r.cells[10]
+.querySelector('select')
+.value===fStatus.value;
+
+}
+
+r.style.display=ok?'':'none';
+
+});
+
+}
+
+function exportarCSV(){
+
+let linhas=[[
+"Nº",
+"Data",
+"Código",
+"Descrição",
+"Categoria",
+"Quantidade",
+"Mínimo",
+"Saldo",
+"Estoque Baixo",
+"Localização",
+"Fornecedor",
+"Status",
+"Observação"
+]];
+dados().forEach((d,i)=>{
+
+let saldo =
+Number(d.quantidade||0) -
+Number(d.minimo||0);
+
+let estoqueBaixo =
+saldo <= 0 ? "SIM" : "NÃO";
+
+linhas.push([
+i+1,
+d.data,
+d.codigo,
+d.descricao,
+d.categoria,
+d.quantidade,
+d.minimo,
+saldo,
+estoqueBaixo,
+d.localizacao,
+d.fornecedor,
+d.status,
+d.observacao
+]);
+
+
+});
+
+let csv=
+linhas.map(r=>
+r.map(c=>`"${c}"`).join(";")
+).join("\n");
+
+let a=document.createElement("a");
+
+a.href=
+URL.createObjectURL(
+new Blob([csv],{type:"text/csv"})
+);
+
+a.download="Ferramentas_Materiais.csv";
+
+a.click();
+
+aviso("CSV exportado com sucesso.");
+
+}
+
+function exportarExcel(){
+
+let linhas=[[
+"Nº",
+"Data",
+"Código",
+"Descrição",
+"Categoria",
+"Quantidade",
+"Mínimo",
+"Saldo",
+"Estoque Baixo",
+"Localização",
+"Fornecedor",
+"Status",
+"Observação"
+]];
+
+dados().forEach((d,i)=>{
+
+let saldo =
+Number(d.quantidade||0) -
+Number(d.minimo||0);
+
+let estoqueBaixo =
+saldo <= 0 ? "SIM" : "NÃO";
+
+linhas.push([
+i+1,
+d.data,
+d.codigo,
+d.descricao,
+d.categoria,
+d.quantidade,
+d.minimo,
+saldo,
+estoqueBaixo,
+d.localizacao,
+d.fornecedor,
+d.status,
+d.observacao
+]);
+
+});
+
+let ws =
+XLSX.utils.aoa_to_sheet(linhas);
+
+ws['!autofilter'] = {
+ref:"A1:M1"
+};
+
+ws['!cols'] = [
+{wch:6},
+{wch:12},
+{wch:15},
+{wch:35},
+{wch:20},
+{wch:12},
+{wch:12},
+{wch:12},
+{wch:15},
+{wch:20},
+{wch:25},
+{wch:15},
+{wch:50}
+];
+
+let wb =
+XLSX.utils.book_new();
+
+XLSX.utils.book_append_sheet(
+wb,
+ws,
+"Ferramentas"
+);
+
+XLSX.writeFile(
+wb,
+"Ferramentas_Materiais.xlsx"
+);
+
+aviso("Excel exportado com sucesso.");
+
+}
+
+pesquisa.oninput=filtrar;
+fStatus.onchange=filtrar;
+
+carregar();
+
+</script>
+
+</body>
+</html>
