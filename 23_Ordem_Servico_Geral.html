@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Ordem de Serviço</title>
+
+
+<style>
+:root{
+--azul:#184b78;
+--azul2:#0f3557;
+--verde:#198754;
+--vermelho:#dc3545;
+--amarelo:#ffc107;
+--cinza:#6c757d;
+--bg:#eef2f5;
+--card:#ffffff;
+--borda:#d9dee5;
+--texto:#202428;
+}
+
+*{box-sizing:border-box}
+
+body{
+font-family:Arial,Helvetica,sans-serif;
+margin:0;
+background:var(--bg);
+color:var(--texto);
+}
+
+header{
+background:linear-gradient(135deg,var(--azul),var(--azul2));
+color:white;
+padding:16px;
+text-align:center;
+font-size:28px;
+font-weight:bold;
+letter-spacing:.4px;
+position:relative;
+box-shadow:0 2px 10px rgba(0,0,0,.18);
+}
+
+.topbar{
+position:absolute;
+left:12px;
+top:50%;
+transform:translateY(-50%);
+display:flex;
+gap:8px;
+}
+
+.container{
+max-width:1320px;
+margin:auto;
+padding:14px;
+}
+
+.card{
+background:white;
+padding:16px;
+border-radius:12px;
+margin-bottom:14px;
+box-shadow:0 2px 10px rgba(0,0,0,.08);
+}
+
+.grid{
+display:grid;
+grid-template-columns:
+1.2fr .7fr 1fr 1fr 1.1fr 1.1fr 1fr 1fr 1fr;
+gap:10px;
+align-items:end;
+}
+
+.campo{
+display:flex;
+flex-direction:column;
+}
+
+label{
+font-weight:bold;
+font-size:13px;
+margin-bottom:5px;
+color:#26313a;
+}
+
+input,select,textarea{
+width:100%;
+padding:10px;
+border:1px solid var(--borda);
+border-radius:8px;
+box-sizing:border-box;
+font-size:14px;
+background:white;
+}
+
+input:focus,select:focus,textarea:focus{
+border-color:var(--azul);
+box-shadow:0 0 0 3px rgba(24,75,120,.12);
+outline:none;
+}
+
+textarea{
+min-height:78px;
+resize:vertical;
+}
+
+button{
+padding:10px 16px;
+cursor:pointer;
+border:none;
+border-radius:8px;
+background:#1976d2;
+color:white;
+font-weight:bold;
+font-size:14px;
+}
+
+button:hover{
+filter:brightness(.92);
+}
+
+.btns-form{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+margin-top:12px;
+}
+
+.btn-salvar{background:var(--verde)}
+.btn-atualizar{background:#0d6efd}
+.btn-menu{background:var(--cinza)}
+.btn-gerar{padding:7px 12px;margin-left:6px}
+
+.indicadores{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+gap:10px;
+margin-bottom:18px;
+}
+
+.card-ind{
+background:#f8fafc;
+border-radius:12px;
+padding:12px;
+min-height:88px;
+text-align:center;
+box-shadow:0 2px 8px rgba(0,0,0,.08);
+border-left:5px solid #1976d2;
+display:flex;
+flex-direction:column;
+justify-content:center;
+}
+
+.card-ind div{
+font-size:24px;
+font-weight:bold;
+color:#1976d2;
+margin-bottom:4px;
+}
+
+.card-ind span{
+font-size:13px;
+}
+
+.card-pesquisa{
+align-items:stretch;
+}
+
+.card-pesquisa div{
+font-size:14px;
+color:#555;
+}
+
+.status-aberta,
+.status-emandamento,
+.status-concluida,
+.status-cancelada,
+.status-aguardandopeca{
+display:inline-block;
+padding:5px 10px;
+border-radius:999px;
+font-size:12px;
+font-weight:bold;
+white-space:nowrap;
+}
+
+.status-aberta{background:#fff3cd;color:#856404}
+.status-emandamento{background:#cfe2ff;color:#084298}
+.status-concluida{background:#d1e7dd;color:#0f5132}
+.status-cancelada{background:#f8d7da;color:#842029}
+.status-aguardandopeca{background:#ffe5b4;color:#8a4b00}
+
+.tabela-wrap{
+width:100%;
+overflow:auto;
+border:1px solid var(--borda);
+border-radius:10px;
+background:white;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+background:white;
+min-width:940px;
+}
+
+th,td{
+border-bottom:1px solid #e5e9ee;
+padding:9px 8px;
+text-align:left;
+font-size:14px;
+vertical-align:middle;
+}
+
+th{
+background:#1976d2;
+color:white;
+position:sticky;
+top:0;
+z-index:2;
+text-transform:uppercase;
+font-size:12px;
+}
+
+tbody tr:nth-child(even){background:#fbfcfe}
+tbody tr:hover{background:#eef6ff}
+
+.acoes{
+display:flex;
+gap:6px;
+flex-wrap:wrap;
+}
+
+.acoes button{
+padding:8px 10px;
+font-size:13px;
+}
+
+.dica{
+background:#eef6ff;
+border:1px solid #b6d4fe;
+color:#084298;
+padding:12px;
+border-radius:10px;
+font-size:14px;
+margin-top:12px;
+}
+
+@media(max-width:900px){
+header{
+font-size:22px;
+padding-top:64px;
+}
+
+.topbar{
+top:12px;
+left:12px;
+right:12px;
+transform:none;
+}
+
+.topbar button{
+flex:1;
+}
+
+.container{
+padding:10px;
+}
+
+.grid{
+grid-template-columns:1fr;
+}
+
+.btns-form{
+display:grid;
+grid-template-columns:1fr;
+}
+
+button{
+width:100%;
+}
+
+.indicadores{
+grid-template-columns:repeat(2,1fr);
+}
+
+table{
+min-width:900px;
+}
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+<header>
+<div class="topbar">
+<button class="btn-menu" onclick="window.location.href='00_Sistema_Manutencao_V25.html'">⬅ Voltar</button>
+<button class="btn-atualizar" onclick="carregarOS();atualizarIndicadores();">🔄 Atualizar</button>
+</div>
+ORDEM DE SERVIÇO
+</header>
+
+<div class="container">
+
+<div class="card">
+
+<div class="grid">
+
+<div class="campo">
+<label>
+
+Número da OS
+
+<button
+type="button"
+onclick="gerarNumeroOS()"
+class="btn-gerar">
+Gerar
+</button>
+
+</label>
+<div style="
+display:flex;
+gap:5px;
+">
+
+<input id="numeroOS">
+
+</div>
+</div>
+
+<div class="campo">
+<label>Data da OS</label>
+<input id="dataOS" readonly>
+</div>
+
+<div class="campo">
+<label>Solicitante</label>
+<select id="solicitante">
+<option value=""></option>
+<option>Produção</option>
+<option>Montagem</option>
+<option>Ferramentaria</option>
+<option>Engenharia</option>
+<option>PCP</option>
+<option>Manutenção</option>
+<option>Diretoria</option>
+</select>
+</div>
+
+<div class="campo">
+<label>Tipo</label>
+<select id="tipo">
+<option>Corretiva</option>
+<option>Preventiva</option>
+<option>Melhoria</option>
+<option>Inspeção</option>
+<option>Segurança</option>
+<option>Compra</option>
+<option>Outros</option>
+</select>
+</div>
+
+<div class="campo">
+<label>Máquina</label>
+<select id="maquina">
+<option value=""></option>
+</select>
+</div>
+
+<div class="campo">
+<label>Dispositivo</label>
+<select id="dispositivo">
+<option value=""></option>
+</select>
+</div>
+
+<div class="campo">
+<label>Prioridade</label>
+<select id="prioridade">
+<option>Baixa</option>
+<option>Normal</option>
+<option>Alta</option>
+<option>Crítica</option>
+</select>
+</div>
+
+<div class="campo">
+<label>Responsável</label>
+<input id="responsavel">
+</div>
+
+<div class="campo">
+<label>Status</label>
+<select id="status">
+<option>Aberta</option>
+<option>Em Andamento</option>
+<option>Aguardando Peça</option>
+<option>Concluída</option>
+<option>Cancelada</option>
+</select>
+</div>
+
+</div>
+
+<label>Descrição</label>
+<textarea
+id="descricao"
+rows="3">
+</textarea>
+
+<div style="
+margin-top:5px;
+">
+
+<button onclick="salvarOS()">Salvar OS</button>
+<button onclick="window.location.href='00_Sistema_Manutencao_V25.html'" style="background:#6c757d;margin-left:8px;">🏠 Menu</button>
+
+</div>
+
+
+<div style="clear:both;"></div>
+
+<div class="card">
+
+<div class="indicadores">
+
+<div class="card-ind">
+<div id="osAbertas">0</div>
+<span>Abertas</span>
+</div>
+
+<div class="card-ind">
+<div id="osAndamento">0</div>
+<span>Andamento</span>
+</div>
+
+<div class="card-ind">
+<div id="osConcluidas">0</div>
+<span>Concluídas</span>
+</div>
+
+<div class="card-ind">
+<div id="osCriticas">0</div>
+<span>Críticas</span>
+</div>
+
+</div>
+
+<h3 style="text-align:center;">
+Ordens de Serviço
+</h3>
+
+</div>
+
+<div class="tabela-wrap">
+<table>
+
+<thead>
+<tr>
+<th>OS</th>
+<th>Data</th>
+<th>Dias em Aberto</th>
+<th>Solicitante</th>
+<th>Máquina</th>
+<th>Prioridade</th>
+<th>Status</th>
+<th>Ações</th>
+</tr>
+</thead>
+
+<tbody id="tbOS">
+</tbody>
+
+</table>
+</div>
+
+<div class="dica">ℹ️ Dica: use a pesquisa para encontrar rapidamente uma OS por número, máquina, solicitante ou status.</div>
+
+</div>
+
+</div>
+
+<script>
+
+const SUPABASE_URL =
+'https://wzcrqzbwcsmfwenzcxkf.supabase.co';
+
+const SUPABASE_KEY =
+'sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu';
+
+const bancoSupabase =
+supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
+
+
+function gerarNumeroOS(){
+
+let ultimo=parseInt(localStorage.getItem('ultimo_numero_os')||'0');
+ultimo++;
+localStorage.setItem('ultimo_numero_os',ultimo);
+
+let ano=new Date().getFullYear();
+let numero='OS-'+ano+'-'+String(ultimo).padStart(4,'0');
+
+document.getElementById('numeroOS').value=numero;
+document.getElementById('dataOS').value=new Date().toLocaleDateString('pt-BR');
+
+}
+
+async function carregarMaquinas(){
+
+let select = document.getElementById('maquina');
+select.innerHTML = '<option value=""></option>';
+
+let { data } = await bancoSupabase
+.from('maquinas')
+.select('maquina')
+.order('maquina');
+
+(data || []).forEach(item=>{
+let op=document.createElement('option');
+op.value=item.maquina || '';
+op.textContent=item.maquina || '';
+select.appendChild(op);
+});
+
+}
+
+async function carregarDispositivos(){
+
+let select = document.getElementById('dispositivo');
+select.innerHTML = '<option value=""></option>';
+
+let { data } = await bancoSupabase
+.from('dispositivos')
+.select('dispositivo')
+.order('dispositivo');
+
+(data || []).forEach(item=>{
+let op=document.createElement('option');
+op.value=item.dispositivo || '';
+op.textContent=item.dispositivo || '';
+select.appendChild(op);
+});
+
+}
+
+document.addEventListener('DOMContentLoaded', async function(){
+await carregarMaquinas();
+await carregarDispositivos();
+await carregarOS();
+await atualizarIndicadores();
+});
+
+async function salvarOS(){
+
+let numero =
+document.getElementById(
+'numeroOS'
+).value;
+
+let data =
+document.getElementById(
+'dataOS'
+).value;
+
+let solicitante =
+document.getElementById(
+'solicitante'
+).value;
+
+let maquina =
+document.getElementById(
+'maquina'
+).value;
+
+let dispositivo =
+document.getElementById(
+'dispositivo'
+).value;
+
+let tipo =
+document.getElementById(
+'tipo'
+).value;
+
+let responsavel =
+document.getElementById(
+'responsavel'
+).value;
+
+let descricao =
+document.getElementById(
+'descricao'
+).value;
+
+let prioridade =
+document.getElementById(
+'prioridade'
+).value;
+
+let status =
+document.getElementById(
+'status'
+).value;
+
+if(!numero){
+
+alert(
+'Gere ou informe o número da OS'
+);
+
+return;
+
+}
+
+if(!data){
+
+data =
+new Date()
+.toLocaleDateString(
+'pt-BR'
+);
+
+document.getElementById(
+'dataOS'
+).value = data;
+
+}
+
+const { data: lista } =
+await bancoSupabase
+.from('ordens_servico')
+.select('*');
+
+let editando =
+localStorage.getItem(
+'os_editando'
+);
+
+console.log("EDITANDO:", editando);
+
+console.log(
+'Editando:',
+editando
+);
+
+if(editando !== null){
+
+lista[editando] = {
+
+numero,
+data,
+solicitante,
+maquina,
+dispositivo,
+tipo,
+responsavel,
+descricao,
+prioridade,
+status
+
+};
+
+localStorage.removeItem(
+'os_editando'
+);
+
+}else{
+
+lista.push({
+
+numero,
+data,
+solicitante,
+maquina,
+dispositivo,
+tipo,
+responsavel,
+descricao,
+prioridade,
+status
+
+});
+
+}
+
+localStorage.setItem(
+'ordens_servico',
+JSON.stringify(lista)
+);
+
+if(editando !== null){
+
+await bancoSupabase
+.from('ordens_servico')
+.update({
+
+numero,
+data,
+solicitante,
+maquina,
+dispositivo,
+tipo,
+responsavel,
+descricao,
+prioridade,
+status
+
+})
+.eq(
+'numero',
+editando
+);
+
+await bancoSupabase
+.from('manutencao')
+.update({
+
+data,
+prioridade,
+maquina,
+dispositivo,
+defeito:descricao,
+responsavel,
+status
+
+})
+.eq(
+'os',
+editando
+);
+
+}else{
+
+await bancoSupabase
+.from('ordens_servico')
+.insert([{
+
+numero,
+data,
+solicitante,
+maquina,
+dispositivo,
+tipo,
+responsavel,
+descricao,
+prioridade,
+status,
+
+historico:
+
+new Date().toLocaleString('pt-BR') +
+
+' - OS criada.'
+
+}]);
+
+await bancoSupabase
+.from('manutencao')
+.insert([{
+
+data,
+os:numero,
+prioridade,
+maquina,
+dispositivo,
+defeito:descricao,
+responsavel,
+status
+
+}]);
+
+}
+
+function atualizarIndicadores(){
+
+let lista = JSON.parse(
+localStorage.getItem(
+'ordens_servico'
+) || '[]'
+);
+
+document.getElementById(
+'osAbertas'
+).innerText =
+lista.filter(x =>
+x.status === 'Aberta'
+).length;
+
+document.getElementById(
+'osAndamento'
+).innerText =
+lista.filter(x =>
+x.status === 'Em Andamento'
+).length;
+
+document.getElementById(
+'osConcluidas'
+).innerText =
+lista.filter(x =>
+x.status === 'Concluída'
+).length;
+
+document.getElementById(
+'osCriticas'
+).innerText =
+lista.filter(x =>
+x.prioridade === 'Crítica'
+).length;
+
+}
+
+await carregarOS();
+
+await 
+
+await atualizarIndicadores();
+
+alert(
+'OS salva com sucesso'
+);
+
+}
+
+async function carregarOS(){
+
+const { data: lista, error } =
+await bancoSupabase
+.from('ordens_servico')
+.select('*');
+
+console.log(lista);
+console.log(error);
+
+let tb =
+document.getElementById(
+'tbOS'
+);
+
+console.log(tb);
+
+
+tb.innerHTML = '';
+
+lista.forEach((os,i)=>{
+
+console.log(os);
+
+let idade = '';
+
+if(os.data){
+
+let partes = os.data.split('/');
+
+let dataOS = new Date(
+partes[2],
+partes[1]-1,
+partes[0]
+);
+
+let hoje = new Date();
+
+let dias = Math.floor(
+(hoje - dataOS) /
+(1000*60*60*24)
+);
+
+if(dias == 0){
+
+idade = 'Hoje';
+
+}else if(dias == 1){
+
+idade = '1 dia';
+
+}else{
+
+idade = dias + ' dias';
+
+}
+
+}
+
+tb.innerHTML += `
+
+<tr>
+<td>${os.numero || ''}</td>
+<td>${os.data || ''}</td>
+<td>
+
+${idade=='Hoje'
+? '🟢'
+: idade=='1 dia'
+? '🟡'
+: parseInt(idade)>=7
+? '🔴'
+: '🟠'}
+
+${idade}
+
+</td>
+<td>${os.solicitante || ''}</td>
+<td>${os.maquina || ''}</td>
+<td>${os.prioridade || ''}</td>
+<td>
+
+<span class="
+status-${(os.status || '')
+.replaceAll(' ','')
+.replaceAll('ã','a')
+.replaceAll('í','i')
+.toLowerCase()}
+">
+
+${os.status || ''}
+
+</span>
+
+</td>
+
+<td><div class="acoes">
+
+<button
+title="Visualizar"
+onclick="visualizarOS(${i})">
+👁
+</button>
+
+<button
+title="Imprimir"
+onclick="imprimirOS(${i})">
+🖨
+</button>
+
+${os.status !== 'Cancelada' ? `
+<button
+title="Editar"
+onclick="editarOS(${i})">
+✏
+</button>
+` : ''}
+
+${os.status === 'Aberta' ? `
+<button
+title="Iniciar Atendimento"
+onclick="iniciarOS(${i})"
+style="background:#1976d2;">
+▶
+</button>
+` : ''}
+
+${os.status === 'Em Andamento' ? `
+<button
+title="Concluir OS"
+onclick="concluirOS(${i})"
+style="background:#2e7d32;">
+✅
+</button>
+` : ''}
+
+${os.status === 'Aguardando Peça' ? `
+<button
+title="Iniciar Atendimento"
+onclick="iniciarOS(${i})"
+style="background:#1976d2;">
+▶
+</button>
+
+<button
+title="Concluir OS"
+onclick="concluirOS(${i})"
+style="background:#2e7d32;">
+✅
+</button>
+` : ''}
+
+<button
+title="Excluir"
+onclick="excluirOS(${i})"
+style="background:#d32f2f;">
+🗑
+</button>
+
+</div></td>
+</tr>
+`;
+
+});
+
+
+console.log(lista);
+
+console.log("Registros:", lista.length);
+
+await atualizarIndicadores();
+}
+
+function filtrarOS(){
+
+let texto =
+document.getElementById(
+'pesquisaOS'
+).value.toLowerCase();
+
+let linhas =
+document.querySelectorAll(
+'#tbOS tr'
+);
+
+linhas.forEach(linha=>{
+
+let conteudo =
+linha.innerText.toLowerCase();
+
+if(
+conteudo.includes(texto)
+){
+
+linha.style.display='';
+
+}else{
+
+linha.style.display='none';
+
+}
+
+});
+
+}
+
+function filtrarStatus(){
+
+let status =
+document.getElementById(
+'filtroStatus'
+).value;
+
+let linhas =
+document.querySelectorAll(
+'#tbOS tr'
+);
+
+linhas.forEach(linha=>{
+
+if(status === ''){
+
+linha.style.display='';
+
+return;
+
+}
+
+let conteudo =
+linha.innerText;
+
+if(
+conteudo.includes(status)
+){
+
+linha.style.display='';
+
+}else{
+
+linha.style.display='none';
+
+}
+
+});
+
+}
+
+
+async function atualizarIndicadores(){
+const {data:lista}=await bancoSupabase.from('ordens_servico').select('*');
+document.getElementById('osAbertas').innerText=lista.filter(x=>x.status==='Aberta').length;
+document.getElementById('osAndamento').innerText=lista.filter(x=>x.status==='Em Andamento').length;
+document.getElementById('osConcluidas').innerText=lista.filter(x=>x.status==='Concluída').length;
+document.getElementById('osCriticas').innerText=lista.filter(x=>x.prioridade==='Crítica').length;
+}
+
+async function editarOS(indice){
+
+const { data: lista } =
+await bancoSupabase
+.from('ordens_servico')
+.select('*');
+
+let os = lista[indice];
+
+
+let usuarioLogado =
+localStorage.getItem(
+"usuarioLogado"
+);
+
+if(
+os.status === 'Concluída' &&
+usuarioLogado !== 'Alexandre'
+){
+alert(
+'OS concluída. Somente Alexandre pode editar.'
+);
+
+return;
+
+}
+
+document.getElementById(
+'numeroOS'
+).value = os.numero || '';
+
+document.getElementById(
+'dataOS'
+).value = os.data || '';
+
+document.getElementById(
+'solicitante'
+).value = os.solicitante || '';
+
+document.getElementById(
+'maquina'
+).value = os.maquina || '';
+
+document.getElementById(
+'prioridade'
+).value = os.prioridade || '';
+
+document.getElementById(
+'status'
+).value = os.status || '';
+
+localStorage.setItem(
+'os_editando',
+os.numero
+);
+
+}
+
+async function iniciarOS(indice){
+
+console.log("INICIAR OS", indice);
+
+if(
+!confirm(
+'Iniciar atendimento desta OS?'
+)
+){
+return;
+}
+
+const { data: lista } =
+await bancoSupabase
+.from('ordens_servico')
+.select('*');
+
+let os = lista[indice];
+
+if(os.status === 'Concluída'){
+
+alert(
+'Esta OS já está concluída.'
+);
+
+return;
+
+}
+
+let usuario =
+localStorage.getItem(
+"usuarioLogado"
+) || "Usuário";
+
+let novoHistorico =
+(os.historico || '') +
+
+'\n' +
+
+new Date().toLocaleString('pt-BR') +
+
+' - Atendimento iniciado por ' +
+
+usuario +
+
+'.';
+
+await bancoSupabase
+.from('ordens_servico')
+.update({
+
+status:'Em Andamento',
+
+
+historico: novoHistorico
+
+})
+.eq(
+'numero',
+os.numero
+);
+
+await carregarOS();
+
+await 
+
+await atualizarIndicadores();
+
+}
+
+async function concluirOS(indice){
+
+if(
+!confirm(
+'Concluir esta OS?'
+)
+){
+return;
+}
+
+const { data: lista } =
+await bancoSupabase
+.from('ordens_servico')
+.select('*');
+
+let os = lista[indice];
+
+let usuario =
+localStorage.getItem(
+"usuarioLogado"
+) || "Usuário";
+
+let novoHistorico =
+(os.historico || '') +
+
+'\n' +
+
+new Date().toLocaleString('pt-BR') +
+
+' - OS concluída por ' +
+
+usuario +
+
+'.';
+
+await bancoSupabase
+.from('ordens_servico')
+.update({
+
+status:'Concluída',
+
+data_conclusao:new Date().toLocaleString('pt-BR'),
+
+historico: novoHistorico
+
+})
+.eq(
+'numero',
+os.numero
+);
+
+await carregarOS();
+
+await 
+
+await atualizarIndicadores();
+
+}
+
+async function excluirOS(indice){
+
+if(
+!confirm(
+'Deseja excluir esta OS?'
+)
+){
+return;
+}
+
+const { data: lista } =
+await bancoSupabase
+.from('ordens_servico')
+.select('*');
+
+let os = lista[indice];
+
+await bancoSupabase
+.from('ordens_servico')
+.delete()
+.eq(
+'numero',
+os.numero
+);
+
+await bancoSupabase
+.from('manutencao')
+.delete()
+.eq(
+'os',
+os.numero
+);
+
+await carregarOS();
+
+await 
+
+await atualizarIndicadores();
+
+}
+async function visualizarOS(indice){
+
+const { data: lista } =
+await bancoSupabase
+.from('ordens_servico')
+.select('*');
+
+let os = lista[indice];
+
+alert(
+
+'OS: ' +
+(os.numero || '') +
+
+'\n\nData: ' +
+(os.data || '') +
+
+'\n\nSolicitante: ' +
+(os.solicitante || '') +
+
+'\n\nMáquina: ' +
+(os.maquina || '') +
+
+'\n\nPrioridade: ' +
+(os.prioridade || '') +
+
+'\n\nTipo: ' +
+(os.tipo || '') +
+
+'\n\nDispositivo: ' +
+(os.dispositivo || '') +
+
+'\n\nResponsável: ' +
+(os.responsavel || '') +
+
+'\n\nStatus: ' +
+(os.status || '') +
+
+'\n\nDescrição: ' +
+(os.descricao || '')
+
+);
+
+}
+
+async function imprimirOS(indice){
+
+const { data: lista } =
+await bancoSupabase
+.from('ordens_servico')
+.select('*');
+
+let os = lista[indice];
+
+let janela = window.open('','_blank');
+
+janela.document.write(`
+
+<h1>ORDEM DE SERVIÇO</h1>
+
+<hr>
+
+<p><b>OS:</b> ${os.numero || ''}</p>
+
+<p><b>Data:</b> ${os.data || ''}</p>
+
+<p><b>Solicitante:</b> ${os.solicitante || ''}</p>
+
+<p><b>Máquina:</b> ${os.maquina || ''}</p>
+
+<p><b>Dispositivo:</b> ${os.dispositivo || ''}</p>
+
+<p><b>Tipo:</b> ${os.tipo || ''}</p>
+
+<p><b>Responsável:</b> ${os.responsavel || ''}</p>
+
+<p><b>Prioridade:</b> ${os.prioridade || ''}</p>
+
+<p><b>Status:</b> ${os.status || ''}</p>
+
+<p><b>Descrição:</b></p>
+
+<div style="
+border:1px solid #000;
+padding:10px;
+min-height:120px;
+">
+${os.descricao || ''}
+</div>
+
+<br><br><br>
+
+____________________________________
+
+<br>
+
+Assinatura
+
+`);
+
+janela.print();
+
+setTimeout(() => {
+janela.close();
+}, 500);
+
+}
+
+async function migrarOS(){
+
+let lista = JSON.parse(
+localStorage.getItem(
+'ordens_servico'
+) || '[]'
+);
+
+const { data, error } =
+await bancoSupabase
+.from('ordens_servico')
+.insert(lista);
+
+console.log(data);
+console.log(error);
+
+}
+
+
+</script>
+
+</body>
+</html>

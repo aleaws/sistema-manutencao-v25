@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>25_Gestao_Manutencao</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<style>
+:root{
+--azul:#184b78;
+--azul2:#0f3557;
+--verde:#198754;
+--vermelho:#dc3545;
+--amarelo:#ffc107;
+--laranja:#fd7e14;
+--cinza:#6c757d;
+--bg:#eef2f5;
+--card:#fff;
+--borda:#d9dee5;
+--texto:#202428;
+}
+*{box-sizing:border-box}
+body{
+font-family:Arial,Helvetica,sans-serif;
+background:var(--bg);
+margin:0;
+color:var(--texto);
+}
+header{
+background:linear-gradient(135deg,var(--azul),var(--azul2));
+color:white;
+padding:15px;
+text-align:center;
+font-size:24px;
+font-weight:bold;
+letter-spacing:.3px;
+}
+.container{
+max-width:1320px;
+margin:auto;
+padding:14px;
+}
+.card{
+background:var(--card);
+border-radius:12px;
+padding:14px;
+box-shadow:0 2px 8px rgba(0,0,0,.08);
+margin-bottom:14px;
+}
+.topo{
+display:flex;
+gap:10px;
+align-items:end;
+justify-content:space-between;
+flex-wrap:wrap;
+}
+.busca{
+flex:1;
+min-width:280px;
+}
+label{
+display:block;
+font-weight:bold;
+font-size:13px;
+margin-bottom:6px;
+color:#26313a;
+}
+input,select,textarea{
+width:100%;
+padding:11px;
+border:1px solid var(--borda);
+border-radius:9px;
+font-size:15px;
+outline:none;
+background:#fff;
+}
+input:focus,select:focus,textarea:focus{
+border-color:var(--azul);
+box-shadow:0 0 0 3px rgba(24,75,120,.12);
+}
+.botoes{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+}
+button{
+padding:10px 14px;
+border:none;
+border-radius:9px;
+background:var(--azul);
+color:#fff;
+font-weight:bold;
+cursor:pointer;
+transition:.15s;
+font-size:14px;
+}
+button:hover{
+filter:brightness(.92);
+transform:translateY(-1px);
+}
+.btn-verde{background:var(--verde)}
+.btn-laranja{background:var(--laranja)}
+.btn-cinza{background:var(--cinza)}
+.btn-olho{background:var(--azul);padding:7px 10px;font-size:13px;border-radius:7px;white-space:nowrap}
+.btn-editar{background:#0d6efd;padding:7px 10px;font-size:13px;border-radius:7px;white-space:nowrap}
+.btn-excluir{background:var(--vermelho);padding:7px 10px;font-size:13px;border-radius:7px;white-space:nowrap}
+.acoes-linha{
+display:flex;
+gap:6px;
+flex-wrap:wrap;
+}
+.filtros{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+margin-top:12px;
+align-items:center;
+}
+.filtros button{
+background:#f8fafc;
+color:#24313d;
+border:1px solid #d7dee7;
+padding:8px 11px;
+font-size:13px;
+}
+.filtros button.ativo{
+background:var(--azul);
+color:#fff;
+border-color:var(--azul);
+}
+.filtro-extra{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+gap:8px;
+margin-top:12px;
+}
+.resumo{
+font-size:13px;
+color:#5b6570;
+margin-top:8px;
+}
+.resumo-forte{
+font-size:14px;
+color:#26313a;
+margin-top:8px;
+font-weight:bold;
+}
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(145px,1fr));
+gap:10px;
+}
+.ind{
+background:#f8fafc;
+border:1px solid #e8edf2;
+border-radius:10px;
+padding:10px;
+text-align:center;
+min-height:74px;
+display:flex;
+flex-direction:column;
+justify-content:center;
+cursor:pointer;
+transition:.15s;
+}
+.ind:hover{
+transform:translateY(-2px);
+box-shadow:0 4px 12px rgba(0,0,0,.12);
+border-color:#b8c8d8;
+}
+.ind.ativo{
+background:#e8f2ff;
+border-color:var(--azul);
+box-shadow:0 0 0 3px rgba(24,75,120,.12);
+}
+.ind.vermelho{
+background:#fff5f5;
+border-color:#f5c2c7;
+}
+.ind.vermelho b{color:#842029}
+.ind.amarelo{
+background:#fff9e6;
+border-color:#ffecb5;
+}
+.ind.amarelo b{color:#664d03}
+.ind.verde{
+background:#f2fff7;
+border-color:#badbcc;
+}
+.ind.verde b{color:#0f5132}
+.ind b{
+font-size:27px;
+color:var(--azul);
+line-height:1.1;
+}
+.ind span{
+font-size:13px;
+color:#4d5963;
+margin-top:4px;
+}
+.tabela-wrap{
+width:100%;
+overflow:auto;
+border:1px solid var(--borda);
+border-radius:10px;
+max-height:650px;
+background:#fff;
+}
+table{
+width:100%;
+border-collapse:collapse;
+min-width:980px;
+}
+th,td{
+border-bottom:1px solid #e5e9ee;
+padding:9px 8px;
+font-size:14px;
+text-align:left;
+vertical-align:middle;
+}
+th{
+background:var(--azul);
+color:#fff;
+position:sticky;
+top:0;
+z-index:2;
+font-size:13px;
+text-transform:uppercase;
+letter-spacing:.2px;
+}
+tbody tr:nth-child(even){background:#fbfcfe}
+tbody tr:hover{background:#eef6ff}
+.badge{
+display:inline-block;
+padding:5px 9px;
+border-radius:999px;
+font-size:12px;
+font-weight:bold;
+border:1px solid transparent;
+white-space:nowrap;
+}
+.bgCritica{background:#f8d7da;color:#842029;border-color:#f5c2c7}
+.bgAlta{background:#fff3cd;color:#664d03;border-color:#ffecb5}
+.bgNormal{background:#d1e7dd;color:#0f5132;border-color:#badbcc}
+.bgBaixa{background:#cff4fc;color:#055160;border-color:#b6effb}
+.stAberta{background:#fff3cd;color:#664d03;border-color:#ffecb5}
+.stAndamento{background:#cfe2ff;color:#084298;border-color:#b6d4fe}
+.stPeca{background:#ffe5b4;color:#8a4b00;border-color:#ffd38a}
+.stConcluida{background:#d1e7dd;color:#0f5132;border-color:#badbcc}
+.stCancelada{background:#f8d7da;color:#842029;border-color:#f5c2c7}
+.linhaCritica{box-shadow:inset 4px 0 0 var(--vermelho)}
+.linhaAlta{box-shadow:inset 4px 0 0 var(--amarelo)}
+.vazio{
+text-align:center;
+color:#666;
+padding:28px!important;
+font-size:15px;
+}
+.secao{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+gap:14px;
+}
+.barra-item{margin-bottom:9px}
+.barra-topo{
+display:flex;
+justify-content:space-between;
+font-size:13px;
+font-weight:bold;
+margin-bottom:4px;
+}
+.barra-fundo{
+height:10px;
+background:#e9eef4;
+border-radius:999px;
+overflow:hidden;
+}
+.barra-preenchida{
+height:100%;
+background:var(--azul);
+border-radius:999px;
+}
+.barra-vermelha{background:var(--vermelho)}
+.barra-amarela{background:var(--amarelo)}
+.barra-verde{background:var(--verde)}
+.resumo-texto{
+line-height:1.7;
+font-size:14px;
+}
+.modal-fundo{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.55);
+z-index:50;
+padding:14px;
+align-items:center;
+justify-content:center;
+}
+.modal{
+background:#fff;
+width:min(850px,100%);
+max-height:90vh;
+overflow:auto;
+border-radius:14px;
+box-shadow:0 18px 45px rgba(0,0,0,.28);
+}
+.modal-head{
+background:linear-gradient(135deg,var(--azul),var(--azul2));
+color:#fff;
+padding:14px 16px;
+border-radius:14px 14px 0 0;
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:10px;
+}
+.modal-head b{font-size:18px}
+.fechar{
+background:#ffffff22;
+border:1px solid #ffffff55;
+padding:7px 10px;
+}
+.modal-body{padding:16px}
+.detalhes{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
+}
+.campo{
+border:1px solid #e1e6eb;
+border-radius:10px;
+background:#f8fafc;
+padding:10px;
+min-height:62px;
+}
+.campo small{
+display:block;
+color:#66717c;
+font-weight:bold;
+margin-bottom:4px;
+text-transform:uppercase;
+font-size:11px;
+}
+.campo div{
+font-size:15px;
+word-break:break-word;
+white-space:pre-wrap;
+}
+.campo.full{grid-column:1/-1}
+.form-edicao{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
+}
+.form-edicao .full{grid-column:1/-1}
+textarea{
+min-height:85px;
+resize:vertical;
+}
+.btn-salvar-edicao{background:var(--verde)}
+.msg{
+display:none;
+margin-top:10px;
+padding:10px;
+border-radius:8px;
+font-size:14px;
+font-weight:bold;
+}
+.ok{background:#d1e7dd;color:#0f5132}
+.erro{background:#f8d7da;color:#842029}
+@media(max-width:850px){
+header{font-size:20px;padding:13px}
+.container{padding:10px}
+.grid{grid-template-columns:repeat(2,1fr)}
+.topo{display:block}
+.botoes{margin-top:10px}
+button{width:100%;padding:11px}
+.btn-olho,.btn-editar,.btn-excluir{width:100%}
+.acoes-linha{display:grid;grid-template-columns:1fr}
+.ind b{font-size:24px}
+th,td{font-size:12px;padding:8px 6px}
+.detalhes,.form-edicao{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+
+<header>📈 25 - GESTÃO DA MANUTENÇÃO</header>
+
+<div class="container">
+
+<div class="card">
+<div class="topo">
+<div class="busca">
+<label>🔎 Pesquisa em tempo real</label>
+<input id="pesquisa" placeholder="Digite OS, máquina, dispositivo, prioridade, status, responsável ou descrição">
+<div class="resumo" id="resumoBusca">Carregando registros...</div>
+<div id="msg" class="msg"></div>
+
+<div class="filtros">
+<button id="fTodos" onclick="setFiltro('todos')" class="ativo">Todos</button>
+<button id="fAbertas" onclick="setFiltro('abertas')">Abertas</button>
+<button id="fAndamento" onclick="setFiltro('andamento')">Em andamento</button>
+<button id="fPeca" onclick="setFiltro('peca')">Aguardando peça</button>
+<button id="fCriticas" onclick="setFiltro('criticas')">Críticas</button>
+<button id="fAtrasadas" onclick="setFiltro('atrasadas')">7+ dias</button>
+<button onclick="limparFiltros()">Limpar filtros</button>
+</div>
+
+<div class="filtro-extra">
+<div>
+<label>Status</label>
+<select id="fStatus" onchange="filtrar()">
+<option value="">Todos</option>
+<option>Aberta</option>
+<option>Em Andamento</option>
+<option>Aguardando Peça</option>
+<option>Concluída</option>
+<option>Cancelada</option>
+</select>
+</div>
+
+<div>
+<label>Prioridade</label>
+<select id="fPrioridade" onchange="filtrar()">
+<option value="">Todas</option>
+<option>Crítica</option>
+<option>Alta</option>
+<option>Normal</option>
+<option>Baixa</option>
+</select>
+</div>
+
+<div>
+<label>Data inicial</label>
+<input type="date" id="dataInicial" onchange="filtrar()">
+</div>
+
+<div>
+<label>Data final</label>
+<input type="date" id="dataFinal" onchange="filtrar()">
+</div>
+</div>
+
+<div class="resumo-forte" id="resumoAutomatico"></div>
+</div>
+
+<div class="botoes">
+<button class="btn-verde" onclick="carregarTudo()">🔄 Atualizar</button>
+<button class="btn-laranja" onclick="exportarExcel()">📊 Exportar Excel</button>
+<button class="btn-cinza" onclick="window.location.href='00_Sistema_Manutencao_V25.html'">🏠 Menu</button>
+</div>
+</div>
+</div>
+
+<div class="card">
+<div class="grid">
+<div class="ind" id="cardTotal" onclick="setFiltro('todos')"><b id="iTotal">0</b><span>Total</span></div>
+<div class="ind vermelho" id="cardAbertas" onclick="setFiltro('abertas')"><b id="iAbertas">0</b><span>Abertas</span></div>
+<div class="ind amarelo" id="cardAndamento" onclick="setFiltro('andamento')"><b id="iAndamento">0</b><span>Em Andamento</span></div>
+<div class="ind amarelo" id="cardPeca" onclick="setFiltro('peca')"><b id="iPeca">0</b><span>Aguardando Peça</span></div>
+<div class="ind vermelho" id="cardCriticas" onclick="setFiltro('criticas')"><b id="iCriticas">0</b><span>Críticas</span></div>
+<div class="ind amarelo" id="cardAtrasadas" onclick="setFiltro('atrasadas')"><b id="iAtrasadas">0</b><span>7+ Dias</span></div>
+<div class="ind verde" id="cardConcluidas" onclick="setFiltro('concluidas')"><b id="iConcluidas">0</b><span>Concluídas</span></div>
+</div>
+</div>
+
+<div class="card">
+<div class="tabela-wrap">
+<table id="tbHistorico">
+<thead>
+<tr>
+<th>OS</th>
+<th>Data</th>
+<th>Máquina</th>
+<th>Dispositivo</th>
+<th>Prioridade</th>
+<th>Status</th>
+<th>Responsável</th>
+<th>Dias</th>
+<th>Ações</th>
+</tr>
+</thead>
+<tbody id="tb"></tbody>
+</table>
+</div>
+</div>
+
+<div class="secao">
+<div class="card">
+<h3>🚨 Resumo de Atenção</h3>
+<div id="painelIntel" class="resumo-texto">Carregando...</div>
+</div>
+
+<div class="card">
+<h3>🏭 Ranking de Máquinas</h3>
+<div class="tabela-wrap">
+<table id="rankMaq"><thead><tr><th>#</th><th>Máquina</th><th>OS</th></tr></thead><tbody></tbody></table>
+</div>
+</div>
+
+<div class="card">
+<h3>🛠 Ranking de Dispositivos</h3>
+<div class="tabela-wrap">
+<table id="rankDisp"><thead><tr><th>#</th><th>Dispositivo</th><th>OS</th></tr></thead><tbody></tbody></table>
+</div>
+</div>
+</div>
+
+<div class="secao">
+<div class="card">
+<h3>📌 OS por Prioridade</h3>
+<div id="graficoPrioridade"></div>
+<table id="tbPrioridade" style="display:none"><thead><tr><th>Prioridade</th><th>Total</th></tr></thead><tbody></tbody></table>
+</div>
+
+<div class="card">
+<h3>📋 OS por Status</h3>
+<div id="graficoStatus"></div>
+<table id="tbStatus" style="display:none"><thead><tr><th>Status</th><th>Total</th></tr></thead><tbody></tbody></table>
+</div>
+</div>
+
+</div>
+
+<div class="modal-fundo" id="modalFundo" onclick="fecharModalFora(event)">
+<div class="modal">
+<div class="modal-head">
+<b>👁 Detalhes da OS</b>
+<button class="fechar" onclick="fecharModal()">Fechar</button>
+</div>
+<div class="modal-body" id="modalBody"></div>
+</div>
+</div>
+
+<div class="modal-fundo" id="modalEditarFundo" onclick="fecharEditarFora(event)">
+<div class="modal">
+<div class="modal-head">
+<b>✏️ Editar OS</b>
+<button class="fechar" onclick="fecharEditar()">Fechar</button>
+</div>
+<div class="modal-body" id="modalEditarBody"></div>
+</div>
+</div>
+
+<script>
+const SUPABASE_URL='https://wzcrqzbwcsmfwenzcxkf.supabase.co';
+const SUPABASE_KEY='sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu';
+const bancoSupabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+let listaCompleta=[];
+let listaFiltrada=[];
+let filtroAtivo='todos';
+let usuarioLogado=localStorage.getItem("usuarioLogado") || "";
+let indiceEdicaoAtual=null;
+
+function el(id){return document.getElementById(id);}
+function valor(v){return (v===null||v===undefined)?'':String(v);}
+function normalizar(v){return valor(v).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
+function escapar(v){return valor(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+
+async function buscar(tabela){
+try{
+const {data,error}=await bancoSupabase.from(tabela).select('*');
+if(error){console.warn(tabela,error.message);return [];}
+return data||[];
+}catch(e){console.warn(tabela,e);return [];}
+}
+
+function dataISO(item){
+let d=item.data||item.data_abertura||item.created_at||'';
+if(!d)return '';
+if(String(d).includes('/')){
+let p=String(d).split('/');
+if(p.length===3)return p[2]+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0');
+}
+return String(d).substring(0,10);
+}
+
+function dataBR(d){
+if(!d)return '';
+if(String(d).includes('/'))return d;
+let p=String(d).split('T')[0].split('-');
+if(p.length===3)return p[2]+'/'+p[1]+'/'+p[0];
+return d;
+}
+
+function diasAberto(item){
+let data=dataISO(item);
+if(!data)return 0;
+let inicio=new Date(data);
+if(isNaN(inicio))return 0;
+let hoje=new Date();
+inicio.setHours(0,0,0,0);
+hoje.setHours(0,0,0,0);
+return Math.max(0,Math.floor((hoje-inicio)/86400000));
+}
+
+function contar(lista,campo,v){
+return lista.filter(x=>(x[campo]||'')===v).length;
+}
+
+function classePrioridade(p){
+if(p==='Crítica')return 'bgCritica';
+if(p==='Alta')return 'bgAlta';
+if(p==='Normal')return 'bgNormal';
+return 'bgBaixa';
+}
+
+function classeStatus(s){
+if(s==='Aberta')return 'stAberta';
+if(s==='Em Andamento')return 'stAndamento';
+if(s==='Aguardando Peça')return 'stPeca';
+if(s==='Concluída')return 'stConcluida';
+if(s==='Cancelada')return 'stCancelada';
+return 'stAberta';
+}
+
+function ranking(lista,campo){
+let r={};
+lista.forEach(x=>{
+let v=(x[campo]||'').trim();
+if(!v)return;
+r[v]=(r[v]||0)+1;
+});
+return Object.entries(r).sort((a,b)=>b[1]-a[1]).slice(0,8);
+}
+
+function preencherTabela(id,dados){
+let tbody=document.querySelector("#"+id+" tbody");
+if(!tbody)return;
+tbody.innerHTML='';
+if(!dados.length){
+tbody.innerHTML='<tr><td colspan="3">Sem dados</td></tr>';
+return;
+}
+dados.forEach((x,i)=>{
+tbody.innerHTML+=`<tr><td>${i+1}</td><td>${escapar(x[0])}</td><td>${x[1]}</td></tr>`;
+});
+}
+
+function resumoPorCampo(lista,campo){
+let r={};
+lista.forEach(x=>{
+let v=(x[campo]||'Não informado').trim() || 'Não informado';
+r[v]=(r[v]||0)+1;
+});
+return Object.entries(r).sort((a,b)=>b[1]-a[1]);
+}
+
+function corBarra(nome){
+if(nome==='Crítica')return 'barra-vermelha';
+if(nome==='Alta'||nome==='Aguardando Peça'||nome==='Em Andamento'||nome==='Aberta')return 'barra-amarela';
+if(nome==='Concluída'||nome==='Normal')return 'barra-verde';
+return '';
+}
+
+function preencherGraficoBarras(id,dados){
+let box=el(id);
+if(!box)return;
+if(!dados.length){
+box.innerHTML='Sem dados';
+return;
+}
+let max=Math.max(...dados.map(x=>x[1]),1);
+box.innerHTML='';
+dados.forEach(x=>{
+let nome=x[0], total=x[1];
+let perc=Math.max(4,Math.round((total/max)*100));
+box.innerHTML+=`
+<div class="barra-item">
+<div class="barra-topo"><span>${escapar(nome)}</span><span>${total}</span></div>
+<div class="barra-fundo"><div class="barra-preenchida ${corBarra(nome)}" style="width:${perc}%"></div></div>
+</div>`;
+});
+}
+
+function textoBusca(r){
+return normalizar([
+r.numero,r.os,r.data,r.solicitante,r.tipo,r.maquina,r.dispositivo,r.prioridade,r.status,r.responsavel,r.descricao,r.historico
+].join(' '));
+}
+
+function passaFiltroRapido(r){
+let status=r.status||'';
+let prioridade=r.prioridade||'';
+let aberta=status!=='Concluída'&&status!=='Cancelada';
+
+if(filtroAtivo==='abertas')return status==='Aberta';
+if(filtroAtivo==='andamento')return status==='Em Andamento';
+if(filtroAtivo==='peca')return status==='Aguardando Peça';
+if(filtroAtivo==='criticas')return prioridade==='Crítica';
+if(filtroAtivo==='atrasadas')return aberta && diasAberto(r)>=7;
+if(filtroAtivo==='concluidas')return status==='Concluída';
+return true;
+}
+
+function filtrar(){
+const termo=normalizar(el('pesquisa').value.trim());
+const fs=el('fStatus').value;
+const fp=el('fPrioridade').value;
+const di=el('dataInicial').value;
+const df=el('dataFinal').value;
+
+listaFiltrada=listaCompleta.filter(r=>{
+let ok=true;
+if(termo && !textoBusca(r).includes(termo))ok=false;
+if(fs && r.status!==fs)ok=false;
+if(fp && r.prioridade!==fp)ok=false;
+let d=dataISO(r);
+if(di && d<di)ok=false;
+if(df && d>df)ok=false;
+if(!passaFiltroRapido(r))ok=false;
+return ok;
+});
+
+renderTudo();
+}
+
+function setFiltro(tipo){
+filtroAtivo=tipo;
+filtrar();
+}
+
+function limparFiltros(){
+filtroAtivo='todos';
+el('pesquisa').value='';
+el('fStatus').value='';
+el('fPrioridade').value='';
+el('dataInicial').value='';
+el('dataFinal').value='';
+filtrar();
+}
+
+function atualizarBotoesFiltro(){
+['fTodos','fAbertas','fAndamento','fPeca','fCriticas','fAtrasadas'].forEach(id=>el(id)?.classList.remove('ativo'));
+const mapa={
+todos:'fTodos',
+abertas:'fAbertas',
+andamento:'fAndamento',
+peca:'fPeca',
+criticas:'fCriticas',
+atrasadas:'fAtrasadas'
+};
+if(el(mapa[filtroAtivo]))el(mapa[filtroAtivo]).classList.add('ativo');
+
+['cardTotal','cardAbertas','cardAndamento','cardPeca','cardCriticas','cardAtrasadas','cardConcluidas'].forEach(id=>el(id)?.classList.remove('ativo'));
+const mapaCard={
+todos:'cardTotal',
+abertas:'cardAbertas',
+andamento:'cardAndamento',
+peca:'cardPeca',
+criticas:'cardCriticas',
+atrasadas:'cardAtrasadas',
+concluidas:'cardConcluidas'
+};
+if(el(mapaCard[filtroAtivo]))el(mapaCard[filtroAtivo]).classList.add('ativo');
+}
+
+function renderIndicadores(){
+let total=listaCompleta.length;
+let abertas=contar(listaCompleta,'status','Aberta');
+let andamento=contar(listaCompleta,'status','Em Andamento');
+let peca=contar(listaCompleta,'status','Aguardando Peça');
+let concluidas=contar(listaCompleta,'status','Concluída');
+let criticas=contar(listaCompleta,'prioridade','Crítica');
+let atrasadas=listaCompleta.filter(x=>x.status!=='Concluída'&&x.status!=='Cancelada'&&diasAberto(x)>=7).length;
+
+el('iTotal').textContent=total;
+el('iAbertas').textContent=abertas;
+el('iAndamento').textContent=andamento;
+el('iPeca').textContent=peca;
+el('iConcluidas').textContent=concluidas;
+el('iCriticas').textContent=criticas;
+el('iAtrasadas').textContent=atrasadas;
+
+let mq=ranking(listaCompleta,'maquina')[0];
+let dp=ranking(listaCompleta,'dispositivo')[0];
+
+el('painelIntel').innerHTML=`
+OS abertas: <b>${abertas}</b><br>
+OS em andamento: <b>${andamento}</b><br>
+OS aguardando peça: <b>${peca}</b><br>
+OS críticas: <b>${criticas}</b><br>
+OS abertas há 7+ dias: <b>${atrasadas}</b><br>
+Máquina com mais OS: <b>${mq?mq[0]:'-'}</b><br>
+Dispositivo com mais OS: <b>${dp?dp[0]:'-'}</b>
+`;
+
+let nomeFiltro={
+todos:'Todos',
+abertas:'Abertas',
+andamento:'Em andamento',
+peca:'Aguardando peça',
+criticas:'Críticas',
+atrasadas:'7+ dias',
+concluidas:'Concluídas'
+}[filtroAtivo]||'Todos';
+
+el('resumoBusca').textContent='Mostrando '+listaFiltrada.length+' de '+total+' OS | Filtro: '+nomeFiltro+'.';
+el('resumoAutomatico').textContent='Resumo: abertas '+abertas+'; andamento '+andamento+'; aguardando peça '+peca+'; críticas '+criticas+'; 7+ dias '+atrasadas+'.';
+}
+
+function renderHistorico(){
+let tb=el('tb');
+tb.innerHTML='';
+if(!listaFiltrada.length){
+tb.innerHTML='<tr><td class="vazio" colspan="9">Nenhuma OS encontrada.</td></tr>';
+return;
+}
+listaFiltrada.forEach((r,i)=>{
+let prioridade=r.prioridade||'Normal';
+let linha=prioridade==='Crítica'?'linhaCritica':prioridade==='Alta'?'linhaAlta':'';
+tb.innerHTML+=`
+<tr class="${linha}">
+<td><b>${escapar(r.numero||r.os||'')}</b></td>
+<td>${escapar(dataBR(dataISO(r)))}</td>
+<td>${escapar(r.maquina||'')}</td>
+<td>${escapar(r.dispositivo||'')}</td>
+<td><span class="badge ${classePrioridade(prioridade)}">${escapar(prioridade)}</span></td>
+<td><span class="badge ${classeStatus(r.status)}">${escapar(r.status||'')}</span></td>
+<td>${escapar(r.responsavel||'')}</td>
+<td>${diasAberto(r)}</td>
+<td>${botoesAcao(i)}</td>
+</tr>`;
+});
+}
+
+function podeAlterar(){
+return usuarioLogado==='Alexandre';
+}
+
+function botoesAcao(i){
+let html='<div class="acoes-linha">';
+html+='<button class="btn-olho" onclick="visualizar('+i+')">👁 Visualizar</button>';
+if(podeAlterar()){
+html+='<button class="btn-editar" onclick="editar('+i+')">✏️ Editar</button>';
+html+='<button class="btn-excluir" onclick="excluirRegistro('+i+')">🗑 Excluir</button>';
+}
+html+='</div>';
+return html;
+}
+
+function renderGraficos(){
+let dadosPrioridade=resumoPorCampo(listaCompleta,'prioridade');
+let dadosStatus=resumoPorCampo(listaCompleta,'status');
+preencherGraficoBarras('graficoPrioridade',dadosPrioridade);
+preencherGraficoBarras('graficoStatus',dadosStatus);
+preencherTabela('rankMaq',ranking(listaCompleta,'maquina'));
+preencherTabela('rankDisp',ranking(listaCompleta,'dispositivo'));
+}
+
+function renderTudo(){
+renderIndicadores();
+renderHistorico();
+renderGraficos();
+atualizarBotoesFiltro();
+}
+
+function campo(titulo,conteudo,full){
+return `<div class="campo ${full?'full':''}"><small>${escapar(titulo)}</small><div>${escapar(conteudo)||'-'}</div></div>`;
+}
+
+function visualizar(indice){
+const r=listaFiltrada[indice];
+if(!r)return;
+el('modalBody').innerHTML=`
+<div class="detalhes">
+${campo('OS',r.numero||r.os)}
+${campo('Data',dataBR(dataISO(r)))}
+${campo('Solicitante',r.solicitante)}
+${campo('Tipo',r.tipo)}
+${campo('Máquina',r.maquina)}
+${campo('Dispositivo',r.dispositivo)}
+${campo('Prioridade',r.prioridade)}
+${campo('Status',r.status)}
+${campo('Responsável',r.responsavel)}
+${campo('Dias em aberto',diasAberto(r))}
+${campo('Descrição',r.descricao,true)}
+${campo('Histórico',r.historico,true)}
+</div>`;
+el('modalFundo').style.display='flex';
+}
+
+function fecharModal(){el('modalFundo').style.display='none';}
+function fecharModalFora(e){if(e.target.id==='modalFundo')fecharModal();}
+
+function editar(indice){
+if(!podeAlterar()){alert('Somente Alexandre pode editar OS.');return;}
+const r=listaFiltrada[indice];
+if(!r)return;
+indiceEdicaoAtual=indice;
+
+el('modalEditarBody').innerHTML=`
+<div class="form-edicao">
+<div>
+<label>OS</label>
+<input id="edit_numero" value="${escapar(r.numero||r.os||'')}" readonly>
+</div>
+
+<div>
+<label>Data</label>
+<input id="edit_data" value="${escapar(r.data||'')}">
+</div>
+
+<div>
+<label>Solicitante</label>
+<input id="edit_solicitante" value="${escapar(r.solicitante||'')}">
+</div>
+
+<div>
+<label>Tipo</label>
+<select id="edit_tipo">
+${['Corretiva','Preventiva','Melhoria','Inspeção','Segurança','Compra','Outros'].map(v=>`<option ${r.tipo===v?'selected':''}>${v}</option>`).join('')}
+</select>
+</div>
+
+<div>
+<label>Máquina</label>
+<input id="edit_maquina" value="${escapar(r.maquina||'')}">
+</div>
+
+<div>
+<label>Dispositivo</label>
+<input id="edit_dispositivo" value="${escapar(r.dispositivo||'')}">
+</div>
+
+<div>
+<label>Prioridade</label>
+<select id="edit_prioridade">
+${['Baixa','Normal','Alta','Crítica'].map(v=>`<option ${r.prioridade===v?'selected':''}>${v}</option>`).join('')}
+</select>
+</div>
+
+<div>
+<label>Status</label>
+<select id="edit_status">
+${['Aberta','Em Andamento','Aguardando Peça','Concluída','Cancelada'].map(v=>`<option ${r.status===v?'selected':''}>${v}</option>`).join('')}
+</select>
+</div>
+
+<div class="full">
+<label>Responsável</label>
+<input id="edit_responsavel" value="${escapar(r.responsavel||'')}">
+</div>
+
+<div class="full">
+<label>Descrição</label>
+<textarea id="edit_descricao">${escapar(r.descricao||'')}</textarea>
+</div>
+
+<div class="full">
+<button class="btn-salvar-edicao" onclick="salvarEdicao()">💾 Salvar alteração</button>
+</div>
+</div>`;
+el('modalEditarFundo').style.display='flex';
+}
+
+function fecharEditar(){
+el('modalEditarFundo').style.display='none';
+indiceEdicaoAtual=null;
+}
+
+function fecharEditarFora(e){
+if(e.target.id==='modalEditarFundo')fecharEditar();
+}
+
+async function salvarEdicao(){
+if(indiceEdicaoAtual===null)return;
+const r=listaFiltrada[indiceEdicaoAtual];
+if(!r || !r.numero){alert('OS sem número. Não foi possível editar.');return;}
+
+let usuario=usuarioLogado||'Usuário';
+let novoHistorico=(r.historico||'')+'\n'+new Date().toLocaleString('pt-BR')+' - OS editada por '+usuario+'.';
+
+let atualizada={
+data:el('edit_data').value,
+solicitante:el('edit_solicitante').value.trim(),
+tipo:el('edit_tipo').value,
+maquina:el('edit_maquina').value.trim(),
+dispositivo:el('edit_dispositivo').value.trim(),
+prioridade:el('edit_prioridade').value,
+status:el('edit_status').value,
+responsavel:el('edit_responsavel').value.trim(),
+descricao:el('edit_descricao').value.trim(),
+historico:novoHistorico
+};
+
+const {error}=await bancoSupabase
+.from('ordens_servico')
+.update(atualizada)
+.eq('numero',r.numero);
+
+if(error){alert('Erro ao editar: '+error.message);return;}
+
+fecharEditar();
+avisar('OS atualizada com sucesso.','ok');
+await carregarTudo();
+}
+
+async function excluirRegistro(indice){
+if(!podeAlterar()){alert('Somente Alexandre pode excluir OS.');return;}
+const r=listaFiltrada[indice];
+if(!r || !r.numero){alert('OS sem número. Não foi possível excluir.');return;}
+
+if(!confirm('Deseja realmente excluir esta OS?\n\nOS: '+r.numero+'\nMáquina: '+(r.maquina||'')+'\n\nEsta ação não poderá ser desfeita.'))return;
+if(!confirm('Confirma a exclusão definitiva da OS '+r.numero+'?'))return;
+
+const {error}=await bancoSupabase
+.from('ordens_servico')
+.delete()
+.eq('numero',r.numero);
+
+if(error){alert('Erro ao excluir: '+error.message);return;}
+
+avisar('OS excluída com sucesso.','ok');
+await carregarTudo();
+}
+
+function avisar(textoMsg,tipo){
+const m=el('msg');
+m.textContent=textoMsg;
+m.className='msg '+(tipo==='erro'?'erro':'ok');
+m.style.display='block';
+setTimeout(()=>{m.style.display='none';},3000);
+}
+
+async function carregarTudo(){
+el('resumoBusca').textContent='Carregando ordens de serviço do Supabase...';
+listaCompleta=await buscar('ordens_servico');
+listaCompleta.sort((a,b)=>dataISO(b).localeCompare(dataISO(a)));
+filtrar();
+}
+
+function exportarExcel(){
+if(!listaFiltrada.length){alert('Não há dados para exportar.');return;}
+
+let wb=XLSX.utils.book_new();
+
+let resumo=[
+['Indicador','Valor'],
+['Fonte','ordens_servico'],
+['Total OS',el('iTotal').innerText],
+['OS Abertas',el('iAbertas').innerText],
+['Em Andamento',el('iAndamento').innerText],
+['Aguardando Peça',el('iPeca').innerText],
+['Concluídas',el('iConcluidas').innerText],
+['Críticas',el('iCriticas').innerText],
+['OS 7+ dias',el('iAtrasadas').innerText]
+];
+
+XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(resumo),'Resumo');
+
+let linhas=[['OS','Data','Máquina','Dispositivo','Prioridade','Status','Responsável','Dias','Descrição']];
+listaFiltrada.forEach(r=>{
+linhas.push([
+r.numero||r.os||'',
+dataBR(dataISO(r)),
+r.maquina||'',
+r.dispositivo||'',
+r.prioridade||'',
+r.status||'',
+r.responsavel||'',
+diasAberto(r),
+r.descricao||''
+]);
+});
+
+XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(linhas),'Historico OS');
+
+function abaTabela(id,nome){
+let t=el(id);
+if(t){
+let ws=XLSX.utils.table_to_sheet(t);
+XLSX.utils.book_append_sheet(wb,ws,nome);
+}
+}
+
+abaTabela('rankMaq','Ranking Maquinas');
+abaTabela('rankDisp','Ranking Dispositivos');
+
+XLSX.writeFile(wb,'Gestao_Manutencao.xlsx');
+avisar('Excel gerado com os registros exibidos.','ok');
+}
+
+document.addEventListener('keydown',function(e){
+if(e.key==='Escape'){fecharModal();fecharEditar();}
+});
+
+el('pesquisa').addEventListener('input',filtrar);
+document.addEventListener('DOMContentLoaded',carregarTudo);
+</script>
+
+</body>
+</html>
