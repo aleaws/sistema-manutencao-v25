@@ -2,279 +2,844 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>25 - Gestão da Manutenção</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>25_Gestao_Manutencao</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
-
-body{
-font-family:Arial;
-background:#f5f5f5;
-padding:20px;
-}
-
-h1{
-margin-bottom:20px;
-}
-
-.cards{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-gap:15px;
-}
-
-.card{
-background:white;
-padding:20px;
-border-radius:10px;
-box-shadow:0 2px 5px rgba(0,0,0,.15);
-text-align:center;
-}
-
-.numero{
-font-size:30px;
-font-weight:bold;
-margin-top:10px;
-}
-
+body{font-family:Arial,sans-serif;background:#f4f6f8;margin:0;padding:0;color:#222}
+header{background:#1f4e79;color:white;padding:12px;text-align:center;position:relative}
+.container{padding:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:12px}
+.card{background:white;border-radius:10px;padding:12px;box-shadow:0 1px 6px rgba(0,0,0,.15)}
+.card h3{margin:0 0 8px 0;font-size:14px;color:#1f4e79}
+.num{font-size:28px;font-weight:bold;color:#1f4e79}
+.sub{font-size:12px;color:#666}
+button{padding:9px 14px;border:none;border-radius:6px;cursor:pointer;font-weight:bold;color:white}
+.bMenu{background:#28a745}
+.bAtualizar{background:#17a2b8}
+.alerta{padding:10px;border-radius:8px;margin-bottom:10px;font-weight:bold}
+.vermelho{background:#f8d7da;color:#842029}
+.amarelo{background:#fff3cd;color:#664d03}
+.verde{background:#d1e7dd;color:#0f5132}
+.secao{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #ccc;padding:6px;font-size:12px;text-align:left}
+th{background:#1f4e79;color:white}
+.badge{display:inline-block;padding:4px 8px;border-radius:20px;font-size:11px;font-weight:bold}
+.bgCritica{background:#f8d7da;color:#842029}
+.bgAlta{background:#fff3cd;color:#664d03}
+.bgNormal{background:#d1e7dd;color:#0f5132}
+.bgBaixa{background:#cff4fc;color:#055160}
+.linhaCritica{background:#fff0f0}
+.linhaAlta{background:#fff9e6}
+.topbar{position:absolute;left:10px;top:50%;transform:translateY(-50%);display:flex;gap:8px}
 </style>
 </head>
 
 <body>
 
-<h1>📈 Gestão da Manutenção</h1>
+<header>
+<div class="topbar">
+<button class="bMenu" onclick="window.location.href='00_Sistema_Manutencao_V25.html'">⬅ Menu</button>
+<button class="bAtualizar" onclick="carregarTudo()">🔄 Atualizar</button>
+</div>
+<span style="font-size:30px;font-weight:bold">📈 GESTÃO DA MANUTENÇÃO</span>
+</header>
 
-<div class="cards">
+<div class="container">
+
+<div id="alertas"></div>
 
 <div class="card">
-<div>Total de OS</div>
-<div id="totalOS" class="numero">0</div>
+<h3>Filtros</h3>
+<select id="fStatus"><option value="">Todos os Status</option><option>Aberta</option><option>Em Andamento</option><option>Aguardando Peça</option><option>Concluída</option><option>Cancelada</option></select>
+<select id="fPrioridade" style="margin-top:8px"><option value="">Todas as Prioridades</option><option>Crítica</option><option>Alta</option><option>Normal</option><option>Baixa</option></select>
+
+<div style="display:flex;gap:8px;margin-top:8px">
+<input type="date" id="dataInicial" style="flex:1">
+<input type="date" id="dataFinal" style="flex:1">
+</div>
+
+<div style="margin-top:8px">
+<button class="bAtualizar" onclick="carregarTudo()">Aplicar</button>
+<button class="bMenu" onclick="document.getElementById('fStatus').value='';document.getElementById('fPrioridade').value='';carregarTudo()">Limpar</button>
+</div>
+</div>
+
+
+<div class="secao" style="margin-top:12px"><div class="card"><h3>🔴 Pendências Críticas</h3><div id="painelCriticas">Carregando...</div></div><div class="card"><h3>🟠 Hoje</h3><div id="painelHoje">Carregando...</div></div><div class="card"><h3>🟢 Próximos 7 Dias</h3><div id="painel7dias">Carregando...</div></div><div class="card"><h3>🔵 Indicadores Inteligentes</h3><div id="painelIntel">Carregando...</div></div></div>
+<div class="grid" style="margin-top:12px">
+<div class="card"><h3>🟢 Máquinas Operando</h3><div class="num" id="maqOperando">0</div><div class="sub">Sem OS aberta</div></div>
+<div class="card"><h3>🔴 Máquinas Paradas</h3><div class="num" id="maqParadas">0</div><div class="sub">Com OS crítica</div></div>
+<div class="card"><h3>🟠 Em Manutenção</h3><div class="num" id="maqManutencao">0</div><div class="sub">Com OS aberta</div></div>
+<div class="card"><h3>🔵 Disponibilidade</h3><div class="num" id="disponibilidade">0%</div><div class="sub">Máquinas disponíveis</div></div>
+</div>
+
+<div class="card" style="margin-top:12px">
+<h3>🏭 Situação das Máquinas</h3>
+<table id="tbSituacaoMaquinas">
+<thead>
+<tr>
+<th>Máquina</th>
+<th>Setor</th>
+<th>Status</th>
+<th>Última OS</th>
+<th>Prioridade</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+<div class="grid">
+<div class="card"><h3>Total de OS</h3><div class="num" id="totalOS">0</div><div class="sub">Registros</div></div>
+<div class="card"><h3>OS Abertas</h3><div class="num" id="abertas">0</div><div class="sub">Pendentes</div></div>
+<div class="card"><h3>Em Andamento</h3><div class="num" id="andamento">0</div><div class="sub">Execução</div></div>
+<div class="card"><h3>Aguardando Peça</h3><div class="num" id="peca">0</div><div class="sub">Paradas</div></div>
+<div class="card"><h3>Concluídas</h3><div class="num" id="concluidas">0</div><div class="sub">Finalizadas</div></div>
+<div class="card"><h3>Críticas</h3><div class="num" id="criticas">0</div><div class="sub">Prioridade máxima</div></div>
+<div class="card"><h3>% Conclusão</h3><div class="num" id="percConclusao">0%</div><div class="sub">OS concluídas</div></div>
+<div class="card"><h3>Canceladas</h3><div class="num" id="canceladas">0</div><div class="sub">Encerradas</div></div>
+</div>
+
+<div class="grid">
+<div class="card"><h3>Máquinas</h3><div class="num" id="maq">0</div><div class="sub">Cadastradas</div></div>
+<div class="card"><h3>Dispositivos</h3><div class="num" id="disp">0</div><div class="sub">Cadastrados</div></div>
+<div class="card"><h3>NC Abertas</h3><div class="num" id="ncAbertas">0</div><div class="sub">Qualidade</div></div>
+<div class="card"><h3>Lubrificações Vencidas</h3><div class="num" id="lubVencidas">0</div><div class="sub">Atenção</div></div>
+<div class="card"><h3>Melhorias Implantadas</h3><div class="num" id="melImplantadas">0</div><div class="sub">Concluídas</div></div>
+<div class="card"><h3>Ferramentas</h3><div class="num" id="ferr">0</div><div class="sub">Itens</div></div>
+</div>
+
+<div class="secao">
+<div class="card">
+<h3>🏭 Ranking de Máquinas</h3>
+<table id="rankMaq"><thead><tr><th>#</th><th>Máquina</th><th>OS</th></tr></thead><tbody></tbody></table>
 </div>
 
 <div class="card">
-<div>Abertas</div>
-<div id="osAbertas" class="numero">0</div>
+<h3>🛠 Ranking de Dispositivos</h3>
+<table id="rankDisp"><thead><tr><th>#</th><th>Dispositivo</th><th>OS</th></tr></thead><tbody></tbody></table>
 </div>
 
 <div class="card">
-<div>Em Andamento</div>
-<div id="osAndamento" class="numero">0</div>
+<h3>👤 Ranking de Responsáveis</h3>
+<table id="rankResp"><thead><tr><th>#</th><th>Responsável</th><th>OS</th></tr></thead><tbody></tbody></table>
+</div>
+</div>
+
+
+
+<div class="card" style="margin-top:12px">
+<h3>🎯 Manutenção Prioritária</h3>
+<table id="tbPrioritaria">
+<thead>
+<tr>
+<th>Prioridade</th>
+<th>OS</th>
+<th>Máquina</th>
+<th>Dispositivo</th>
+<th>Responsável</th>
+<th>Dias em Aberto</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+
+<div class="card" style="margin-top:12px">
+<h3>🚨 OS que exigem atenção</h3>
+<table id="tbAtencao">
+<thead>
+<tr>
+<th>Prioridade</th>
+<th>OS</th>
+<th>Máquina</th>
+<th>Dispositivo</th>
+<th>Responsável</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+
+<div class="secao" style="margin-top:12px">
+<div class="card">
+<h3>📌 OS por Prioridade</h3>
+<table id="tbPrioridade">
+<thead><tr><th>Prioridade</th><th>Total</th></tr></thead>
+<tbody></tbody>
+</table>
 </div>
 
 <div class="card">
-<div>Aguardando Peça</div>
-<div id="osPeca" class="numero">0</div>
+<h3>📋 OS por Status</h3>
+<table id="tbStatus">
+<thead><tr><th>Status</th><th>Total</th></tr></thead>
+<tbody></tbody>
+</table>
 </div>
 
 <div class="card">
-<div>Concluídas</div>
-<div id="osConcluidas" class="numero">0</div>
+<h3>📅 OS por Mês</h3>
+<table id="tbMes">
+<thead><tr><th>Mês</th><th>Total</th></tr></thead>
+<tbody></tbody>
+</table>
+</div>
 </div>
 
-<div class="card">
-<div>Canceladas</div>
-<div id="osCanceladas" class="numero">0</div>
-</div>
 
-<div class="card">
-<div>Críticas</div>
-<div id="osCriticas" class="numero">0</div>
+<div class="card" style="margin-top:12px">
+<button class="bAtualizar" onclick="exportarExcel()">📊 Exportar Excel</button>
 </div>
 
 </div>
 
 <script>
+const SUPABASE_URL='https://wzcrqzbwcsmfwenzcxkf.supabase.co';
+const SUPABASE_KEY='sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu';
+const bancoSupabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-const SUPABASE_URL =
-'https://wzcrqzbwcsmfwenzcxkf.supabase.co';
+function ler(chave){
+try{return JSON.parse(localStorage.getItem(chave)||'[]');}
+catch{return [];}
+}
 
-const SUPABASE_KEY =
-'sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu';
+function texto(id,valor){
+let el=document.getElementById(id);
+if(el) el.innerText=valor;
+}
 
-const bancoSupabase =
-window.supabase.createClient(
-SUPABASE_URL,
-SUPABASE_KEY
-);
+async function buscar(tabela){
+try{
+const {data,error}=await bancoSupabase.from(tabela).select('*');
+if(error){console.warn(tabela,error.message);return [];}
+return data||[];
+}catch(e){
+console.warn(tabela,e);
+return [];
+}
+}
 
-console.log(
-'Conectado ao Supabase'
-);
+function contar(lista,campo,valor){
+return lista.filter(x=>(x[campo]||'')===valor).length;
+}
 
-async function carregarIndicadores(){
-
-const { data: lista, error } =
-await bancoSupabase
-.from('ordens_servico')
-.select('*');
-
-document.getElementById(
-'totalOS'
-).innerText =
-lista.length;
-
-document.getElementById(
-'osAbertas'
-).innerText =
-lista.filter(x =>
-x.status === 'Aberta'
-).length;
-
-document.getElementById(
-'osAndamento'
-).innerText =
-lista.filter(x =>
-x.status === 'Em Andamento'
-).length;
-
-document.getElementById(
-'osPeca'
-).innerText =
-lista.filter(x =>
-x.status === 'Aguardando Peça'
-).length;
-
-document.getElementById(
-'osConcluidas'
-).innerText =
-lista.filter(x =>
-x.status === 'Concluída'
-).length;
-
-document.getElementById(
-'osCanceladas'
-).innerText =
-lista.filter(x =>
-x.status === 'Cancelada'
-).length;
-
-document.getElementById(
-'osCriticas'
-).innerText =
-lista.filter(x =>
-x.prioridade === 'Crítica'
-).length;
-
-let ranking = {};
-
-lista.forEach(os=>{
-
-if(!os.maquina) return;
-
-ranking[os.maquina] =
-(ranking[os.maquina] || 0) + 1;
-
+function ranking(lista,campo){
+let r={};
+lista.forEach(x=>{
+let v=(x[campo]||'').trim();
+if(!v) return;
+r[v]=(r[v]||0)+1;
 });
+return Object.entries(r).sort((a,b)=>b[1]-a[1]).slice(0,10);
+}
 
-let ordenado =
-Object.entries(ranking)
-.sort((a,b)=>b[1]-a[1]);
+function preencherTabela(id,dados){
+let tbody=document.querySelector("#"+id+" tbody");
+if(!tbody) return;
+tbody.innerHTML='';
+if(!dados.length){
+tbody.innerHTML='<tr><td colspan="3">Sem dados</td></tr>';
+return;
+}
+dados.forEach((x,i)=>{
+tbody.innerHTML+=`<tr><td>${i+1}</td><td>${x[0]}</td><td>${x[1]}</td></tr>`;
+});
+}
+
+function lubrificacoesVencidas(lista){
+let hoje=new Date();
+hoje.setHours(0,0,0,0);
+let total=0;
+lista.forEach(x=>{
+if(!x.proxima) return;
+let d=new Date(x.proxima);
+d.setHours(0,0,0,0);
+if(d<hoje) total++;
+});
+return total;
+}
+
+function montarAlertas(dados){
+let itens=[];
+if(dados.criticas>0) itens.push(`<div class="alerta vermelho">🚨 ${dados.criticas} OS críticas exigem atenção.</div>`);
+if(dados.peca>0) itens.push(`<div class="alerta amarelo">🧩 ${dados.peca} OS aguardando peça.</div>`);
+if(dados.ncAbertas>0) itens.push(`<div class="alerta vermelho">⚠ ${dados.ncAbertas} não conformidades abertas.</div>`);
+if(dados.lubVencidas>0) itens.push(`<div class="alerta amarelo">🛢 ${dados.lubVencidas} lubrificações vencidas.</div>`);
+if(!itens.length) itens.push(`<div class="alerta verde">✅ Nenhum alerta crítico no momento.</div>`);
+document.getElementById('alertas').innerHTML=itens.join('');
+}
+
+
+function resumoPorCampo(lista,campo){
+let r={};
+lista.forEach(x=>{
+let v=(x[campo]||'Não informado').trim();
+if(!v) v='Não informado';
+r[v]=(r[v]||0)+1;
+});
+return Object.entries(r).sort((a,b)=>b[1]-a[1]);
+}
+
+function mesOS(item){
+let data=item.data || item.data_abertura || item.created_at || '';
+if(!data) return 'Sem data';
+let d=new Date(data);
+if(isNaN(d)) return 'Sem data';
+let mes=String(d.getMonth()+1).padStart(2,'0');
+return mes+'/'+d.getFullYear();
+}
+
+function resumoPorMes(lista){
+let r={};
+lista.forEach(x=>{
+let m=mesOS(x);
+r[m]=(r[m]||0)+1;
+});
+return Object.entries(r).sort((a,b)=>{
+let aa=a[0].split('/');
+let bb=b[0].split('/');
+if(a[0]==='Sem data') return 1;
+if(b[0]==='Sem data') return -1;
+return (Number(bb[1]+bb[0]) - Number(aa[1]+aa[0]));
+});
+}
+
+function preencherResumo(id,dados){
+let tbody=document.querySelector("#"+id+" tbody");
+if(!tbody) return;
+tbody.innerHTML='';
+if(!dados.length){
+tbody.innerHTML='<tr><td colspan="2">Sem dados</td></tr>';
+return;
+}
+dados.forEach(x=>{
+tbody.innerHTML+=`<tr><td>${x[0]}</td><td>${x[1]}</td></tr>`;
+});
+}
+
+function classePrioridade(p){
+if(p==='Crítica') return 'bgCritica';
+if(p==='Alta') return 'bgAlta';
+if(p==='Normal') return 'bgNormal';
+return 'bgBaixa';
+}
+
+
+function dataOS(item){
+let data =
+item.data ||
+item.data_abertura ||
+item.created_at ||
+'';
+
+if(!data) return '';
+
+return data.substring(0,10);
+}
+
+function diasAberto(item){
+let data =
+dataOS(item);
+
+if(!data) return 0;
+
+let inicio =
+new Date(data);
+
+if(isNaN(inicio)) return 0;
+
+let hoje =
+new Date();
+
+inicio.setHours(0,0,0,0);
+hoje.setHours(0,0,0,0);
+
+return Math.max(
+0,
+Math.floor(
+(hoje - inicio) / 86400000
+)
+);
+}
+
+function pesoPrioridade(p){
+if(p === 'Crítica') return 1;
+if(p === 'Alta') return 2;
+if(p === 'Normal') return 3;
+if(p === 'Baixa') return 4;
+return 5;
+}
+
+function preencherPrioritaria(lista){
 
 let tbody =
 document.querySelector(
-'#tbRanking tbody'
+"#tbPrioritaria tbody"
 );
 
-tbody.innerHTML='';
+if(!tbody) return;
 
-ordenado.forEach((item,i)=>{
+let dados =
+lista
+.filter(x =>
+x.status !== 'Concluída' &&
+x.status !== 'Cancelada'
+)
+.map(x=>({
+item:x,
+dias:diasAberto(x)
+}))
+.sort((a,b)=>{
+
+let pa =
+pesoPrioridade(
+a.item.prioridade || ''
+);
+
+let pb =
+pesoPrioridade(
+b.item.prioridade || ''
+);
+
+if(pa !== pb){
+return pa - pb;
+}
+
+return b.dias - a.dias;
+
+})
+.slice(0,10);
+
+tbody.innerHTML = '';
+
+if(!dados.length){
+
+tbody.innerHTML =
+'<tr><td colspan="7">Sem manutenções prioritárias.</td></tr>';
+
+return;
+
+}
+
+dados.forEach(obj=>{
+
+let x =
+obj.item;
+
+let prioridade =
+x.prioridade || 'Normal';
+
+let linha =
+prioridade === 'Crítica'
+? 'linhaCritica'
+: prioridade === 'Alta'
+? 'linhaAlta'
+: '';
 
 tbody.innerHTML += `
-<tr>
-<td>${i+1}</td>
-<td>${item[0]}</td>
-<td>${item[1]}</td>
-</tr>
-`;
-
-});
-
-let rankingDisp = {};
-
-lista.forEach(os=>{
-
-if(!os.dispositivo) return;
-
-rankingDisp[os.dispositivo] =
-(rankingDisp[os.dispositivo] || 0) + 1;
-
-});
-
-let ordenadoDisp =
-Object.entries(rankingDisp)
-.sort((a,b)=>b[1]-a[1]);
-
-let tbodyDisp =
-document.querySelector(
-'#tbRankingDisp tbody'
-);
-
-tbodyDisp.innerHTML='';
-
-ordenadoDisp.forEach((item,i)=>{
-
-tbodyDisp.innerHTML += `
-<tr>
-<td>${i+1}</td>
-<td>${item[0]}</td>
-<td>${item[1]}</td>
-</tr>
-`;
+<tr class="${linha}">
+<td><span class="badge ${classePrioridade(prioridade)}">${prioridade}</span></td>
+<td>${x.numero || x.os || ''}</td>
+<td>${x.maquina || ''}</td>
+<td>${x.dispositivo || ''}</td>
+<td>${x.responsavel || ''}</td>
+<td>${obj.dias}</td>
+<td>${x.status || ''}</td>
+</tr>`;
 
 });
 
 }
 
-carregarIndicadores();
+function preencherAtencao(lista){
+let tbody=document.querySelector("#tbAtencao tbody");
+if(!tbody) return;
 
+let atencao=lista
+.filter(x =>
+x.status !== 'Concluída' &&
+x.status !== 'Cancelada' &&
+(
+x.prioridade === 'Crítica' ||
+x.prioridade === 'Alta' ||
+x.status === 'Aguardando Peça'
+)
+)
+.slice(0,20);
+
+tbody.innerHTML='';
+
+if(!atencao.length){
+tbody.innerHTML='<tr><td colspan="6">Sem OS críticas, altas ou aguardando peça.</td></tr>';
+return;
+}
+
+atencao.forEach(x=>{
+let prioridade=x.prioridade || 'Normal';
+let linha=prioridade==='Crítica'?'linhaCritica':prioridade==='Alta'?'linhaAlta':'';
+tbody.innerHTML+=`
+<tr class="${linha}">
+<td><span class="badge ${classePrioridade(prioridade)}">${prioridade}</span></td>
+<td>${x.numero || x.os || ''}</td>
+<td>${x.maquina || ''}</td>
+<td>${x.dispositivo || ''}</td>
+<td>${x.responsavel || ''}</td>
+<td>${x.status || ''}</td>
+</tr>`;
+});
+}
+
+
+
+function exportarExcel(){
+
+let linhas=[
+[
+"Indicador",
+"Valor"
+],
+[
+"Total OS",
+document.getElementById('totalOS').innerText
+],
+[
+"Abertas",
+document.getElementById('abertas').innerText
+],
+[
+"Em Andamento",
+document.getElementById('andamento').innerText
+],
+[
+"Aguardando Peça",
+document.getElementById('peca').innerText
+],
+[
+"Concluídas",
+document.getElementById('concluidas').innerText
+],
+[
+"Canceladas",
+document.getElementById('canceladas').innerText
+],
+[
+"Críticas",
+document.getElementById('criticas').innerText
+],
+[
+"% Conclusão",
+document.getElementById('percConclusao').innerText
+],
+[
+"Máquinas",
+document.getElementById('maq').innerText
+],
+[
+"Dispositivos",
+document.getElementById('disp').innerText
+],
+[
+"NC Abertas",
+document.getElementById('ncAbertas').innerText
+],
+[
+"Lubrificações Vencidas",
+document.getElementById('lubVencidas').innerText
+],
+[
+"Melhorias Implantadas",
+document.getElementById('melImplantadas').innerText
+],
+[
+"Ferramentas",
+document.getElementById('ferr').innerText
+]
+];
+
+let wb =
+XLSX.utils.book_new();
+
+let wsResumo =
+XLSX.utils.aoa_to_sheet(linhas);
+
+wsResumo['!cols'] = [
+{wch:30},
+{wch:15}
+];
+
+XLSX.utils.book_append_sheet(
+wb,
+wsResumo,
+"Resumo"
+);
+
+function tabelaParaAba(id,nome){
+let tabela =
+document.getElementById(id);
+
+if(!tabela) return;
+
+let ws =
+XLSX.utils.table_to_sheet(tabela);
+
+XLSX.utils.book_append_sheet(
+wb,
+ws,
+nome
+);
+
+}
+
+tabelaParaAba('rankMaq','Ranking Maquinas');
+tabelaParaAba('rankDisp','Ranking Dispositivos');
+tabelaParaAba('rankResp','Ranking Responsaveis');
+tabelaParaAba('tbSituacaoMaquinas','Situacao Maquinas');
+tabelaParaAba('tbPrioritaria','Manutencao Prioritaria');
+tabelaParaAba('tbAtencao','OS Atencao');
+tabelaParaAba('tbPrioridade','Por Prioridade');
+tabelaParaAba('tbStatus','Por Status');
+tabelaParaAba('tbMes','Por Mes');
+
+XLSX.writeFile(
+wb,
+"Gestao_Manutencao.xlsx"
+);
+
+}
+
+function diasEntre(d){if(!d)return 0;let dt=new Date(d);if(isNaN(dt))return 0;return Math.floor((new Date()-dt)/86400000);}
+function atualizarCentro(os,nc,lub,melhorias){const crit=os.filter(x=>x.prioridade==='Crítica').length;const peca=os.filter(x=>x.status==='Aguardando Peça').length;document.getElementById('painelCriticas').innerHTML=`OS Críticas: <b>${crit}</b><br>OS Aguardando Peça: <b>${peca}</b><br>NC Abertas: <b>${nc.filter(x=>x.status==='Aberta'||x.status==='Em Andamento').length}</b><br>Lubrificações Vencidas: <b>${lubrificacoesVencidas(lub)}</b>`;const hoje=new Date().toISOString().slice(0,10);document.getElementById('painelHoje').innerHTML=`OS abertas: <b>${os.filter(x=>(x.data||'').startsWith(hoje)&&x.status==='Aberta').length}</b><br>OS concluídas: <b>${os.filter(x=>(x.data||'').startsWith(hoje)&&x.status==='Concluída').length}</b><br>Melhorias: <b>${melhorias.filter(x=>(x.data||'').startsWith(hoje)).length}</b>`;let lim=new Date();lim.setDate(lim.getDate()+7);document.getElementById('painel7dias').innerHTML=`Lubrificações: <b>${lub.filter(x=>x.proxima&&new Date(x.proxima)<=lim&&new Date(x.proxima)>=new Date()).length}</b><br>Preventivas: <b>0</b>`;let mq=ranking(os,'maquina')[0],dp=ranking(os,'dispositivo')[0],rp=ranking(os,'responsavel')[0];let m=0,c=0;os.forEach(o=>{if(o.data&&o.status==='Concluída'){m+=diasEntre(o.data);c++;}});document.getElementById('painelIntel').innerHTML=`Média: <b>${c?Math.round(m/c):0} dias</b><br>Máquina: <b>${mq?mq[0]:'-'}</b><br>Dispositivo: <b>${dp?dp[0]:'-'}</b><br>Responsável: <b>${rp?rp[0]:'-'}</b>`;}
+function nomeMaquina(m){
+return (
+m.maquina ||
+m.nome ||
+m.equipamento ||
+m.codigo ||
+''
+).trim();
+}
+
+function setorMaquina(m){
+return (
+m.setor ||
+m.local ||
+m.area ||
+''
+).trim();
+}
+
+function prioridadeMaisAlta(lista){
+let ordenadas =
+lista.slice().sort((a,b)=>
+pesoPrioridade(a.prioridade || '') -
+pesoPrioridade(b.prioridade || '')
+);
+
+return ordenadas[0]?.prioridade || '';
+}
+
+function ultimaOS(lista){
+let ordenadas =
+lista.slice().sort((a,b)=>{
+let da = dataOS(a);
+let db = dataOS(b);
+return db.localeCompare(da);
+});
+
+return ordenadas[0] || null;
+}
+
+function atualizarDisponibilidade(maquinas,os){
+
+let tbody =
+document.querySelector("#tbSituacaoMaquinas tbody");
+
+if(!tbody) return;
+
+tbody.innerHTML = '';
+
+let abertas =
+os.filter(x =>
+x.status !== 'Concluída' &&
+x.status !== 'Cancelada'
+);
+
+let operando = 0;
+let paradas = 0;
+let manutencao = 0;
+
+let listaMaquinas =
+maquinas.length
+? maquinas
+: ler('cadastro_maquinas_v24');
+
+if(!listaMaquinas.length){
+
+tbody.innerHTML =
+'<tr><td colspan="5">Nenhuma máquina cadastrada.</td></tr>';
+
+texto('maqOperando',0);
+texto('maqParadas',0);
+texto('maqManutencao',0);
+texto('disponibilidade','0%');
+
+return;
+
+}
+
+listaMaquinas.forEach(m=>{
+
+let nome =
+nomeMaquina(m);
+
+if(!nome) return;
+
+let osDaMaquina =
+abertas.filter(x =>
+(x.maquina || '').trim() === nome
+);
+
+let status = '🟢 Operando';
+let classe = '';
+let prioridade = '';
+let ultima = ultimaOS(
+os.filter(x =>
+(x.maquina || '').trim() === nome
+)
+);
+
+if(osDaMaquina.length){
+
+prioridade =
+prioridadeMaisAlta(osDaMaquina);
+
+if(prioridade === 'Crítica'){
+status = '🔴 Parada';
+classe = 'linhaCritica';
+paradas++;
+}else{
+status = '🟠 Em Manutenção';
+classe = 'linhaAlta';
+manutencao++;
+}
+
+}else{
+
+operando++;
+
+}
+
+tbody.innerHTML += `
+<tr class="${classe}">
+<td>${nome}</td>
+<td>${setorMaquina(m)}</td>
+<td>${status}</td>
+<td>${ultima ? (ultima.numero || ultima.os || '') : ''}</td>
+<td>${prioridade || (ultima ? (ultima.prioridade || '') : '')}</td>
+</tr>`;
+
+});
+
+let total =
+operando + paradas + manutencao;
+
+let disp =
+total ? Math.round((operando / total) * 100) : 0;
+
+texto('maqOperando',operando);
+texto('maqParadas',paradas);
+texto('maqManutencao',manutencao);
+texto('disponibilidade',disp + '%');
+
+}
+
+async function carregarTudo(){
+const osSupabase=await buscar('ordens_servico');
+const manutencaoSupabase=await buscar('manutencao');
+const maquinas=await buscar('maquinas');
+const dispositivos=await buscar('dispositivos');
+
+let os=osSupabase.length?osSupabase:manutencaoSupabase;
+const fs=document.getElementById('fStatus')?.value||'';
+const fp=document.getElementById('fPrioridade')?.value||'';
+if(fs) os=os.filter(x=>x.status===fs);
+if(fp) os=os.filter(x=>x.prioridade===fp);
+
+const di=document.getElementById('dataInicial')?.value;
+const df=document.getElementById('dataFinal')?.value;
+
+if(di){
+os=os.filter(x=>{
+const d=(x.data||x.data_abertura||x.created_at||'').substring(0,10);
+return d>=di;
+});
+}
+
+if(df){
+os=os.filter(x=>{
+const d=(x.data||x.data_abertura||x.created_at||'').substring(0,10);
+return d<=df;
+});
+}
+
+let nc=ler('nao_conformidades_v24');
+let lub=ler('lubrificacao_v24');
+let melhorias=ler('melhorias_v24');
+let ferramentas=ler('ferramentas_materiais_v24');
+
+let total=os.length;
+let abertas=contar(os,'status','Aberta');
+let andamento=contar(os,'status','Em Andamento');
+let peca=contar(os,'status','Aguardando Peça');
+let concluidas=contar(os,'status','Concluída');
+let canceladas=contar(os,'status','Cancelada');
+let criticas=contar(os,'prioridade','Crítica');
+let perc=total?Math.round((concluidas/total)*100):0;
+
+let ncAbertas=nc.filter(x=>x.status==='Aberta'||x.status==='Em Andamento').length;
+let lubVencidas=lubrificacoesVencidas(lub);
+let melImplantadas=melhorias.filter(x=>x.status==='Implantada').length;
+
+texto('totalOS',total);
+texto('abertas',abertas);
+texto('andamento',andamento);
+texto('peca',peca);
+texto('concluidas',concluidas);
+texto('canceladas',canceladas);
+texto('criticas',criticas);
+texto('percConclusao',perc+'%');
+
+texto('maq',maquinas.length || ler('cadastro_maquinas_v24').length);
+texto('disp',dispositivos.length || ler('cadastro_dispositivos_v24').length);
+texto('ncAbertas',ncAbertas);
+texto('lubVencidas',lubVencidas);
+texto('melImplantadas',melImplantadas);
+texto('ferr',ferramentas.length);
+
+preencherTabela('rankMaq',ranking(os,'maquina'));
+preencherTabela('rankDisp',ranking(os,'dispositivo'));
+preencherTabela('rankResp',ranking(os,'responsavel'));
+
+preencherPrioritaria(os);
+preencherAtencao(os);
+preencherResumo('tbPrioridade',resumoPorCampo(os,'prioridade'));
+preencherResumo('tbStatus',resumoPorCampo(os,'status'));
+preencherResumo('tbMes',resumoPorMes(os));
+
+montarAlertas({criticas,peca,ncAbertas,lubVencidas});atualizarCentro(os,nc,lub,melhorias);
+atualizarDisponibilidade(maquinas,os);
+
+}
+
+document.addEventListener('DOMContentLoaded',carregarTudo);
 </script>
-
-<div style="
-display:flex;
-gap:30px;
-align-items:flex-start;
-flex-wrap:wrap;
-">
-
-<div>
-
-<h2>🏭 Ranking de Máquinas</h2>
-
-<table id="tbRanking" border="1" cellpadding="8" cellspacing="0">
-<thead>
-<tr>
-<th>Posição</th>
-<th>Máquina</th>
-<th>OS</th>
-</tr>
-</thead>
-<tbody>
-</tbody>
-</table>
-
-</div>
-
-<div>
-
-<h2>🛠 Ranking de Dispositivos</h2>
-
-<table id="tbRankingDisp" border="1" cellpadding="8" cellspacing="0">
-<thead>
-<tr>
-<th>Posição</th>
-<th>Dispositivo</th>
-<th>OS</th>
-</tr>
-</thead>
-<tbody>
-</tbody>
-</table>
-
-</div>
-
-</div>
-<br><br>
 
 </body>
 </html>
