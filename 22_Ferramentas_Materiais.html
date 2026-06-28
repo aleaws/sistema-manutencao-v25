@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>22_Ferramentas_Materiais</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="permissoes.js"></script>
+
+<style>
+:root{
+--azul-900:#163b5c;
+--azul-700:#1f5f93;
+--azul-500:#4f93c8;
+--verde:#21805b;
+--laranja:#fd7e14;
+--vermelho:#dc3545;
+--cinza-950:#17202a;
+--cinza-700:#4b5563;
+--cinza-200:#d7dde3;
+--cinza-100:#f3f4f6;
+--fundo:#f5f7fa;
+--branco:#fff;
+--raio:8px;
+--sombra:0 10px 26px rgba(17,24,39,.10);
+}
+*{box-sizing:border-box}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--fundo);margin:0;color:var(--cinza-950)}
+header{
+position:sticky;top:0;z-index:10;
+display:flex;align-items:center;justify-content:space-between;gap:12px;
+background:var(--azul-700);color:#fff;padding:12px 16px;
+box-shadow:0 4px 16px rgba(15,23,42,.18)
+}
+.titulo-topo{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:800}
+.marca{display:grid;place-items:center;width:36px;height:36px;border-radius:var(--raio);background:#fff;color:var(--azul-900)}
+.acoes-topo{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.container{width:min(1320px,100%);margin:0 auto;padding:14px}
+.card{background:#fff;padding:12px;margin-bottom:12px;border:1px solid var(--cinza-200);border-radius:var(--raio);box-shadow:var(--sombra)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.indicador{min-height:82px;padding:12px;border:1px solid var(--cinza-200);border-left:5px solid var(--azul-500);border-radius:var(--raio);background:#fff}
+.ind{font-size:26px;font-weight:800;color:var(--azul-900);line-height:1.1}
+label{display:block;margin-bottom:5px;color:var(--cinza-700);font-size:12px;font-weight:800;text-transform:uppercase}
+button{min-height:38px;padding:9px 12px;border:none;border-radius:var(--raio);color:#fff;font-weight:800;cursor:pointer}
+.b1{background:var(--azul-900)}
+.b2{background:var(--verde)}
+.b3{background:var(--laranja)}
+.b4{background:#4b5563}
+.b5{background:#c53030}
+.btn-claro{background:#fff!important;color:var(--azul-900)!important}
+.barra-acoes{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.msg{display:none;padding:10px;background:#d1e7dd;color:#0f5132;border-radius:var(--raio);margin-top:10px;font-weight:700}
+.erro{background:#f8d7da!important;color:#842029!important}
+input,select,textarea{
+width:100%;min-height:38px;box-sizing:border-box;font-size:14px;
+border:1px solid var(--cinza-200);border-radius:var(--raio);padding:8px 10px;background:#fff;outline:none
+}
+textarea{min-height:38px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--azul-500);box-shadow:0 0 0 3px rgba(79,147,200,.18)}
+.tabela-wrap{overflow-x:auto;border:1px solid var(--cinza-200);border-radius:var(--raio)}
+table{width:100%;min-width:1765px;border-collapse:collapse;background:#fff;table-layout:fixed}
+thead th{position:sticky;top:0;z-index:2}
+th,td{
+border-bottom:1px solid var(--cinza-200);
+border-right:1px solid var(--cinza-200);
+padding:8px 9px;font-size:13px;text-align:left;vertical-align:middle
+}
+th:last-child,td:last-child{border-right:0}
+th{background:var(--azul-900);color:#fff;font-size:12px;text-transform:uppercase;font-weight:800;text-align:center;white-space:nowrap}
+tbody tr:nth-child(even){background:#f8fafc}
+tbody tr:nth-child(odd){background:#fff}
+tbody tr:hover{background:#eef6ff}
+tbody tr:nth-child(even) input,tbody tr:nth-child(odd) input,tbody tr:hover input,
+tbody tr:nth-child(even) select,tbody tr:nth-child(odd) select,tbody tr:hover select,
+tbody tr:nth-child(even) textarea,tbody tr:nth-child(odd) textarea,tbody tr:hover textarea{background:transparent}
+td input,td select,td textarea{border:none;box-shadow:none!important;background:transparent;font-size:13px;padding:6px 4px;min-height:34px}
+td input,td select{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+td:nth-child(1),td:nth-child(6),td:nth-child(7),td:nth-child(11){text-align:center}
+td:nth-child(4) input{font-weight:600}
+td:nth-child(10) textarea{min-height:42px;line-height:1.25;white-space:normal;overflow:auto;resize:vertical}
+.col-n{width:55px;text-align:center}
+.col-data{width:110px}
+.col-codigo{width:220px}
+.col-desc{width:360px}
+.col-cat{width:180px}
+.col-qtd{width:70px;text-align:center}
+.col-min{width:70px;text-align:center}
+.col-forn{width:120px}
+.col-status{width:110px}
+.col-obs{width:auto}
+.col-excluir{width:70px;text-align:center}
+.btn-excluir{min-height:34px;padding:7px 10px;background:#c53030;color:#fff;border-radius:8px}
+@media(max-width:760px){header{align-items:flex-start;flex-direction:column}.acoes-topo,.acoes-topo button,.barra-acoes button{width:100%}.titulo-topo{font-size:19px}.container{padding:10px}}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="titulo-topo"><span class="marca">🧰</span><span>Ferramentas e Materiais</span></div>
+  <div class="acoes-topo">
+    <button class="btn-claro" type="button" onclick="window.location.href='00_Sistema_Manutencao_V25.html'">← Menu</button>
+    <button class="btn-claro" type="button" onclick="location.reload()">🔄 Atualizar</button>
+  </div>
+</header>
+
+<div class="container">
+
+<div class="grid">
+  <div class="indicador"><div>Total Itens</div><div class="ind" id="tot">0</div></div>
+  <div class="indicador"><div>Estoque Baixo</div><div class="ind" id="abertas">0</div></div>
+  <div class="indicador"><div>Sem Estoque</div><div class="ind" id="andamento">0</div></div>
+  <div class="indicador"><div>Solicitados</div><div class="ind" id="concluidas">0</div></div>
+  <div class="indicador"><div>Comprados</div><div class="ind" id="atrasadas">0</div></div>
+</div>
+
+<div class="card">
+  <div class="grid">
+    <div>
+      <label>Pesquisa</label>
+      <input id="pesquisa" placeholder="Pesquisar...">
+    </div>
+    <div>
+      <label>Categoria</label>
+      <select id="fStatus">
+        <option value="">Todas</option>
+        <option>Ferramentas de Corte</option>
+        <option>Matéria-prima</option>
+        <option>Parafusos/Fixadores</option>
+        <option>Componentes</option>
+        <option>Ferramentas para Manutenção</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="barra-acoes">
+    <button class="b1" onclick="novo()">Novo Item</button>
+    <button class="b2" onclick="salvarManual()">Salvar</button>
+    <button class="b3" onclick="exportarExcel()">📊 Exportar Excel</button>
+    <button class="b4" onclick="window.print()">Imprimir</button>
+    <div id="msg" class="msg"></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="tabela-wrap">
+    <table id="tb">
+      <colgroup>
+        <col style="width:55px">
+        <col style="width:110px">
+        <col style="width:220px">
+        <col style="width:360px">
+        <col style="width:180px">
+        <col style="width:70px">
+        <col style="width:70px">
+        <col style="width:120px">
+        <col style="width:110px">
+        <col style="width:auto">
+        <col id="colExcluir" style="width:70px">
+      </colgroup>
+      <thead>
+        <tr>
+          <th class="col-n">Nº</th>
+          <th class="col-data">Data</th>
+          <th class="col-codigo">Código</th>
+          <th class="col-desc">Descrição</th>
+          <th class="col-cat">Categoria</th>
+          <th class="col-qtd">Quantidade</th>
+          <th class="col-min">Mínimo</th>
+          <th class="col-forn">Fornecedor</th>
+          <th class="col-status">Status</th>
+          <th class="col-obs">Observação</th>
+          <th id="thExcluir" class="col-excluir">Excluir</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+</div>
+
+<script>
+const SUPABASE_URL = 'https://wzcrqzbwcsmfwenzcxkf.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu';
+const bancoSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const TABELA = 'ferramentas_materiais';
+const CHAVE_LOCAL = 'ferramentas_materiais_v24';
+
+if(typeof verificarPermissao !== "function"){
+  function verificarPermissao(){ return true; }
+}
+verificarPermissao("22_Ferramentas_Materiais.html");
+
+const usuarioLogado = localStorage.getItem("usuarioLogado") || "Sistema";
+
+function podeExcluir(){
+  return usuarioLogado === "Alexandre";
+}
+
+function registrarLog(acao){
+  let logs = [];
+  try{ logs = JSON.parse(localStorage.getItem("logs_auditoria") || "[]"); }catch(e){}
+  logs.unshift({data:new Date().toLocaleString('pt-BR'),usuario:usuarioLogado,acao});
+  localStorage.setItem("logs_auditoria", JSON.stringify(logs.slice(0,800)));
+}
+
+function aviso(t,tipo='ok'){
+  msg.innerText=t;
+  msg.className='msg' + (tipo==='erro' ? ' erro' : '');
+  msg.style.display='block';
+  setTimeout(()=>msg.style.display='none',3500);
+}
+
+function aplicarPermissaoExcluir(){
+  const th = document.getElementById('thExcluir');
+  if(th && !podeExcluir()) th.style.display = 'none';
+}
+
+aplicarPermissaoExcluir();
+
+function esc(v){
+  return String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function novo(d={}){
+  let r=tb.tBodies[0].insertRow();
+
+  r.innerHTML=`
+<td class="col-n"></td>
+<td><input type="date" value="${esc(d.data||'')}"></td>
+<td><input value="${esc(d.codigo||'')}"></td>
+<td><input value="${esc(d.descricao||'')}"></td>
+<td>
+<select>
+<option ${d.categoria=="Ferramentas de Corte"?"selected":""}>Ferramentas de Corte</option>
+<option ${d.categoria=="Matéria-prima"?"selected":""}>Matéria-prima</option>
+<option ${d.categoria=="Parafusos/Fixadores"?"selected":""}>Parafusos/Fixadores</option>
+<option ${d.categoria=="Componentes"?"selected":""}>Componentes</option>
+<option ${d.categoria=="Ferramentas para Manutenção"?"selected":""}>Ferramentas para Manutenção</option>
+</select>
+</td>
+<td><input type="number" value="${esc(d.quantidade||0)}"></td>
+<td><input type="number" value="${esc(d.minimo||0)}"></td>
+<td><input value="${esc(d.fornecedor||'')}"></td>
+<td>
+<select>
+<option ${d.status=="Em Estoque"?"selected":""}>Em Estoque</option>
+<option ${d.status=="Baixo Estoque"?"selected":""}>Baixo Estoque</option>
+<option ${d.status=="Sem Estoque"?"selected":""}>Sem Estoque</option>
+<option ${d.status=="Solicitado"?"selected":""}>Solicitado</option>
+<option ${d.status=="Comprado"?"selected":""}>Comprado</option>
+</select>
+</td>
+<td><textarea rows="1">${esc(d.obs||'')}</textarea></td>
+${podeExcluir() ? `<td class="col-excluir"><button class="btn-excluir" type="button" onclick="excluir(this)">X</button></td>` : ``}`;
+
+  r.querySelectorAll("input,select,textarea").forEach(e=>{
+    e.oninput=()=>{
+      salvarLocal();
+      filtrar();
+    };
+  });
+
+  renum();
+}
+
+function excluir(btn){
+  if(!podeExcluir()){
+    alert("Somente Alexandre pode excluir ferramentas/materiais.");
+    return;
+  }
+  if(!confirm("Excluir item?")) return;
+  registrarLog("Excluiu ferramenta/material");
+  btn.closest("tr").remove();
+  renum();
+  salvarManual();
+}
+
+function renum(){
+  [...tb.tBodies[0].rows].forEach((r,i)=>{
+    r.cells[0].innerText=i+1;
+  });
+  indicadores();
+}
+
+function dados(){
+  return [...tb.tBodies[0].rows].map(r=>({
+    data:r.cells[1].querySelector('input').value,
+    codigo:r.cells[2].querySelector('input').value,
+    descricao:r.cells[3].querySelector('input').value,
+    categoria:r.cells[4].querySelector('select').value,
+    quantidade:Number(r.cells[5].querySelector('input').value || 0),
+    minimo:Number(r.cells[6].querySelector('input').value || 0),
+    fornecedor:r.cells[7].querySelector('input').value,
+    status:r.cells[8].querySelector('select').value,
+    obs:r.cells[9].querySelector('textarea').value
+  }));
+}
+
+function salvarLocal(){
+  localStorage.setItem(CHAVE_LOCAL, JSON.stringify(dados()));
+  indicadores();
+}
+
+async function salvar(){
+  const lista = dados();
+  salvarLocal();
+
+  const { error: erroDelete } = await bancoSupabase
+    .from(TABELA)
+    .delete()
+    .neq('id', 0);
+
+  if(erroDelete){
+    console.error(erroDelete);
+    aviso('Salvo neste navegador, mas não sincronizou no Supabase: ' + erroDelete.message, 'erro');
+    return false;
+  }
+
+  if(lista.length){
+    const { error } = await bancoSupabase
+      .from(TABELA)
+      .insert(lista);
+
+    if(error){
+      console.error(error);
+      aviso('Salvo neste navegador, mas não sincronizou no Supabase: ' + error.message, 'erro');
+      return false;
+    }
+  }
+
+  return true;
+}
+
+async function salvarManual(){
+  const ok = await salvar();
+  if(ok) aviso("Dados salvos com sucesso.");
+}
+
+async function carregar(){
+  tb.tBodies[0].innerHTML = '';
+
+  const { data, error } = await bancoSupabase
+    .from(TABELA)
+    .select('*')
+    .order('descricao');
+
+  if(!error && data && data.length){
+    data.forEach(x=>novo(x));
+    localStorage.setItem(CHAVE_LOCAL, JSON.stringify(dados()));
+  }else{
+    if(error){
+      console.warn(error.message);
+      aviso('Não carregou do Supabase. Usando dados locais. Se a tabela não existir, crie ferramentas_materiais.', 'erro');
+    }
+
+    let d=[];
+    try{ d=JSON.parse(localStorage.getItem(CHAVE_LOCAL)||'[]'); }catch(e){ d=[]; }
+    d.forEach(x=>novo(x));
+  }
+
+  indicadores();
+}
+
+function indicadores(){
+  let d=dados();
+  let estoqueBaixo=0;
+  let semEstoque=0;
+  let solicitados=0;
+  let comprados=0;
+
+  d.forEach(x=>{
+    let qtd=Number(x.quantidade||0);
+    let minimo=Number(x.minimo||0);
+    if(qtd===0) semEstoque++;
+    if(qtd<=minimo) estoqueBaixo++;
+    if(x.status==="Solicitado") solicitados++;
+    if(x.status==="Comprado") comprados++;
+  });
+
+  tot.innerText=d.length;
+  abertas.innerText=estoqueBaixo;
+  andamento.innerText=semEstoque;
+  concluidas.innerText=solicitados;
+  atrasadas.innerText=comprados;
+}
+
+function filtrar(){
+  let txt=pesquisa.value.toLowerCase();
+  [...tb.tBodies[0].rows].forEach(r=>{
+    let ok=r.innerText.toLowerCase().includes(txt);
+    if(fStatus.value){
+      ok = ok && r.cells[4].querySelector('select').value===fStatus.value;
+    }
+    r.style.display=ok?'':'none';
+  });
+}
+
+function exportarExcel(){
+  let linhas=[[
+    "Nº","Data","Código","Descrição","Categoria","Quantidade","Mínimo",
+    "Saldo","Estoque Baixo","Fornecedor","Status","Observação"
+  ]];
+
+  dados().forEach((d,i)=>{
+    let saldo = Number(d.quantidade||0) - Number(d.minimo||0);
+    let estoqueBaixo = saldo <= 0 ? "SIM" : "NÃO";
+    linhas.push([
+      i+1,d.data,d.codigo,d.descricao,d.categoria,d.quantidade,d.minimo,
+      saldo,estoqueBaixo,d.fornecedor,d.status,d.obs
+    ]);
+  });
+
+  let ws = XLSX.utils.aoa_to_sheet(linhas);
+  ws['!autofilter'] = {ref:"A1:L1"};
+  ws['!cols'] = [
+    {wch:6},{wch:12},{wch:24},{wch:40},{wch:20},{wch:10},{wch:10},
+    {wch:12},{wch:15},{wch:16},{wch:14},{wch:55}
+  ];
+
+  let wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Ferramentas");
+  XLSX.writeFile(wb, "Ferramentas_Materiais.xlsx");
+  aviso("Excel exportado com sucesso.");
+}
+
+pesquisa.oninput=filtrar;
+fStatus.onchange=filtrar;
+carregar();
+</script>
+
+</body>
+</html>
