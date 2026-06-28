@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PCP - Programação e Controle</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --azul-900:#163b5c; --azul-700:#1f5f93; --azul-500:#4f93c8;
+      --verde:#21805b; --amarelo:#b7791f; --vermelho:#c53030;
+      --texto:#17202a; --muted:#6b7280; --borda:#e5e7eb; --fundo:#f5f7fa; --branco:#fff;
+      --raio:8px; --sombra:0 10px 26px rgba(17,24,39,.10);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;color:var(--texto);background:var(--fundo)}
+    button,input,select,textarea{font:inherit}
+    button{border:0;border-radius:var(--raio);cursor:pointer;font-weight:800}
+    .topbar{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;color:#fff;background:var(--azul-700);box-shadow:0 4px 16px rgba(15,23,42,.18)}
+    .titulo-app{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:800}
+    .marca{display:grid;place-items:center;width:36px;height:36px;border-radius:var(--raio);color:var(--azul-900);background:#fff}
+    .acoes-topo{display:flex;gap:8px;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:38px;padding:9px 12px;color:#fff;background:var(--azul-900)}
+    .btn-claro{color:var(--azul-900);background:#fff}
+    .btn-perigo{background:var(--vermelho)}
+    main{width:min(1320px,100%);margin:0 auto;padding:14px}
+    .indicadores{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+    .indicador{min-height:84px;padding:12px;border:1px solid var(--borda);border-left:5px solid var(--azul-500);border-radius:var(--raio);background:#fff;box-shadow:0 5px 15px rgba(17,24,39,.06)}
+    .indicador strong{display:block;color:var(--azul-900);font-size:24px}
+    .indicador span{display:block;margin-top:8px;color:#4b5563;font-size:13px;font-weight:700}
+    .atraso{border-left-color:var(--vermelho)} .ok{border-left-color:var(--verde)} .alerta{border-left-color:var(--amarelo)}
+    .layout{display:grid;grid-template-columns:minmax(300px,390px) minmax(0,1fr);gap:14px;align-items:start}
+    .painel{border:1px solid var(--borda);border-radius:var(--raio);background:#fff;box-shadow:var(--sombra)}
+    .painel-header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;border-bottom:1px solid var(--borda)}
+    .painel-header h2{margin:0;font-size:16px;color:var(--azul-900)}
+    form{display:grid;gap:10px;padding:12px}
+    label{display:grid;gap:5px;color:#4b5563;font-size:12px;font-weight:800;text-transform:uppercase}
+    input,select,textarea{width:100%;min-height:38px;padding:8px 10px;border:1px solid var(--borda);border-radius:var(--raio);outline:none}
+    textarea{min-height:76px;resize:vertical}
+    .duas{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .form-acoes,.card-acoes,.tabs{display:flex;gap:8px;flex-wrap:wrap}
+    .filtros{display:grid;grid-template-columns:minmax(200px,1fr) repeat(4,minmax(130px,160px));gap:8px;padding:12px;border-bottom:1px solid var(--borda)}
+    .tab{min-height:34px;padding:8px 12px;color:#4b5563;background:#f3f4f6}.tab.ativo{color:#fff;background:var(--azul-900)}
+    .conteudo{padding:12px}.kanban{display:grid;grid-template-columns:repeat(5,minmax(190px,1fr));gap:10px;overflow-x:auto}
+    .coluna{min-width:190px;min-height:260px;border:1px solid var(--borda);border-radius:var(--raio);background:#fafafa}
+    .coluna h3{display:flex;justify-content:space-between;margin:0;padding:10px;border-bottom:1px solid var(--borda);color:var(--azul-900);font-size:13px;text-transform:uppercase}
+    .coluna-lista{display:grid;gap:8px;padding:8px}
+    .op-card{display:grid;gap:8px;padding:10px;border:1px solid var(--borda);border-radius:var(--raio);background:#fff;box-shadow:0 4px 10px rgba(17,24,39,.06)}
+    .op-card h4{margin:0;font-size:14px;line-height:1.3}
+    .meta{display:flex;gap:6px;flex-wrap:wrap;color:var(--muted);font-size:12px;font-weight:700}
+    .tag{display:inline-flex;align-items:center;min-height:24px;padding:4px 7px;border-radius:999px;color:var(--azul-900);background:#eaf2f9;font-size:11px;font-weight:800}
+    .alta,.critica,.atrasada,.bloqueado,.pendente{color:#fff;background:var(--vermelho)} .media,.parcial{color:#fff;background:var(--amarelo)} .baixa,.liberado{color:#fff;background:var(--verde)}
+    .mini{min-height:30px;padding:6px 8px;color:var(--azul-900);background:#f3f4f6;border:1px solid var(--borda);font-size:12px}
+    table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:9px 8px;border-bottom:1px solid var(--borda);text-align:left;vertical-align:top} th{color:var(--azul-900);background:#f3f4f6;font-size:12px;text-transform:uppercase}
+    .tabela-wrap{overflow-x:auto}.vazio{padding:24px;color:var(--muted);text-align:center;font-weight:700}.oculto{display:none}
+    @media(max-width:980px){.layout{grid-template-columns:1fr}.filtros{grid-template-columns:1fr 1fr}}
+    @media(max-width:620px){.topbar{align-items:flex-start;flex-direction:column}.acoes-topo,.btn{width:100%}.duas,.filtros{grid-template-columns:1fr}main{padding:10px}}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="titulo-app"><span class="marca">📅</span><span>PCP - Programação e Controle</span></div>
+    <div class="acoes-topo">
+      <button class="btn btn-claro" onclick="voltarMenu()">⬅ Menu</button>
+      <button class="btn btn-claro" onclick="exportarCSV()">Exportar CSV</button>
+      <button class="btn" type="button" onclick="salvarProgramacaoTopo()">Salvar</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="indicadores">
+      <div class="indicador"><strong id="indTotal">0</strong><span>Ordens programadas</span></div>
+      <div class="indicador ok"><strong id="indProducao">0</strong><span>Em produção</span></div>
+      <div class="indicador alerta"><strong id="indMateriais">0</strong><span>Material pendente</span></div>
+      <div class="indicador atraso"><strong id="indAtrasadas">0</strong><span>Atrasadas</span></div>
+      <div class="indicador"><strong id="indPecas">0</strong><span>Peças programadas</span></div>
+    </section>
+
+    <section class="layout">
+      <aside class="painel">
+        <div class="painel-header"><h2 id="tituloForm">Nova programação</h2><button class="mini" onclick="limparFormulario()">Limpar</button></div>
+        <form id="formOrdem">
+          <input id="ordemId" type="hidden">
+          <div class="duas"><label>OP / Pedido<input id="op" required placeholder="Ex.: OP-1025"></label><label>Cliente<input id="cliente" placeholder="Cliente ou interno"></label></div>
+          <label>Produto / item<input id="produto" required placeholder="Ex.: Conjunto soldado A"></label>
+          <div class="duas"><label>Quantidade<input id="quantidade" type="number" min="0" step="1"></label><label>Recurso / máquina<input id="recurso" placeholder="Ex.: Prensa 01, CNC"></label></div>
+          <div class="duas"><label>Status<select id="status"><option>Planejado</option><option>Liberado</option><option>Em produção</option><option>Concluído</option><option>Bloqueado</option></select></label><label>Prioridade<select id="prioridade"><option>Baixa</option><option selected>Média</option><option>Alta</option><option>Crítica</option></select></label></div>
+          <div class="duas"><label>Material<select id="material"><option>Liberado</option><option>Parcial</option><option>Pendente</option><option>Bloqueado</option></select></label><label>Responsável<input id="responsavel"></label></div>
+          <div class="duas"><label>Início planejado<input id="inicio" type="date"></label><label>Entrega<input id="entrega" type="date"></label></div>
+          <label>Observações<textarea id="observacoes" placeholder="Restrições, material faltante, observações de produção"></textarea></label>
+          <div class="form-acoes"><button class="btn" type="submit">Salvar programação</button><button class="btn btn-perigo" type="button" onclick="excluirSelecionada()">Excluir</button></div>
+        </form>
+      </aside>
+
+      <section class="painel">
+        <div class="painel-header"><h2>Carteira do PCP</h2><span id="contadorLista" class="tag">0 itens</span></div>
+        <div class="filtros">
+          <input id="busca" type="search" placeholder="Buscar OP, produto, cliente, máquina...">
+          <select id="filtroStatus"><option value="">Todos status</option><option>Planejado</option><option>Liberado</option><option>Em produção</option><option>Concluído</option><option>Bloqueado</option></select>
+          <select id="filtroMaterial"><option value="">Todos materiais</option><option>Liberado</option><option>Parcial</option><option>Pendente</option><option>Bloqueado</option></select>
+          <select id="filtroPrioridade"><option value="">Todas prioridades</option><option>Baixa</option><option>Média</option><option>Alta</option><option>Crítica</option></select>
+          <select id="ordenacao"><option value="entrega">Ordenar por entrega</option><option value="prioridade">Ordenar por prioridade</option><option value="quantidade">Ordenar por quantidade</option><option value="criacao">Ordenar por criação</option></select>
+        </div>
+        <div class="tabs"><button id="tabKanban" class="tab ativo" onclick="mudarVisualizacao('kanban')">Kanban</button><button id="tabTabela" class="tab" onclick="mudarVisualizacao('tabela')">Tabela</button></div>
+        <div class="conteudo"><div id="visaoKanban" class="kanban"></div><div id="visaoTabela" class="tabela-wrap oculto"></div></div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const SUPABASE_URL = 'https://wzcrqzbwcsmfwenzcxkf.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu';
+    const bancoSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const TABELA = 'pcp_programacao';
+    const CHAVE_LOCAL = 'pcp_programacao_controle_v1_backup';
+    const STATUS = ['Planejado','Liberado','Em produção','Concluído','Bloqueado'];
+    const PESO = {'Crítica':4,'Alta':3,'Média':2,'Baixa':1};
+
+    let ordens = [];
+    let visualizacao = 'kanban';
+
+    document.addEventListener('DOMContentLoaded', async function(){
+      document.getElementById('formOrdem').addEventListener('submit', salvarFormulario);
+      ['busca','filtroStatus','filtroMaterial','filtroPrioridade','ordenacao'].forEach(id => {
+        let el = document.getElementById(id);
+        if(el) el.addEventListener('input', renderizar);
+      });
+      await carregarSupabase();
+      renderizar();
+    });
+
+    function criarId(){
+      return 'PCP-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,7).toUpperCase();
+    }
+
+    function valor(id){
+      const el = document.getElementById(id);
+      return el ? String(el.value || '').trim() : '';
+    }
+
+    function setValor(id,v){
+      const el = document.getElementById(id);
+      if(el) el.value = v || '';
+    }
+
+    function normalizar(t){
+      return String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+    }
+
+    function esc(v){
+      return String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    function dataBR(d){
+      if(!d)return '';
+      const p=String(d).split('T')[0].split('-');
+      return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:d;
+    }
+
+    function registrarLog(acao){
+      try{
+        let logs = JSON.parse(localStorage.getItem('logs_auditoria') || '[]');
+        logs.unshift({
+          data:new Date().toLocaleString('pt-BR'),
+          usuario:localStorage.getItem('usuarioLogado') || 'Sistema',
+          acao:acao
+        });
+        localStorage.setItem('logs_auditoria', JSON.stringify(logs.slice(0,500)));
+      }catch(e){}
+    }
+
+    function aviso(msg){
+      alert(msg);
+    }
+
+    async function carregarSupabase(){
+      const { data, error } = await bancoSupabase
+        .from(TABELA)
+        .select('*')
+        .order('entrega', { ascending:true });
+
+      if(error){
+        console.error(error);
+        alert('Erro ao carregar PCP do Supabase: ' + error.message);
+        try{
+          ordens = JSON.parse(localStorage.getItem(CHAVE_LOCAL) || '[]');
+        }catch(e){
+          ordens = [];
+        }
+        return;
+      }
+
+      ordens = data || [];
+      localStorage.setItem(CHAVE_LOCAL, JSON.stringify(ordens));
+    }
+
+    async function salvarRegistroSupabase(reg){
+      const { error } = await bancoSupabase
+        .from(TABELA)
+        .upsert([reg], { onConflict:'id' });
+
+      if(error){
+        console.error(error);
+        alert('Erro ao salvar no Supabase: ' + error.message);
+        return false;
+      }
+      return true;
+    }
+
+    async function excluirRegistroSupabase(id){
+      const { error } = await bancoSupabase
+        .from(TABELA)
+        .delete()
+        .eq('id', id);
+
+      if(error){
+        console.error(error);
+        alert('Erro ao excluir no Supabase: ' + error.message);
+        return false;
+      }
+      return true;
+    }
+
+    function montarRegistroFormulario(){
+      const id = valor('ordemId') || criarId();
+      const existente = ordens.find(o => o.id === id);
+
+      return {
+        id:id,
+        op:valor('op'),
+        cliente:valor('cliente'),
+        produto:valor('produto'),
+        quantidade:Number(valor('quantidade') || 0),
+        recurso:valor('recurso'),
+        status:valor('status'),
+        prioridade:valor('prioridade'),
+        material:valor('material'),
+        responsavel:valor('responsavel'),
+        inicio:valor('inicio') || null,
+        entrega:valor('entrega') || null,
+        observacoes:valor('observacoes'),
+        criadoEm:existente ? existente.criadoEm : new Date().toISOString(),
+        atualizadoEm:new Date().toISOString()
+      };
+    }
+
+    async function salvarFormulario(e){
+      e.preventDefault();
+
+      if(!valor('op')){
+        alert('Informe a OP / Pedido.');
+        return;
+      }
+
+      if(!valor('produto')){
+        alert('Informe o Produto / item.');
+        return;
+      }
+
+      const reg = montarRegistroFormulario();
+      const ok = await salvarRegistroSupabase(reg);
+      if(!ok) return;
+
+      const i = ordens.findIndex(o => o.id === reg.id);
+      if(i >= 0) ordens[i] = reg;
+      else ordens.unshift(reg);
+
+      localStorage.setItem(CHAVE_LOCAL, JSON.stringify(ordens));
+      registrarLog('Salvou programação PCP: ' + (reg.op || reg.id));
+      renderizar();
+      limparFormulario();
+      aviso('Programação salva no Supabase.');
+    }
+
+    function salvarProgramacaoTopo(){
+      const form = document.getElementById('formOrdem');
+      if(!form)return;
+      if(form.requestSubmit) form.requestSubmit();
+      else salvarFormulario({preventDefault:function(){}});
+    }
+
+    function preencherFormulario(id){
+      const o=ordens.find(x=>x.id===id);
+      if(!o)return;
+      document.getElementById('tituloForm').textContent='Editar programação';
+      ['ordemId','op','cliente','produto','quantidade','recurso','status','prioridade','material','responsavel','inicio','entrega','observacoes'].forEach(c=>{
+        setValor(c, c==='ordemId'?o.id:o[c]);
+      });
+      scrollTo({top:0,behavior:'smooth'});
+    }
+
+    function limparFormulario(){
+      document.getElementById('tituloForm').textContent='Nova programação';
+      document.getElementById('formOrdem').reset();
+      setValor('ordemId','');
+      setValor('status','Planejado');
+      setValor('prioridade','Média');
+      setValor('material','Liberado');
+    }
+
+    async function excluirSelecionada(){
+      const id=valor('ordemId');
+      if(!id){alert('Selecione uma programação para excluir.');return;}
+      if(!confirm('Deseja excluir esta programação?'))return;
+
+      const ok = await excluirRegistroSupabase(id);
+      if(!ok)return;
+
+      ordens=ordens.filter(o=>o.id!==id);
+      localStorage.setItem(CHAVE_LOCAL, JSON.stringify(ordens));
+      registrarLog('Excluiu programação PCP: ' + id);
+      renderizar();
+      limparFormulario();
+      aviso('Programação excluída do Supabase.');
+    }
+
+    async function mudarStatus(id,status){
+      const o=ordens.find(x=>x.id===id);
+      if(!o)return;
+
+      const atualizado = Object.assign({}, o, {
+        status:status,
+        atualizadoEm:new Date().toISOString()
+      });
+
+      const ok = await salvarRegistroSupabase(atualizado);
+      if(!ok)return;
+
+      Object.assign(o, atualizado);
+      localStorage.setItem(CHAVE_LOCAL, JSON.stringify(ordens));
+      registrarLog('Alterou status PCP: ' + (o.op || id) + ' para ' + status);
+      renderizar();
+    }
+
+    function avancarStatus(id){
+      const o=ordens.find(x=>x.id===id);
+      if(!o)return;
+      mudarStatus(id, STATUS[Math.min(STATUS.indexOf(o.status)+1, STATUS.length-1)] || 'Planejado');
+    }
+
+    function atrasada(o){
+      if(!o.entrega||o.status==='Concluído')return false;
+      const h=new Date();
+      h.setHours(0,0,0,0);
+      return new Date(o.entrega+'T00:00:00')<h;
+    }
+
+    function filtrados(){
+      const b=normalizar(valor('busca'));
+      const fs=valor('filtroStatus');
+      const fm=valor('filtroMaterial');
+      const fp=valor('filtroPrioridade');
+      const ord=valor('ordenacao');
+
+      const arr=ordens.filter(o=>
+        (!b||normalizar([o.op,o.cliente,o.produto,o.recurso,o.responsavel,o.observacoes].join(' ')).includes(b)) &&
+        (!fs||o.status===fs) &&
+        (!fm||o.material===fm) &&
+        (!fp||o.prioridade===fp)
+      );
+
+      arr.sort((a,b)=>
+        ord==='prioridade' ? (PESO[b.prioridade]||0)-(PESO[a.prioridade]||0) :
+        ord==='quantidade' ? Number(b.quantidade||0)-Number(a.quantidade||0) :
+        ord==='criacao' ? String(b.criadoEm||'').localeCompare(String(a.criadoEm||'')) :
+        String(a.entrega||'9999-12-31').localeCompare(String(b.entrega||'9999-12-31'))
+      );
+      return arr;
+    }
+
+    function renderizar(){
+      const lista=filtrados();
+      indicadores();
+      document.getElementById('contadorLista').textContent=lista.length+' itens';
+      renderKanban(lista);
+      renderTabela(lista);
+    }
+
+    function indicadores(){
+      document.getElementById('indTotal').textContent=ordens.length;
+      document.getElementById('indProducao').textContent=ordens.filter(o=>o.status==='Em produção').length;
+      document.getElementById('indMateriais').textContent=ordens.filter(o=>['Pendente','Parcial','Bloqueado'].includes(o.material)).length;
+      document.getElementById('indAtrasadas').textContent=ordens.filter(atrasada).length;
+      document.getElementById('indPecas').textContent=ordens.reduce((t,o)=>t+Number(o.quantidade||0),0).toLocaleString('pt-BR');
+    }
+
+    function renderKanban(lista){
+      const c=document.getElementById('visaoKanban');
+      c.textContent='';
+      STATUS.forEach(st=>{
+        const itens=lista.filter(o=>o.status===st);
+        const col=document.createElement('section');
+        col.className='coluna';
+        col.innerHTML='<h3><span>'+st+'</span><span>'+itens.length+'</span></h3>';
+        const l=document.createElement('div');
+        l.className='coluna-lista';
+        if(!itens.length){
+          const v=document.createElement('div');
+          v.className='vazio';
+          v.textContent='Sem ordens';
+          l.appendChild(v);
+        }
+        itens.forEach(o=>l.appendChild(card(o)));
+        col.appendChild(l);
+        c.appendChild(col);
+      });
+    }
+
+    function card(o){
+      const a=document.createElement('article');
+      a.className='op-card';
+      a.innerHTML='<h4>'+esc(o.op||'Sem OP')+' - '+esc(o.produto||'Sem produto')+'</h4>';
+
+      const m=document.createElement('div');
+      m.className='meta';
+      m.append(tag(o.prioridade,normalizar(o.prioridade)),tag(o.material,normalizar(o.material)),tag(o.recurso||'Sem recurso'));
+      if(atrasada(o))m.append(tag('Atrasada','atrasada'));
+
+      const d=document.createElement('div');
+      d.className='meta';
+      d.textContent=[
+        o.cliente||'Sem cliente',
+        'Qtd: '+Number(o.quantidade||0).toLocaleString('pt-BR'),
+        o.entrega?'Entrega: '+dataBR(o.entrega):'Sem entrega'
+      ].join(' • ');
+
+      const b=document.createElement('div');
+      b.className='card-acoes';
+      b.append(mini('Editar',()=>preencherFormulario(o.id)),mini('Avançar',()=>avancarStatus(o.id)),mini('Concluir',()=>mudarStatus(o.id,'Concluído')));
+
+      a.append(m,d,b);
+      return a;
+    }
+
+    function tag(t,cl){
+      const s=document.createElement('span');
+      s.className='tag '+(cl||'');
+      s.textContent=t;
+      return s;
+    }
+
+    function mini(t,fn){
+      const b=document.createElement('button');
+      b.type='button';
+      b.className='mini';
+      b.textContent=t;
+      b.onclick=fn;
+      return b;
+    }
+
+    function renderTabela(lista){
+      const c=document.getElementById('visaoTabela');
+      c.textContent='';
+      if(!lista.length){
+        c.innerHTML='<div class="vazio">Nenhuma programação encontrada</div>';
+        return;
+      }
+
+      const tb=document.createElement('table');
+      tb.innerHTML='<thead><tr><th>OP</th><th>Produto</th><th>Status</th><th>Material</th><th>Recurso</th><th>Qtd.</th><th>Entrega</th><th></th></tr></thead>';
+      const body=document.createElement('tbody');
+
+      lista.forEach(o=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML='<td>'+esc(o.op)+'<br><small>'+esc(o.cliente)+'</small></td><td>'+esc(o.produto)+'</td><td>'+esc(o.status)+(atrasada(o)?'<br><span class="tag atrasada">Atrasada</span>':'')+'</td><td>'+esc(o.material)+'</td><td>'+esc(o.recurso)+'</td><td>'+Number(o.quantidade||0).toLocaleString('pt-BR')+'</td><td>'+esc(dataBR(o.entrega))+'</td><td></td>';
+        const btn=document.createElement('button');
+        btn.type='button';
+        btn.className='mini';
+        btn.textContent='Editar';
+        btn.onclick=()=>preencherFormulario(o.id);
+        tr.lastElementChild.appendChild(btn);
+        body.appendChild(tr);
+      });
+
+      tb.appendChild(body);
+      c.appendChild(tb);
+    }
+
+    function mudarVisualizacao(t){
+      visualizacao=t;
+      document.getElementById('visaoKanban').classList.toggle('oculto',t!=='kanban');
+      document.getElementById('visaoTabela').classList.toggle('oculto',t!=='tabela');
+      document.getElementById('tabKanban').classList.toggle('ativo',t==='kanban');
+      document.getElementById('tabTabela').classList.toggle('ativo',t==='tabela');
+    }
+
+    function exportarCSV(){
+      const linhas=[['ID','OP','Cliente','Produto','Quantidade','Recurso','Status','Prioridade','Material','Responsável','Início','Entrega','Observações']];
+      filtrados().forEach(o=>linhas.push([o.id,o.op,o.cliente,o.produto,o.quantidade,o.recurso,o.status,o.prioridade,o.material,o.responsavel,o.inicio,o.entrega,o.observacoes]));
+      const csv=linhas.map(l=>l.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(';')).join('\n');
+      const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;
+      a.download='pcp_programacao_controle.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function voltarMenu(){
+      window.location.href='00_Sistema_Manutencao_V25.html';
+    }
+  </script>
+</body>
+</html>
