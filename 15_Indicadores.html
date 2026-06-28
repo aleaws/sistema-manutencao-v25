@@ -119,6 +119,7 @@ font-weight:bold;
 ">
 📊 INDICADORES 
 
+</span>
 </header>
 
 <div class="container">
@@ -258,7 +259,12 @@ let melhoriasDados=
 ler("melhorias_v24");
 
 let prioridadesDados=
+ler("planejamento_prioridades_v24");
+
+if(prioridadesDados.length===0){
+prioridadesDados=
 ler("planejamento_prioridades");
+}
 
 maq.innerText=
 maquinas.length;
@@ -322,7 +328,7 @@ lubvenc.innerText=vencidas;
 
 }
 
-atualizar();
+window.onload=atualizar;
 
 </script>
 

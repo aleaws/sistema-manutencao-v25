@@ -118,6 +118,7 @@ font-weight:bold;
 ">
 📝 PAUTA
 
+</span>
 </header>
 
 <div class="container">
@@ -259,13 +260,13 @@ X
 
 r.querySelectorAll("input,select,textarea").forEach(e=>{
 e.oninput=()=>{
-salvar();
+salvarLocal();
 filtrar();
 };
 });
 
 renum();
-salvar();
+salvarLocal();
 
 }
 
@@ -276,7 +277,7 @@ if(!confirm("Excluir pendência?")) return;
 btn.closest("tr").remove();
 
 renum();
-salvar();
+salvarLocal();
 
 }
 
@@ -306,7 +307,7 @@ obs:r.cells[7].querySelector('textarea').value
 
 }
 
-function salvar(){
+function salvarLocal(){
 
 localStorage.setItem(
 'pauta_v24',
@@ -317,9 +318,16 @@ indicadores();
 
 }
 
-function salvarManual(){
+function salvar(){
 
-salvar();
+salvarLocal();
+return true;
+
+}
+
+async function salvarManual(){
+
+await salvar();
 aviso("Dados salvos com sucesso.");
 
 }

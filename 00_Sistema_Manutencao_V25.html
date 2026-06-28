@@ -1,801 +1,382 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Sistema de Manutenção</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>00_Sistema_Manutencao_V25</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --azul-900: #163b5c;
+      --azul-700: #1f5f93;
+      --azul-500: #4f93c8;
+      --cinza-950: #17202a;
+      --cinza-700: #4b5563;
+      --cinza-200: #e5e7eb;
+      --cinza-100: #f3f4f6;
+      --branco: #fff;
+      --raio: 8px;
+      --sombra: 0 10px 26px rgba(17, 24, 39, .10);
+    }
 
-<style>
+    * { box-sizing: border-box; }
 
-body{
-margin:0;
-font-family:Arial,sans-serif;
-background:#f4f6f8;
-}
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--cinza-950);
+      background: #f5f7fa;
+    }
 
-header{
-background:#5B9BD5;
-color:white;
-padding:10px;
-text-align:center;
-font-size:24px;
-font-weight:bold;
-}
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto minmax(220px, 1fr);
+      gap: 16px;
+      align-items: center;
+      padding: 12px 18px;
+      color: var(--branco);
+      background: var(--azul-700);
+      box-shadow: 0 4px 16px rgba(15, 23, 42, .18);
+    }
 
-.dashboard{
+    input {
+      width: min(360px, 100%);
+      min-height: 40px;
+      padding: 9px 12px;
+      border: 1px solid rgba(255,255,255,.35);
+      border-radius: var(--raio);
+      color: var(--branco);
+      background: rgba(255,255,255,.14);
+      outline: none;
+    }
 
-display:grid;
+    input::placeholder { color: rgba(255,255,255,.86); }
 
-grid-template-columns:
-repeat(auto-fit,minmax(160px,1fr));
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 22px;
+      font-weight: 800;
+      text-align: center;
+    }
 
-gap:6px;
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: var(--raio);
+      color: var(--azul-900);
+      background: var(--branco);
+    }
 
-padding:4px;
+    .user-area {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
 
-}
+    .pill {
+      min-height: 38px;
+      padding: 9px 12px;
+      border-radius: var(--raio);
+      color: var(--azul-900);
+      background: var(--branco);
+      font-weight: 700;
+    }
 
-.ind{
+    button {
+      min-height: 38px;
+      padding: 9px 12px;
+      border: 0;
+      border-radius: var(--raio);
+      cursor: pointer;
+      color: var(--branco);
+      background: var(--azul-900);
+      font-weight: 800;
+    }
 
-background:white;
+    main {
+      width: min(1260px, 100%);
+      margin: 0 auto;
+      padding: 14px;
+    }
 
-padding:8px;
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
 
-border-radius:8px;
+    .indicador {
+      min-height: 84px;
+      padding: 12px;
+      border: 1px solid var(--cinza-200);
+      border-left: 5px solid var(--azul-500);
+      border-radius: var(--raio);
+      background: var(--branco);
+      box-shadow: 0 5px 15px rgba(17, 24, 39, .06);
+    }
 
-box-shadow:0 1px 6px rgba(0,0,0,.15);
+    .indicador strong {
+      display: block;
+      color: var(--azul-900);
+      font-size: 24px;
+    }
 
-text-align:center;
+    .indicador span {
+      display: block;
+      margin-top: 8px;
+      color: var(--cinza-700);
+      font-size: 13px;
+      font-weight: 700;
+    }
 
-}
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+      gap: 12px;
+    }
 
-.ind .num{
+    .card {
+      min-height: 96px;
+      padding: 14px;
+      border: 1px solid var(--cinza-200);
+      border-radius: var(--raio);
+      color: var(--cinza-950);
+      background: var(--branco);
+      box-shadow: 0 5px 18px rgba(17, 24, 39, .07);
+      text-align: left;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
 
-font-size:18px;
+    .card:hover {
+      box-shadow: var(--sombra);
+      transform: translateY(-2px);
+    }
 
-font-weight:bold;
+    .card-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-color:#1f4e79;
+    .icone {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: var(--raio);
+      background: #eaf2f9;
+      font-size: 19px;
+    }
 
-}
+    .titulo {
+      font-size: 14px;
+      line-height: 1.25;
+      font-weight: 800;
+    }
 
-.alerta{
+    .info {
+      margin-top: 12px;
+      color: #6b7280;
+      font-size: 13px;
+      font-weight: 700;
+    }
 
-background:#dc3545;
-color:white;
-padding:10px;
-margin:10px;
-border-radius:8px;
-font-weight:bold;
+    footer {
+      padding: 18px 12px 24px;
+      color: #6b7280;
+      text-align: center;
+      font-size: 12px;
+    }
 
-}
-
-.grid{
-
-display:grid;
-
-grid-template-columns:
-repeat(auto-fit,minmax(220px,1fr));
-
-gap:15px;
-
-padding:15px;
-
-}
-
-.card{
-    background: linear-gradient(145deg, #ffffff, #f3f6fa);
-    border-radius: 16px;
-    padding: 10px;
-    text-align: center;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-    transition: 0.25s;
-    cursor: pointer;
-}
-
-.card:hover{
-    transform: translateY(-4px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
-}
-
-.icone{
-    font-size: 24px;
-    margin-bottom: 4px;
-    padding: 6px;
-    border-radius: 10px;
-    display: inline-block;
-    background: #eef3ff;
-}
-
-.titulo{
-    font-weight: 600;
-    font-size: 13px;
-    margin-top: 2px;
-}
-
-.info{
-    font-size: 11px;
-    color: #666;
-}
-
-iframe{
-
-width:100%;
-
-height:calc(100vh - 60px);
-
-border:none;
-
-display:none;
-
-}
-
-.topo{
-
-padding:10px;
-
-background:#e9ecef;
-
-display:none;
-
-}
-
-button{
-
-padding:10px 15px;
-
-border:none;
-
-border-radius:6px;
-
-cursor:pointer;
-
-background:#1f4e79;
-
-color:white;
-
-font-weight:bold;
-
-}
-
-</style>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+    @media (max-width: 860px) {
+      header { grid-template-columns: 1fr; }
+      .brand { justify-content: flex-start; font-size: 19px; }
+      .user-area { justify-content: flex-start; }
+    }
+  </style>
 </head>
-
 <body>
+  <header>
+    <input id="pesquisa" type="search" placeholder="🔎 Pesquisa global">
+    <div class="brand">
+      <span class="brand-mark">🏭</span>
+      <span>Sistema de Manutenção V25</span>
+    </div>
+    <div class="user-area">
+      <span id="usuarioAtual" class="pill">👤 Usuário</span>
+      <button type="button" onclick="sair()">Sair</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="dashboard">
+      <div class="indicador"><strong id="iMaquinas">0</strong><span>Máquinas</span></div>
+      <div class="indicador"><strong id="iDispositivos">0</strong><span>Dispositivos</span></div>
+      <div class="indicador"><strong id="iOSAbertas">0</strong><span>OS abertas</span></div>
+      <div class="indicador"><strong id="iOSCriticas">0</strong><span>OS críticas</span></div>
+      <div class="indicador"><strong id="iLiberacoes">0</strong><span>Inspeções / Liberações</span></div>
+      <div class="indicador"><strong id="iNC">0</strong><span>NC abertas</span></div>
+      <div class="indicador"><strong id="iMelhorias">0</strong><span>Melhorias implantadas</span></div>
+    </section>
+
+    <section id="menu" class="grid"></section>
+  </main>
+
+  <footer>
+    Sistema de Manutenção<br>
+    Desenvolvido por Alexandre Willian
+  </footer>
+
+  
+  <script>
+    const SUPABASE_URL='https://wzcrqzbwcsmfwenzcxkf.supabase.co';
+    const SUPABASE_KEY='sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu';
+    const bancoSupabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+    const MODULOS = [
+      { id: 'cardManutencao', icone: '🔧', titulo: 'Manutenção das Máquinas', info: 'OS de máquinas', arquivo: '03_Manutencao.html' },
+      { id: 'cardOSDispositivos', icone: '🛠', titulo: 'Manutenção dos Dispositivos', info: 'OS de dispositivos', arquivo: '07_OS_Dispositivos.html' },
+      { id: 'cardMaquinas', icone: '🏭', titulo: 'Cadastro de Máquinas', info: 'Máquinas cadastradas', arquivo: '04_Maquinas.html' },
+      { id: 'cardDispositivos', icone: '⚙️', titulo: 'Cadastro de Dispositivos', info: 'Dispositivos cadastrados', arquivo: '05_Dispositivos.html' },
+      { id: 'cardOrdemServico', icone: '📋', titulo: 'Ordem de Serviço Geral', info: 'Cadastrar • Editar • Imprimir', arquivo: '23_Ordem_Servico_Geral.html' },
+      { id: 'cardGestao', icone: '📈', titulo: 'Gestão da Manutenção', info: 'Indicadores • Rankings • OS', arquivo: '25_Gestao_Manutencao.html' },
+      { id: 'cardLiberacoes', icone: '🧮', titulo: 'Inspeção e Liberação', info: 'Cadastro único', arquivo: '10_Liberacoes_Mobile.html' },
+      { id: 'cardHistoricoOS', icone: '📜', titulo: 'Histórico das OS', info: 'Linha do tempo • Excel', arquivo: '26_Historico_Ordens_Servico.html' },
+      { id: 'cardHistoricoLib', icone: '📋', titulo: 'Histórico de Liberações', info: 'Pesquisa • Detalhes • Excel', arquivo: '11_Historico_Liberacoes.html' },
+      { id: 'cardNC', icone: '⚠️', titulo: 'Não Conformidades', info: 'Registro e tratamento', arquivo: '09_Nao_Conformidades.html' },
+      { id: 'cardMelhorias', icone: '💡', titulo: 'Melhorias', info: 'Ideias e implantações', arquivo: '06_Melhorias.html' },
+      { id: 'cardLubrificacao', icone: '🛢', titulo: 'Lubrificação', info: 'Planos e vencimentos', arquivo: '19_Lubrificacao.html' },
+      { id: 'cardFerramentas', icone: '🧰', titulo: 'Ferramentas e Materiais', info: 'Controle de itens', arquivo: '22_Ferramentas_Materiais.html' },
+      { id: 'cardIndicadores', icone: '📊', titulo: 'Indicadores', info: 'Painel geral', arquivo: '15_Indicadores.html' },
+      { id: 'cardPauta', icone: '📝', titulo: 'Pauta', info: 'Pendências e reuniões', arquivo: '08_Pauta.html' },
+      { id: 'cardEngenharia', icone: '📐', titulo: 'Engenharia', info: 'Projetos • Melhorias • Ações', arquivo: '26_Engenharia_Projetos_Melhorias.html' },
+      { id: 'cardPCP', icone: '📅', titulo: 'PCP', info: 'Programação • Materiais • Entregas', arquivo: '27_PCP_Programacao_Controle.html' },
+      { id: 'cardBackup', icone: '💾', titulo: 'Backup Geral', info: 'Exportações e segurança', arquivo: '99_Backup_Geral.html' }
+    ];
+
+    const PERMISSOES = {
+      PCP: ['cardMaquinas', 'cardDispositivos', 'cardManutencao', 'cardOSDispositivos', 'cardLiberacoes', 'cardOrdemServico', 'cardGestao', 'cardHistoricoOS', 'cardPCP'],
+      Engenharia: ['cardMaquinas', 'cardDispositivos', 'cardMelhorias', 'cardOrdemServico', 'cardGestao', 'cardHistoricoOS', 'cardHistoricoLib', 'cardEngenharia'],
+      Diretoria: ['cardGestao', 'cardHistoricoOS', 'cardHistoricoLib', 'cardIndicadores', 'cardOrdemServico'],
+      Produção: ['cardOrdemServico', 'cardLiberacoes', 'cardHistoricoOS']
+    };
+
+    const usuarioLogado = localStorage.getItem('usuarioLogado') || 'Alexandre';
+
+    document.addEventListener('DOMContentLoaded', function () {
+      document.getElementById('usuarioAtual').textContent = '👤 ' + usuarioLogado;
+      renderizarMenu();
+      atualizarDashboard();
+      document.getElementById('pesquisa').addEventListener('input', renderizarMenu);
+    });
+
+    function renderizarMenu() {
+      const menu = document.getElementById('menu');
+      const pesquisa = normalizar(document.getElementById('pesquisa').value);
+      const permitidos = PERMISSOES[usuarioLogado];
+      menu.textContent = '';
+
+      MODULOS.filter(function (modulo) {
+        const autorizado = !permitidos || permitidos.includes(modulo.id);
+        const encontrado = !pesquisa || normalizar(modulo.titulo + ' ' + modulo.info).includes(pesquisa);
+        return autorizado && encontrado;
+      }).forEach(function (modulo) {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'card';
+        card.id = modulo.id;
+        card.onclick = function () { window.location.href = modulo.arquivo; };
+        card.innerHTML =
+          '<div class="card-top"><div class="icone">' + modulo.icone + '</div><div class="titulo">' + modulo.titulo + '</div></div>' +
+          '<div class="info" id="info_' + modulo.id + '">' + modulo.info + '</div>';
+        menu.appendChild(card);
+      });
+    }
+
+    async function buscar(tabela) {
+      try {
+        const { data, error } = await bancoSupabase.from(tabela).select('*');
+        if (error) {
+          console.warn(tabela, error.message);
+          return [];
+        }
+        return data || [];
+      } catch (e) {
+        console.warn(tabela, e);
+        return [];
+      }
+    }
+
+    function isAberta(status) {
+      return status !== 'Concluída' && status !== 'Concluida' && status !== 'Cancelada';
+    }
+
+    function resultadoLiberacaoNaoOk(r) {
+      const texto = normalizar([r.resultado, r.conforme, r.op_correta, r.desenho_correto, r.obs].join(' '));
+      return texto.includes('nao') || texto.includes('não') || texto.includes('mau');
+    }
+
+    async function atualizarDashboard() {
+      const maquinas = await buscar('maquinas');
+      const dispositivos = await buscar('dispositivos');
+      const ordens = await buscar('ordens_servico');
+      const manutencao = await buscar('manutencao');
+      const liberacoes = await buscar('liberacoes');
+      const nc = await buscar('nao_conformidades');
+      const melhorias = await buscar('melhorias');
+
+      const osAbertas = ordens.filter(o => isAberta(o.status)).length;
+      const osCriticas = ordens.filter(o => o.prioridade === 'Crítica' && isAberta(o.status)).length;
+      const ncAbertas = nc.filter(o => isAberta(o.status)).length;
+      const melhoriasImplantadas = melhorias.filter(o => normalizar(o.status).includes('implant')).length;
+
+      document.getElementById('iMaquinas').textContent = maquinas.length;
+      document.getElementById('iDispositivos').textContent = dispositivos.length;
+      document.getElementById('iOSAbertas').textContent = osAbertas;
+      document.getElementById('iOSCriticas').textContent = osCriticas;
+      document.getElementById('iLiberacoes').textContent = liberacoes.length;
+      document.getElementById('iNC').textContent = ncAbertas;
+      document.getElementById('iMelhorias').textContent = melhoriasImplantadas;
+
+      const setInfo = (id, texto) => {
+        const e = document.getElementById('info_' + id);
+        if (e) e.textContent = texto;
+      };
+
+      setInfo('cardMaquinas', maquinas.length + ' cadastradas');
+      setInfo('cardDispositivos', dispositivos.length + ' cadastrados');
+      setInfo('cardOrdemServico', osAbertas + ' abertas • ' + osCriticas + ' críticas');
+      setInfo('cardGestao', 'Total de OS: ' + ordens.length);
+      setInfo('cardLiberacoes', liberacoes.length + ' registros');
+      setInfo('cardHistoricoOS', ordens.length + ' registros');
+      setInfo('cardHistoricoLib', liberacoes.length + ' registros');
+      setInfo('cardManutencao', manutencao.filter(x => x.tipo === 'Máquina' && isAberta(x.status)).length + ' abertas');
+      setInfo('cardOSDispositivos', manutencao.filter(x => x.tipo === 'Dispositivo' && isAberta(x.status)).length + ' abertas');
+      setInfo('cardNC', ncAbertas + ' abertas');
+      setInfo('cardMelhorias', melhoriasImplantadas + ' implantadas');
+    }
+
+    function normalizar(texto) {
+      return String(texto || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    }
+
+    function sair() {
+      localStorage.removeItem('usuarioLogado');
+      window.location.href = 'index.html';
+    }
+  </script>
 
-<div
-id="usuarioAtual"
-style="
-position:fixed;
-top:40px;
-right:1050px;
-z-index:9999;
-font-weight:bold;
-color:#1f4e79;
-background:white;
-padding:8px 12px;
-border-radius:8px;
-box-shadow:0 2px 8px rgba(0,0,0,.15);
-"
->
-👤 Usuário
-</div>
-
-
-<button
-onclick="sair()"
-style="
-position:fixed;
-top:40px;
-right:980px;
-z-index:9999;
-background:linear-gradient(
-135deg,
-#1f4e79,
-#0d3b8e
-);
-color:white;
-border:none;
-box-shadow:0 4px 12px rgba(0,0,0,.25);
-
-transition:.3s;
-padding:10px 15px;
-border-radius:80px;
-cursor:pointer;
-font-weight:bold;
-">
-Sair
-</button>
-
-<header style="
-display:flex;
-align-items:center;
-justify-content:space-between;
-padding:12px 20px;
-">
-
-<div>
-<input
-id="pesquisaGlobal"
-placeholder="🔎 Pesquisa Global"
-style="
-width:260px;
-padding:8px;
-border-radius:6px;
-border:none;
-font-size:14px;">
-</div>
-
-<div style="
-font-size:24px;
-font-weight:bold;
-">
-🏭 SISTEMA DE MANUTENÇÃO
-</div>
-
-<div style="
-text-align:right;
-padding-right:60px;
-">
-<img src="Bonier_logo2.png" style="height:100px;">
-</div>
-
-</header>
-
-<div id="menu">
-
-<div id="alertas"></div>
-
-<div class="card">
-
-<div id="resultadoPesquisa"
-style="margin-top:10px"></div>
-
-</div>
-<div class="dashboard" style="margin-top:0">
-
-<div class="ind">
-<div class="num" id="maq">0</div>
-Máquinas
-</div>
-
-<div class="ind">
-<div class="num" id="disp">0</div>
-Dispositivos
-</div>
-
-<div class="ind">
-<div class="num" id="osabertas">0</div>
-OS Abertas
-</div>
-
-<div class="ind">
-<div class="num" id="osconcluidas">0</div>
-OS Concluídas
-</div>
-
-<div class="ind">
-<div class="num" id="ncabertas">0</div>
-NC Abertas
-</div>
-
-<div class="ind">
-<div class="num" id="lubvenc">0</div>
-Lubrificações Vencidas
-</div>
-
-<div class="ind">
-<div class="num" id="melh">0</div>
-Melhorias Implantadas
-</div>
-
-<div class="ind">
-<div class="num" id="osdisp">0</div>
-Manutenção de Dispositivos
-</div>
-
-</div>
-
-
-
-<div class="grid">
-
-<div
-id="cardManutencao"
-class="card"
-onclick="abrir('03_Manutencao.html')">
-<div class="icone">🔧</div>
-<div class="titulo">Manutenção das Máquinas</div>
-<div class="info" id="infoOS"></div>
-</div>
-
-<div class="card" onclick="abrir('07_OS_Dispositivos.html')">
-<div class="icone">🛠</div>
-<div class="titulo">Manutenção dos Dispositivos</div>
-<div class="info" id="infoOSDisp"></div>
-</div>
-
-<div
-id="cardMaquinas"
-class="card"
-onclick="abrir('04_Maquinas.html')">
-<div class="icone">🏭</div>
-<div class="titulo">Cadastro de Máquinas</div>
-<div class="info" id="infoMaq"></div>
-</div>
-
-<div
-id="cardDispositivos"
-class="card"
-onclick="abrir('05_Dispositivos.html')">
-<div class="icone">🛠</div>
-<div class="titulo">Cadastro de Dispositivos</div>
-<div class="info" id="infoDisp"></div>
-</div>
-
-<div class="card" onclick="abrir('19_Lubrificacao.html')">
-<div class="icone">🛢</div>
-<div class="titulo">Lubrificação</div>
-<div class="info" id="infoLub"></div>
-</div>
-
-<div class="card" onclick="abrir('20_Diario_Simples.html')">
-<div class="icone">🏭</div>
-<div class="titulo">Diário de Manutenção / Produção</div>
-<div class="info" id="infoSimples"></div>
-</div>
-
-<div class="card" onclick="abrir('09_Nao_Conformidades.html')">
-<div class="icone">⚠️</div>
-<div class="titulo">Não Conformidades</div>
-<div class="info" id="infoNC"></div>
-</div>
-
-<div
-id="cardMelhorias"
-class="card"
-onclick="abrir('06_Melhorias.html')"
->
-<div class="icone">💡</div>
-<div class="titulo">Melhorias</div>
-<div class="info" id="infoMel"></div>
-</div>
-
-<div class="card" onclick="abrir('08_Pauta.html')">
-<div class="icone">📝</div>
-<div class="titulo">Pauta</div>
-<div class="info" id="infoPauta"></div>
-</div>
-
-<div class="card" onclick="abrir('15_Indicadores.html')">
-<div class="icone">📊</div>
-<div class="titulo">Indicadores</div>
-</div>
-
-
-
-<div
-id="cardLiberacoes"
-class="card"
-onclick="abrir('10_Liberacoes_Mobile.html')"
->
-<div class="icone">📱</div>
-<div class="titulo">Inspeção e Liberação</div>
-<div class="info" id="infoLiberacoes"></div>
-</div>
-
-<div
-id="cardBackup"
-class="card"
-onclick="abrir('99_Backup_Geral.html')">
-<div class="icone">💾</div>
-<div class="titulo">Backup Geral</div>
-</div>
-
-<div class="card" onclick="abrir('22_Ferramentas_Materiais.html')">
-<div class="icone">🧰</div>
-<div class="titulo">Ferramentas e Materiais</div>
-<div class="info" id="infoFerr"></div>
-</div>
-
-
-
-<div
-id="cardOrdemServico"
-class="card"
-onclick="abrir('23_Ordem_Servico_Geral.html')">
-<div class="icone">📋</div>
-<div class="titulo">Ordem de Serviço Geral</div>
-<div class="info" id="infoOrdemServico">Cadastrar • Editar • Histórico</div>
-</div>
-
-<div class="card" onclick="abrir('25_Gestao_Manutencao.html')">
-<div class="icone">📈</div>
-<div class="titulo">Gestão da Manutenção</div>
-<div class="info">
-OS • Rankings • Indicadores
-</div>
-</div>
-
-</div>
-
-<div id="barra" class="topo">
-<button onclick="voltar()">
-⬅ Voltar ao Menu
-</button>
-
-<button onclick="atualizar()">
-🔄 Atualizar
-</button>
-
-</div>
-
-<iframe id="frame"></iframe>
-
-<script>
-
-const SUPABASE_URL =
-'https://wzcrqzbwcsmfwenzcxkf.supabase.co';
-
-const SUPABASE_KEY =
-'sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu';
-
-const bancoSupabase =
-window.supabase.createClient(
-SUPABASE_URL,
-SUPABASE_KEY
-);
-
-let usuarioLogado =
-localStorage.getItem("usuarioLogado");
-
-if(!usuarioLogado){
-alert("Faça login");
-window.location.href = "index.html";
-}
-
-document.addEventListener("DOMContentLoaded", function(){
-
-const usuarioBox = document.getElementById("usuarioAtual");
-if(usuarioBox){
-usuarioBox.innerHTML = "👤 " + usuarioLogado;
-}
-
-aplicarPermissoes();
-atualizar();
-
-const campoPesquisa = document.getElementById("pesquisaGlobal");
-if(campoPesquisa){
-campoPesquisa.addEventListener("input", pesquisarGlobal);
-}
-
-});
-
-function aplicarPermissoes(){
-
-if(usuarioLogado === "PCP"){
-
-document.querySelectorAll(".card").forEach(card => {
-card.style.display = "none";
-});
-
-mostrarCard("cardMaquinas");
-mostrarCard("cardDispositivos");
-mostrarCard("cardManutencao");
-mostrarCard("cardLiberacoes");
-mostrarCard("cardOrdemServico");
-esconderCard("cardBackup");
-
-}
-
-if(usuarioLogado === "Engenharia"){
-
-document.querySelectorAll(".card").forEach(card => {
-card.style.display = "none";
-});
-
-mostrarCard("cardMaquinas");
-mostrarCard("cardDispositivos");
-mostrarCard("cardMelhorias");
-mostrarCard("cardOrdemServico");
-esconderCard("cardBackup");
-
-}
-
-}
-
-function mostrarCard(id){
-const el = document.getElementById(id);
-if(el) el.style.display = "block";
-}
-
-function esconderCard(id){
-const el = document.getElementById(id);
-if(el) el.style.display = "none";
-}
-
-function ler(chave){
-try{
-return JSON.parse(localStorage.getItem(chave) || '[]');
-}catch{
-return [];
-}
-}
-
-async function buscarTabela(tabela){
-try{
-const { data, error } = await bancoSupabase
-.from(tabela)
-.select('*');
-
-if(error){
-console.warn("Erro Supabase em " + tabela + ":", error.message);
-return [];
-}
-
-return data || [];
-}catch(erro){
-console.warn("Falha ao buscar " + tabela + ":", erro);
-return [];
-}
-}
-
-function texto(id, valor){
-const el = document.getElementById(id);
-if(el) el.innerText = valor;
-}
-
-function html(id, valor){
-const el = document.getElementById(id);
-if(el) el.innerHTML = valor;
-}
-
-async function atualizar(){
-
-const maqs = await buscarTabela('maquinas');
-const disps = await buscarTabela('dispositivos');
-const osGeral = await buscarTabela('ordens_servico');
-const osManutencao = await buscarTabela('manutencao');
-const os = osGeral.length ? osGeral : osManutencao;
-const simples = await buscarTabela('diario_simples');
-
-let nc = ler('nao_conformidades_v24');
-let lub = ler('lubrificacao_v24');
-let mel = ler('melhorias_v24');
-let ferramentas = ler('ferramentas_materiais_v24');
-let osDispositivos = ler('os_dispositivos_v24');
-const liberacoes = await buscarTabela('liberacoes');
-let pauta = ler('pauta_v24');
-
-texto('maq', maqs.length);
-texto('disp', disps.length);
-
-let abertas = os.filter(x =>
-x.status === 'Aberta' ||
-x.status === 'Em Andamento'
-).length;
-
-texto('osabertas', abertas);
-
-let concluidas = os.filter(x =>
-x.status === 'Concluída'
-).length;
-
-texto('osconcluidas', concluidas);
-
-let ncAbertas = nc.filter(x =>
-x.status === 'Aberta' ||
-x.status === 'Em Andamento'
-).length;
-
-texto('ncabertas', ncAbertas);
-
-let implantadas = mel.filter(x =>
-x.status === 'Implantada'
-).length;
-
-texto('melh', implantadas);
-texto('osdisp', osDispositivos.length);
-
-let vencidas = 0;
-let hoje = new Date();
-hoje.setHours(0,0,0,0);
-
-lub.forEach(x => {
-if(!x.proxima) return;
-let d = new Date(x.proxima);
-d.setHours(0,0,0,0);
-if(d < hoje) vencidas++;
-});
-
-texto('lubvenc', vencidas);
-
-html('infoOS', abertas + " abertas");
-html('infoMaq', maqs.length + " cadastradas");
-html('infoDisp', disps.length + " cadastrados");
-html('infoNC', ncAbertas + " abertas");
-html('infoLub', vencidas + " vencidas");
-html('infoMel', implantadas + " implantadas");
-html('infoOSDisp', osDispositivos.length + " abertas");
-html('infoFerr', ferramentas.length + " itens");
-html('infoSimples', simples.length + " registros");
-html('infoPauta', pauta.length + " pendências");
-html('infoLiberacoes', liberacoes.length + " registros");
-
-let alertas = [];
-
-if(abertas > 0) alertas.push("🔧 " + abertas + " OS abertas");
-if(ncAbertas > 0) alertas.push("⚠ " + ncAbertas + " NC abertas");
-if(vencidas > 0) alertas.push("🛢 " + vencidas + " lubrificações vencidas");
-
-let alertasDiv = document.getElementById('alertas');
-
-if(alertasDiv){
-if(alertas.length){
-alertasDiv.innerHTML = '<div class="alerta">' + alertas.join(' | ') + '</div>';
-}else{
-alertasDiv.innerHTML = '';
-}
-}
-
-}
-
-function abrir(arq){
-window.open(arq, '_self');
-}
-
-function voltar(){
-
-const frame = document.getElementById('frame');
-const barra = document.getElementById('barra');
-const menu = document.getElementById('menu');
-
-if(frame){
-frame.src = '';
-frame.style.display = 'none';
-}
-
-if(barra) barra.style.display = 'none';
-if(menu) menu.style.display = 'block';
-
-atualizar();
-
-}
-
-async function pesquisarGlobal(){
-
-let campo = document.getElementById("pesquisaGlobal");
-let resultado = document.getElementById("resultadoPesquisa");
-
-if(!campo || !resultado) return;
-
-let txt = campo.value.toLowerCase().trim();
-let htmlBusca = "";
-
-if(!txt){
-resultado.innerHTML = "";
-return;
-}
-
-let maquinas = ler("cadastro_maquinas_v24");
-let dispositivos = ler("cadastro_dispositivos_v24");
-let manutencao = ler("manutencao_v24");
-let ferramentas = ler("ferramentas_materiais_v24");
-
-htmlBusca += "<h4>Máquinas</h4>";
-
-maquinas.forEach(m => {
-if(
-(m.codigo || "").toLowerCase().includes(txt) ||
-(m.maquina || "").toLowerCase().includes(txt)
-){
-htmlBusca += `
-<div style="cursor:pointer;padding:5px;border-bottom:1px solid #ddd" onclick="abrir('04_Maquinas.html')">
-🏭 ${m.codigo || ''} - ${m.maquina || ''}
-</div>`;
-}
-});
-
-htmlBusca += "<h4>Dispositivos</h4>";
-
-dispositivos.forEach(d => {
-if(
-(d.codigo || "").toLowerCase().includes(txt) ||
-(d.dispositivo || "").toLowerCase().includes(txt)
-){
-htmlBusca += `
-<div style="cursor:pointer;padding:5px;border-bottom:1px solid #ddd" onclick="abrir('05_Dispositivos.html')">
-🛠 ${d.codigo || ''} - ${d.dispositivo || ''}
-</div>`;
-}
-});
-
-htmlBusca += "<h4>🔧 Manutenção</h4>";
-
-manutencao.forEach(m => {
-if(
-(m.os || "").toLowerCase().includes(txt) ||
-(m.maquina || "").toLowerCase().includes(txt) ||
-(m.dispositivo || "").toLowerCase().includes(txt)
-){
-htmlBusca += `
-<div style="cursor:pointer;padding:5px;border-bottom:1px solid #ddd" onclick="abrir('03_Manutencao.html')">
-🔧 OS ${m.os || ''} - ${m.maquina || ''}
-</div>`;
-}
-});
-
-
-htmlBusca += "<h4>📱 Inspeção e Liberação</h4>";
-
-try{
-const { data: liberacoesBusca } = await bancoSupabase
-.from('liberacoes')
-.select('*')
-.or(
-'op.ilike.%' + txt + '%,' +
-'numero.ilike.%' + txt + '%,' +
-'maquina.ilike.%' + txt + '%,' +
-'dispositivo.ilike.%' + txt + '%,' +
-'operador.ilike.%' + txt + '%,' +
-'responsavel.ilike.%' + txt + '%,' +
-'conforme.ilike.%' + txt + '%'
-)
-.order('data',{ascending:false})
-.limit(10);
-
-(liberacoesBusca || []).forEach(l => {
-htmlBusca += `
-<div style="cursor:pointer;padding:5px;border-bottom:1px solid #ddd" onclick="abrir('11_Historico_Liberacoes.html')">
-📱 ${l.numero || ''} | OP ${l.op || ''} - ${l.maquina || ''}
-</div>`;
-});
-}catch(e){
-console.warn("Erro pesquisa liberações:", e);
-}
-
-
-htmlBusca += "<h4>🧰 Ferramentas e Materiais</h4>";
-
-ferramentas.forEach(f => {
-if(
-(f.codigo || "").toLowerCase().includes(txt) ||
-(f.descricao || "").toLowerCase().includes(txt) ||
-(f.categoria || "").toLowerCase().includes(txt) ||
-(f.fornecedor || "").toLowerCase().includes(txt)
-){
-htmlBusca += `
-<div style="cursor:pointer;padding:5px;border-bottom:1px solid #ddd" onclick="abrir('22_Ferramentas_Materiais.html')">
-🧰 ${f.codigo || ''} - ${f.descricao || ''}
-</div>`;
-}
-});
-
-resultado.innerHTML = htmlBusca;
-
-}
-
-function sair(){
-localStorage.removeItem("usuarioLogado");
-window.location.href = "index.html";
-}
-
-</script>
-<div style="
-text-align:center;
-padding:15px;
-font-size:12px;
-color:#777;
-margin-top:20px;
-">
-
-Sistema de Manutenção<br>
-
-Desenvolvido por Alexandre Willian
-
-</div>
 </body>
 </html>

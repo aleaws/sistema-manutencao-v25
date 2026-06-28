@@ -112,11 +112,8 @@ font-size:30px;
 font-weight:bold;
 ">
 🛠 CADASTRO DE DISPOSITIVOS
+</span>
 
-
-</header>
-
-</header>
 </header>
 
 <div class="container">
@@ -220,6 +217,56 @@ const bancoSupabase = window.supabase.createClient(
     SUPABASE_KEY
 );
 
+if(typeof registrarLog !== "function"){
+
+function registrarLog(acao){
+
+let logs =
+JSON.parse(
+localStorage.getItem("logs_auditoria") || "[]"
+);
+
+logs.unshift({
+data:new Date().toLocaleString(),
+usuario:localStorage.getItem("usuarioLogado") || "Sistema",
+acao:acao
+});
+
+localStorage.setItem(
+"logs_auditoria",
+JSON.stringify(logs)
+);
+
+}
+
+}
+
+if(typeof somenteLeitura !== "function"){
+
+function somenteLeitura(){
+
+let usuario =
+localStorage.getItem("usuarioLogado");
+
+return (
+usuario === "PCP" ||
+usuario === "Engenharia"
+);
+
+}
+
+}
+
+if(typeof verificarPermissao !== "function"){
+
+function verificarPermissao(){
+
+return true;
+
+}
+
+}
+
 verificarPermissao(
 "05_Dispositivos.html"
 );
@@ -321,7 +368,10 @@ QR
 <button
 class="b5"
 onclick="excluir(this)"
-style="width:30px;"
+style="
+width:30px;
+display:${usuarioLogado==="Alexandre" ? "inline-block" : "none"};
+"
 >
 X
 </button>
@@ -365,7 +415,7 @@ return;
 
 }
 
-salvar();
+salvarLocal();
 filtrar();
 
 };
@@ -446,7 +496,7 @@ registrarLog(
 btn.closest("tr").remove();
 
 renum();
-salvar();
+salvarLocal();
 
 }
 
@@ -474,14 +524,22 @@ obs:r.cells[5].querySelector('input').value
 
 }
 
+function salvarLocal(){
+
+localStorage.setItem(
+'cadastro_dispositivos_v24',
+JSON.stringify(dados())
+);
+
+indicadores();
+
+}
+
 async function salvar(){
 
 const lista = dados();
 
-localStorage.setItem(
-'cadastro_dispositivos_v24',
-JSON.stringify(lista)
-);
+salvarLocal();
 
 const { error: erroDelete } =
 await bancoSupabase
@@ -497,9 +555,11 @@ alert(
 'Erro ao sincronizar'
 );
 
-return;
+return false;
 
 }
+
+if(lista.length > 0){
 
 const { error } =
 await bancoSupabase
@@ -514,19 +574,28 @@ alert(
 'Erro ao sincronizar'
 );
 
-return;
+return false;
+
+}
 
 }
 
 indicadores();
 
+return true;
+
 }
 
-function salvarManual(){
+async function salvarManual(){
 
-salvar();
+const ok =
+await salvar();
+
+if(ok){
 
 aviso("Dados salvos com sucesso.");
+
+}
 
 }
 

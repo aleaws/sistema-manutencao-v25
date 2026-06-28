@@ -85,12 +85,14 @@ display:none;
 type="text"
 id="usuario"
 placeholder="Usuário"
+autocomplete="username"
 >
 
 <input
 type="password"
 id="senha"
 placeholder="Senha"
+autocomplete="current-password"
 >
 
 <div style="
@@ -111,12 +113,13 @@ margin-right:5px;
 Mostrar senha
 
 </div>
+
 <button onclick="entrar()">
 Entrar
 </button>
 
 <div id="erro">
-Senha incorreta
+Usuário ou senha incorretos
 </div>
 
 <div style="
@@ -125,7 +128,7 @@ font-size:12px;
 color:#666;
 ">
 
-Versão V25
+Sistema Oficial
 
 <br>
 
@@ -183,13 +186,19 @@ JSON.stringify(logs)
 
 function mostrarSenha(){
 
-if(verSenha.checked){
+let campoSenha =
+document.getElementById("senha");
 
-senha.type = "text";
+let check =
+document.getElementById("verSenha");
+
+if(check.checked){
+
+campoSenha.type = "text";
 
 }else{
 
-senha.type = "password";
+campoSenha.type = "password";
 
 }
 
@@ -197,21 +206,37 @@ senha.type = "password";
 
 async function entrar(){
 
+let campoUsuario =
+document.getElementById("usuario");
+
+let campoSenha =
+document.getElementById("senha");
+
+let campoErro =
+document.getElementById("erro");
+
 let user =
-usuario.value.toLowerCase();
+campoUsuario.value
+.toLowerCase()
+.trim();
 
 let pass =
-senha.value;
+campoSenha.value;
 
-console.log("USER:", user);
-console.log("PASS:", pass);
+campoErro.style.display =
+"none";
 
-const teste =
-await bancoSupabase
-.from('usuarios')
-.select('*');
+if(!user || !pass){
 
-console.log(teste);
+campoErro.innerText =
+"Preencha usuário e senha";
+
+campoErro.style.display =
+"block";
+
+return;
+
+}
 
 const { data, error } =
 await bancoSupabase
@@ -223,9 +248,11 @@ await bancoSupabase
 
 if(error){
 
-console.error(error);
+campoErro.innerText =
+"Erro ao consultar usuário";
 
-erro.style.display="block";
+campoErro.style.display =
+"block";
 
 return;
 
@@ -247,21 +274,32 @@ registrarLog(
 "Login realizado"
 );
 
-window.location.href=
+/*
+ATENÇÃO:
+Por enquanto mantemos este nome porque o arquivo principal
+funcional está salvo como 00_Sistema_Manutencao_V25.html.
+Depois que todos os módulos forem padronizados,
+trocaremos tudo para 00_Sistema_Manutencao.html.
+*/
+
+window.location.href =
 "00_Sistema_Manutencao_V25.html";
 
 return;
 
 }
 
+campoErro.innerText =
+"Usuário ou senha incorretos";
 
-
-
-erro.style.display="block";
+campoErro.style.display =
+"block";
 
 }
 
-senha.addEventListener("keypress",function(e){
+document
+.getElementById("senha")
+.addEventListener("keypress",function(e){
 
 if(e.key==="Enter"){
 

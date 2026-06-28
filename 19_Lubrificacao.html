@@ -122,6 +122,8 @@ font-weight:bold;
 ">
 🛢 PLANO DE LUBRIFICAÇÃO
 
+</span>
+
 </header>
 
 <div class="container">
@@ -194,6 +196,8 @@ font-weight:bold;
 
 <script>
 
+if(typeof registrarLog!=="function"){function registrarLog(){}}
+if(typeof verificarPermissao!=="function"){function verificarPermissao(){return true;}}
 verificarPermissao(
 "19_Lubrificacao.html"
 );
@@ -290,14 +294,14 @@ ${comboMaquinas(d.maquina)}
 r.querySelectorAll("input,select").forEach(e=>{
 
 e.oninput=()=>{
-salvar();
+salvarLocal();
 filtrar();
 };
 
 });
 
 renum();
-salvar();
+salvarLocal();
 
 }
 
@@ -308,7 +312,7 @@ if(!confirm("Excluir registro?")) return;
 btn.closest("tr").remove();
 
 renum();
-salvar();
+salvarLocal();
 
 }
 
@@ -332,7 +336,7 @@ obs:r.cells[5].querySelector('input').value
 }));
 
 }
-function salvar(){
+function salvarLocal(){
 
 localStorage.setItem(
 'lubrificacao_v24',
@@ -340,6 +344,13 @@ JSON.stringify(dados())
 );
 
 indicadores();
+
+}
+
+function salvar(){
+
+salvarLocal();
+return true;
 
 }
 

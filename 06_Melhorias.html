@@ -120,6 +120,7 @@ font-weight:bold;
 ">
 💡 MELHORIAS
 
+</span>
 </header>
 
 <div class="container">
@@ -337,13 +338,13 @@ X
 
 r.querySelectorAll("input,select,textarea").forEach(e=>{
 e.oninput=()=>{
-salvar();
+salvarLocal();
 filtrar();
 };
 });
 
 renum();
-salvar();
+salvarLocal();
 
 }
 
@@ -383,7 +384,7 @@ registrarLog(
 );
 
 renum();
-salvar();
+salvarLocal();
 
 }
 
@@ -414,7 +415,7 @@ obs:r.cells[8].querySelector('textarea').value
 
 }
 
-function salvar(){
+function salvarLocal(){
 
 localStorage.setItem(
 'melhorias_v24',
@@ -425,9 +426,16 @@ indicadores();
 
 }
 
+function salvar(){
+
+salvarLocal();
+return true;
+
+}
+
 async function salvarManual(){
 
-salvar();
+await salvar();
 
 await bancoSupabase
 .from('melhorias')
@@ -442,18 +450,12 @@ await bancoSupabase
 if(error){
 
 console.error(error);
-
-aviso(
-"Erro ao salvar no Supabase."
-);
-
+aviso("Erro ao salvar no Supabase.");
 return;
 
 }
 
-aviso(
-"Dados salvos com sucesso."
-);
+aviso("Dados salvos com sucesso.");
 
 }
 async function carregar(){

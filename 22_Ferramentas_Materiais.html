@@ -119,6 +119,7 @@ font-weight:bold;
 ">
 🧰 FERRAMENTAS E MATERIAIS
 
+</span>
 </header>
 
 <div class="container">
@@ -277,13 +278,13 @@ X
 
 r.querySelectorAll("input,select,textarea").forEach(e=>{
 e.oninput=()=>{
-salvar();
+salvarLocal();
 filtrar();
 };
 });
 
 renum();
-salvar();
+salvarLocal();
 
 }
 
@@ -294,7 +295,7 @@ if(!confirm("Excluir NC?")) return;
 btn.closest("tr").remove();
 
 renum();
-salvar();
+salvarLocal();
 
 }
 
@@ -335,7 +336,7 @@ obs:r.cells[10].querySelector('textarea').value
 }));
 
 }
-function salvar(){
+function salvarLocal(){
 
 localStorage.setItem(
 'ferramentas_materiais_v24',
@@ -345,9 +346,16 @@ JSON.stringify(dados())
 indicadores();
 
 }
-function salvarManual(){
 
-salvar();
+function salvar(){
+
+salvarLocal();
+return true;
+
+}
+async function salvarManual(){
+
+await salvar();
 aviso("Dados salvos com sucesso.");
 
 }
@@ -436,7 +444,7 @@ r.innerText.toLowerCase().includes(txt);
 if(fStatus.value){
 
 ok = ok &&
-r.cells[10]
+r.cells[4]
 .querySelector('select')
 .value===fStatus.value;
 
@@ -487,7 +495,7 @@ estoqueBaixo,
 d.localizacao,
 d.fornecedor,
 d.status,
-d.observacao
+d.obs
 ]);
 
 
@@ -553,7 +561,7 @@ estoqueBaixo,
 d.localizacao,
 d.fornecedor,
 d.status,
-d.observacao
+d.obs
 ]);
 
 });
