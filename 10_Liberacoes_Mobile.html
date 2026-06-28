@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>10_Liberacoes_Mobile</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+--azul:#184b78;
+--fundo:#eef2f5;
+--card:#ffffff;
+--borda:#d7dde3;
+--verde:#198754;
+--vermelho:#dc3545;
+--laranja:#fd7e14;
+--cinza:#6c757d;
+}
+
+*{box-sizing:border-box}
+
+body{
+font-family:Arial,sans-serif;
+margin:0;
+background:var(--fundo);
+color:#222;
+}
+
+header{
+background:var(--azul);
+color:#fff;
+padding:16px;
+text-align:center;
+font-size:24px;
+font-weight:bold;
+box-shadow:0 2px 8px rgba(0,0,0,.18);
+}
+
+.layout{
+max-width:720px;
+margin:14px auto;
+padding:0 12px;
+}
+
+.card{
+background:var(--card);
+padding:16px;
+border-radius:12px;
+box-shadow:0 2px 10px rgba(0,0,0,.10);
+}
+
+label{
+display:block;
+font-weight:bold;
+margin-top:10px;
+font-size:14px;
+color:#1f2933;
+}
+
+input,select,textarea,button{
+width:100%;
+padding:10px;
+font-size:15px;
+border-radius:8px;
+border:1px solid var(--borda);
+}
+
+textarea{
+min-height:74px;
+resize:vertical;
+}
+
+button{
+margin-top:10px;
+border:none;
+color:#fff;
+font-weight:bold;
+cursor:pointer;
+}
+
+.linha{
+display:grid;
+grid-template-columns:1fr;
+gap:10px;
+}
+
+.aviso-fluxo{
+margin-top:10px;
+padding:10px;
+background:#eef6ff;
+border:1px solid #cfe2ff;
+border-radius:8px;
+font-size:14px;
+line-height:1.35;
+}
+
+.grupo-check{
+margin-top:10px;
+padding:10px;
+border:1px solid var(--borda);
+border-radius:10px;
+background:#f8fafc;
+}
+
+.titulo-check{
+font-weight:bold;
+margin-bottom:7px;
+font-size:14px;
+}
+
+.botoes-check{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:6px;
+}
+
+.botoes-check button{
+margin:0;
+padding:10px 4px;
+font-size:13px;
+background:#fff;
+color:#222;
+border:1px solid var(--borda);
+}
+
+.botoes-check button.ok.ativo{
+background:var(--verde);
+color:#fff;
+border-color:var(--verde);
+}
+
+.botoes-check button.nok.ativo{
+background:var(--vermelho);
+color:#fff;
+border-color:var(--vermelho);
+}
+
+.ativo{
+filter:brightness(.98);
+}
+
+.tudo-ok{
+background:var(--verde);
+font-size:16px;
+padding:12px;
+}
+
+.salvar{background:var(--verde)}
+.limpar{background:var(--laranja)}
+.menu{background:#0d6efd}
+
+.botoes-finais{
+display:grid;
+grid-template-columns:2fr 1fr 1fr;
+gap:8px;
+margin-top:12px;
+}
+
+.botoes-finais button{
+margin-top:0;
+}
+
+.msg{
+display:none;
+max-width:720px;
+margin:10px auto;
+padding:12px;
+border-radius:8px;
+font-weight:bold;
+}
+
+.okmsg{background:#d1e7dd;color:#0f5132}
+.erromsg{background:#f8d7da;color:#842029}
+
+
+.info-sync{
+margin-top:10px;
+padding:9px;
+background:#f8fafc;
+border:1px solid var(--borda);
+border-radius:8px;
+font-size:13px;
+font-weight:bold;
+color:#374151;
+}
+.os-aviso{
+display:none;
+margin-top:10px;
+padding:10px;
+border-radius:8px;
+font-size:14px;
+font-weight:bold;
+background:#fff3cd;
+color:#664d03;
+border:1px solid #ffecb5;
+}
+.atualizar-cad{background:#0d6efd}
+
+@media(max-width:700px){
+header{
+font-size:22px;
+padding:16px;
+}
+
+.layout{
+margin:12px auto;
+}
+
+.botoes-finais{
+grid-template-columns:1fr;
+}
+}
+</style>
+</head>
+
+<body>
+
+<header>📱 Inspeção e Liberação</header>
+
+<div class="layout">
+<div class="card">
+
+<div class="linha">
+<div>
+<label>Data</label>
+<input id="data" type="date">
+</div>
+
+<div>
+<label>OP</label>
+<input id="op" placeholder="Digite a OP">
+</div>
+</div>
+
+<div class="linha">
+<div>
+<label>Máquina</label>
+<select id="maquina">
+<option value="">Carregando máquinas...</option>
+</select>
+</div>
+
+<div>
+<label>Dispositivo</label>
+<select id="dispositivo">
+<option value="">Carregando dispositivos...</option>
+</select>
+</div>
+</div>
+
+<label>Serviço</label>
+<input id="servico" value="Inspeção e Liberação" readonly>
+
+<div class="aviso-fluxo">
+<b>Fluxo único:</b> este é o cadastro oficial. O registro salvo aqui vai direto para o Supabase e aparece no Histórico.
+</div>
+
+<div id="infoSync" class="info-sync">🔄 Cadastros ainda não carregados.</div>
+<div id="osAviso" class="os-aviso"></div>
+<button type="button" class="atualizar-cad" onclick="atualizarCadastros()">🔄 Atualizar Cadastros</button>
+
+<button type="button" class="tudo-ok" onclick="marcarTudoOK()">✅ Tudo OK</button>
+
+<div class="grupo-check">
+<div class="titulo-check">Proteções / Segurança</div>
+<div class="botoes-check">
+<button type="button" class="ok ativo" id="btn_seguranca_sim" onclick="marcar('seguranca','Sim')">OK</button>
+<button type="button" class="nok" id="btn_seguranca_nao" onclick="marcar('seguranca','Não')">NÃO OK</button>
+</div>
+<input type="hidden" id="seguranca" value="Sim">
+</div>
+
+<div class="grupo-check">
+<div class="titulo-check">Máquina Limpa e Sem Anormalidade</div>
+<div class="botoes-check">
+<button type="button" class="ok ativo" id="btn_maquina_ok_sim" onclick="marcar('maquina_ok','Sim')">OK</button>
+<button type="button" class="nok" id="btn_maquina_ok_nao" onclick="marcar('maquina_ok','Não')">NÃO OK</button>
+</div>
+<input type="hidden" id="maquina_ok" value="Sim">
+</div>
+
+<div class="grupo-check">
+<div class="titulo-check">Dispositivo Fixado / Regulagem</div>
+<div class="botoes-check">
+<button type="button" class="ok ativo" id="btn_dispositivo_ok_sim" onclick="marcar('dispositivo_ok','Sim')">OK</button>
+<button type="button" class="nok" id="btn_dispositivo_ok_nao" onclick="marcar('dispositivo_ok','Não')">NÃO OK</button>
+</div>
+<input type="hidden" id="dispositivo_ok" value="Sim">
+</div>
+
+<div class="grupo-check">
+<div class="titulo-check">Lubrificação / Condição Visual</div>
+<div class="botoes-check">
+<button type="button" class="ok ativo" id="btn_lubrificacao_ok_sim" onclick="marcar('lubrificacao_ok','Sim')">OK</button>
+<button type="button" class="nok" id="btn_lubrificacao_ok_nao" onclick="marcar('lubrificacao_ok','Não')">NÃO OK</button>
+</div>
+<input type="hidden" id="lubrificacao_ok" value="Sim">
+</div>
+
+<div class="grupo-check">
+<div class="titulo-check">Primeira Peça / Amostra</div>
+<div class="botoes-check">
+<button type="button" class="ok ativo" id="btn_amostra_ok_sim" onclick="marcar('amostra_ok','Sim')">OK</button>
+<button type="button" class="nok" id="btn_amostra_ok_nao" onclick="marcar('amostra_ok','Não')">NÃO OK</button>
+</div>
+<input type="hidden" id="amostra_ok" value="Sim">
+</div>
+
+<div class="grupo-check">
+<div class="titulo-check">OP Correta</div>
+<div class="botoes-check">
+<button type="button" class="ok ativo" id="btn_op_correta_sim" onclick="marcar('op_correta','Sim')">OK</button>
+<button type="button" class="nok" id="btn_op_correta_nao" onclick="marcar('op_correta','Não')">NÃO OK</button>
+</div>
+<input type="hidden" id="op_correta" value="Sim">
+</div>
+
+<div class="grupo-check">
+<div class="titulo-check">Desenho Correto</div>
+<div class="botoes-check">
+<button type="button" class="ok ativo" id="btn_desenho_correto_sim" onclick="marcar('desenho_correto','Sim')">OK</button>
+<button type="button" class="nok" id="btn_desenho_correto_nao" onclick="marcar('desenho_correto','Não')">NÃO OK</button>
+</div>
+<input type="hidden" id="desenho_correto" value="Sim">
+</div>
+
+<div class="linha">
+<div>
+<label>Resultado da Inspeção / Liberação</label>
+<select id="conforme">
+<option>Liberado</option>
+<option>Não Liberado</option>
+<option>Mau Uso</option>
+</select>
+</div>
+
+<div>
+<label>Operador Orientado</label>
+<select id="orientado">
+<option>Sim</option>
+<option>Não</option>
+</select>
+</div>
+</div>
+
+<div class="linha">
+<div>
+<label>Operador</label>
+<input id="operador">
+</div>
+
+<div>
+<label>Responsável</label>
+<input id="responsavel">
+</div>
+</div>
+
+<label>Motivo do Mau Uso</label>
+<textarea id="motivo_mau_uso" placeholder="Preencher somente quando for Mau Uso"></textarea>
+
+<label>Observação</label>
+<textarea id="obs"></textarea>
+
+<div class="botoes-finais">
+<button class="salvar" onclick="salvar()">Salvar</button>
+<button class="limpar" onclick="limparFormulario()">Limpar</button>
+<button class="menu" onclick="window.location.href='11_Historico_Liberacoes.html'">📋 Histórico</button>
+<button class="menu" onclick="window.location.href='00_Sistema_Manutencao_V25.html'">Menu</button>
+</div>
+
+</div>
+</div>
+
+<div id="msg" class="msg"></div>
+
+<script>
+const SUPABASE_URL = 'https://wzcrqzbwcsmfwenzcxkf.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu';
+const banco = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let listaMaquinas = [];
+let listaDispositivos = [];
+let listaOS = [];
+let osVinculada = null;
+
+const CAMPOS_CHECK = [
+'seguranca',
+'maquina_ok',
+'dispositivo_ok',
+'lubrificacao_ok',
+'amostra_ok',
+'op_correta',
+'desenho_correto'
+];
+
+document.addEventListener('DOMContentLoaded', iniciar);
+
+async function iniciar(){
+document.getElementById('data').value = new Date().toISOString().split('T')[0];
+document.getElementById('maquina').addEventListener('change', aoMudarMaquina);
+document.getElementById('dispositivo').addEventListener('change', verificarOSAberta);
+document.getElementById('op').addEventListener('change', buscarOSPorOP);
+document.getElementById('conforme').addEventListener('change', atualizarResultadoAutomatico);
+await atualizarCadastros();
+}
+
+function usuarioAtual(){
+return localStorage.getItem('usuarioLogado') || 'Sistema';
+}
+
+function registrarLog(acao, detalhe=''){
+let logs = [];
+try{ logs = JSON.parse(localStorage.getItem('logs_auditoria') || '[]'); }catch(e){ logs = []; }
+logs.unshift({
+data:new Date().toLocaleString('pt-BR'),
+usuario:usuarioAtual(),
+acao,
+detalhe
+});
+localStorage.setItem('logs_auditoria', JSON.stringify(logs.slice(0,800)));
+}
+
+function atualizarInfoSync(txt){
+const el = document.getElementById('infoSync');
+if(el) el.innerHTML = txt;
+}
+
+async function atualizarCadastros(){
+atualizarInfoSync('🔄 Carregando máquinas, dispositivos e OS abertas...');
+await Promise.all([
+carregarMaquinas(),
+carregarDispositivos(),
+carregarOSAbertas()
+]);
+preencherMaquinas();
+preencherDispositivos();
+atualizarInfoSync(
+'✅ Sincronizado: ' + listaMaquinas.length + ' máquinas | ' +
+listaDispositivos.length + ' dispositivos | ' + listaOS.length + ' OS abertas'
+);
+verificarOSAberta();
+}
+
+function statusAtivo(item){
+let st = String(item.status || '').trim().toLowerCase();
+if(!st) return true;
+return ['ativo','ativa','em uso','operando','ok'].includes(st);
+}
+
+async function carregarMaquinas(){
+const {data, error} = await banco
+.from('maquinas')
+.select('*')
+.order('maquina');
+
+if(error){
+aviso('Erro ao carregar máquinas: ' + error.message, 'erro');
+listaMaquinas = [];
+return;
+}
+
+let mapa = new Map();
+(data || []).filter(statusAtivo).forEach(item => {
+let nome = String(item.maquina || item.equipamento || '').trim();
+if(nome && !mapa.has(nome.toLowerCase())) mapa.set(nome.toLowerCase(), Object.assign({}, item, {maquina:nome}));
+});
+listaMaquinas = [...mapa.values()].sort((a,b)=>String(a.maquina||'').localeCompare(String(b.maquina||''), undefined, {numeric:true}));
+}
+
+async function carregarDispositivos(){
+const {data, error} = await banco
+.from('dispositivos')
+.select('*')
+.order('dispositivo');
+
+if(error){
+aviso('Erro ao carregar dispositivos: ' + error.message, 'erro');
+listaDispositivos = [];
+return;
+}
+
+let mapa = new Map();
+(data || []).filter(statusAtivo).forEach(item => {
+let nome = String(item.dispositivo || '').trim();
+if(nome && !mapa.has(nome.toLowerCase())) mapa.set(nome.toLowerCase(), item);
+});
+listaDispositivos = [...mapa.values()].sort((a,b)=>String(a.dispositivo||'').localeCompare(String(b.dispositivo||''), undefined, {numeric:true}));
+}
+
+async function carregarOSAbertas(){
+const {data, error} = await banco
+.from('ordens_servico')
+.select('*')
+.not('status','in','("Concluída","Concluida","Cancelada")');
+
+if(error){
+console.warn('Não foi possível carregar OS abertas:', error.message);
+listaOS = [];
+return;
+}
+listaOS = data || [];
+}
+
+function preencherMaquinas(valorAtual=''){
+const campo = document.getElementById('maquina');
+let atual = valorAtual || campo.value;
+campo.innerHTML = '<option value="">Selecione</option>';
+listaMaquinas.forEach(item => {
+let nome = item.maquina || '';
+campo.innerHTML += `<option ${nome===atual?'selected':''}>${esc(nome)}</option>`;
+});
+}
+
+function preencherDispositivos(valorAtual=''){
+const campo = document.getElementById('dispositivo');
+let atual = valorAtual || campo.value;
+let maquina = document.getElementById('maquina').value;
+let lista = listaDispositivos;
+
+if(maquina){
+let vinculados = listaDispositivos.filter(d => String(d.maquina || '').trim() === maquina);
+if(vinculados.length) lista = vinculados;
+}
+
+campo.innerHTML = '<option value="">Selecione</option>';
+lista.forEach(item => {
+let nome = item.dispositivo || '';
+campo.innerHTML += `<option ${nome===atual?'selected':''}>${esc(nome)}</option>`;
+});
+}
+
+function aoMudarMaquina(){
+preencherDispositivos('');
+verificarOSAberta();
+}
+
+async function buscarOSPorOP(){
+let op = document.getElementById('op').value.trim();
+if(!op) return;
+
+let {data, error} = await banco
+.from('ordens_servico')
+.select('*')
+.or('numero.eq.' + op + ',os.eq.' + op)
+.limit(1);
+
+if(error){
+console.warn(error.message);
+return;
+}
+
+let os = (data || [])[0];
+if(!os) return;
+
+osVinculada = os;
+if(os.maquina){
+preencherMaquinas(os.maquina);
+document.getElementById('maquina').value = os.maquina;
+preencherDispositivos(os.dispositivo || '');
+}
+if(os.dispositivo){
+document.getElementById('dispositivo').value = os.dispositivo;
+}
+if(os.responsavel && !document.getElementById('responsavel').value){
+document.getElementById('responsavel').value = os.responsavel;
+}
+mostrarAvisoOS('🔗 OP/OS encontrada: ' + (os.numero || os.os || op) + '. Máquina e dispositivo preenchidos automaticamente.');
+}
+
+function verificarOSAberta(){
+let maquina = document.getElementById('maquina').value;
+let dispositivo = document.getElementById('dispositivo').value;
+osVinculada = null;
+
+if(!maquina && !dispositivo){
+esconderAvisoOS();
+return;
+}
+
+let os = listaOS.find(o => {
+let okMaquina = maquina && String(o.maquina || '') === maquina;
+let okDisp = dispositivo && String(o.dispositivo || '') === dispositivo;
+return okMaquina || okDisp;
+});
+
+if(os){
+osVinculada = os;
+mostrarAvisoOS('⚠ Existe OS aberta relacionada: ' + (os.numero || os.os || 'sem número') + ' | Status: ' + (os.status || '') + ' | Prioridade: ' + (os.prioridade || ''));
+}else{
+esconderAvisoOS();
+}
+}
+
+function mostrarAvisoOS(texto){
+const box = document.getElementById('osAviso');
+box.innerHTML = texto;
+box.style.display = 'block';
+}
+
+function esconderAvisoOS(){
+const box = document.getElementById('osAviso');
+box.innerHTML = '';
+box.style.display = 'none';
+}
+
+function marcar(campo, valor){
+document.getElementById(campo).value = valor;
+
+['sim','nao'].forEach(tipo => {
+const botao = document.getElementById('btn_' + campo + '_' + tipo);
+if(botao) botao.classList.remove('ativo');
+});
+
+let id = valor === 'Não' ? 'nao' : 'sim';
+const ativo = document.getElementById('btn_' + campo + '_' + id);
+if(ativo) ativo.classList.add('ativo');
+
+atualizarResultadoAutomatico();
+}
+
+function marcarTudoOK(){
+CAMPOS_CHECK.forEach(campo => marcar(campo, 'Sim'));
+document.getElementById('conforme').value = 'Liberado';
+}
+
+function atualizarResultadoAutomatico(){
+const temNao = CAMPOS_CHECK.some(campo => document.getElementById(campo).value === 'Não');
+const resultado = document.getElementById('conforme');
+if(resultado.value !== 'Mau Uso') resultado.value = temNao ? 'Não Liberado' : 'Liberado';
+}
+
+function textoChecklist(){
+return 'Checklist: ' +
+' Segurança=' + document.getElementById('seguranca').value +
+' | Máquina=' + document.getElementById('maquina_ok').value +
+' | Dispositivo=' + document.getElementById('dispositivo_ok').value +
+' | Lubrificação=' + document.getElementById('lubrificacao_ok').value +
+' | Amostra=' + document.getElementById('amostra_ok').value +
+' | OP Correta=' + document.getElementById('op_correta').value +
+' | Desenho Correto=' + document.getElementById('desenho_correto').value;
+}
+
+function aviso(texto, tipo='ok'){
+const caixa = document.getElementById('msg');
+caixa.innerHTML = texto;
+caixa.className = 'msg ' + (tipo === 'erro' ? 'erromsg' : 'okmsg');
+caixa.style.display = 'block';
+setTimeout(() => { caixa.style.display = 'none'; }, 4500);
+}
+
+async function salvar(){
+const dataCampo = document.getElementById('data');
+const op = document.getElementById('op');
+const maquina = document.getElementById('maquina');
+const dispositivo = document.getElementById('dispositivo');
+const servico = document.getElementById('servico');
+const responsavel = document.getElementById('responsavel');
+const operador = document.getElementById('operador');
+const conforme = document.getElementById('conforme');
+const orientado = document.getElementById('orientado');
+const motivo = document.getElementById('motivo_mau_uso');
+const obs = document.getElementById('obs');
+
+if(!op.value.trim()){
+aviso('Informe a OP.', 'erro');
+return;
+}
+if(!maquina.value){
+aviso('Informe a máquina.', 'erro');
+return;
+}
+if(!dispositivo.value){
+aviso('Informe o dispositivo.', 'erro');
+return;
+}
+
+let obsFinal = obs.value ? obs.value.trim() + '\n' : '';
+
+if(osVinculada){
+obsFinal += 'OS vinculada: ' + (osVinculada.numero || osVinculada.os || '') + '\n';
+}
+
+if(conforme.value === 'Mau Uso'){
+if(!motivo.value.trim()){
+aviso('Informe o motivo do mau uso.', 'erro');
+return;
+}
+obsFinal += 'Motivo Mau Uso: ' + motivo.value.trim() + '\n';
+}
+
+obsFinal += textoChecklist();
+
+const existeNaoConforme =
+CAMPOS_CHECK.some(campo => document.getElementById(campo).value === 'Não') ||
+conforme.value === 'Não Liberado';
+
+if(existeNaoConforme){
+if(!confirm('Existe item NÃO conforme. Salvar mesmo assim?')) return;
+}
+
+let resultadoBanco = conforme.value;
+if(resultadoBanco === 'Liberado') resultadoBanco = 'Sim';
+if(resultadoBanco === 'Não Liberado') resultadoBanco = 'Não';
+
+const registro = {
+data: dataCampo.value,
+op: op.value.trim(),
+maquina: maquina.value,
+dispositivo: dispositivo.value,
+servico: servico.value,
+responsavel: responsavel.value.trim(),
+operador: operador.value.trim(),
+conforme: resultadoBanco,
+orientado: orientado.value,
+obs: obsFinal
+};
+
+const {error} = await banco.from('liberacoes').insert([registro]);
+
+if(error){
+aviso('Erro ao salvar: ' + error.message, 'erro');
+console.error(error);
+return;
+}
+
+registrarLog('Liberação salva', 'OP: ' + registro.op + ' | Máquina: ' + registro.maquina + ' | Dispositivo: ' + registro.dispositivo + ' | Resultado: ' + registro.conforme);
+
+await atualizarStatusOSVinculada(registro);
+
+aviso('Registro salvo com sucesso. Histórico será atualizado automaticamente.');
+setTimeout(() => {
+limparFormulario();
+document.getElementById('data').value = new Date().toISOString().split('T')[0];
+}, 900);
+}
+
+async function atualizarStatusOSVinculada(registro){
+if(!osVinculada || !osVinculada.numero) return;
+
+let historico = (osVinculada.historico || '') + '\n' +
+new Date().toLocaleString('pt-BR') +
+' - Liberação registrada por ' + usuarioAtual() +
+'. OP: ' + registro.op +
+'. Resultado: ' + registro.conforme + '.';
+
+const {error} = await banco
+.from('ordens_servico')
+.update({historico})
+.eq('numero', osVinculada.numero);
+
+if(error) console.warn('Não foi possível atualizar histórico da OS:', error.message);
+}
+
+function limparFormulario(){
+document.getElementById('op').value = '';
+document.getElementById('maquina').value = '';
+preencherDispositivos('');
+document.getElementById('dispositivo').value = '';
+document.getElementById('operador').value = '';
+document.getElementById('responsavel').value = '';
+document.getElementById('motivo_mau_uso').value = '';
+document.getElementById('obs').value = '';
+document.getElementById('orientado').value = 'Sim';
+osVinculada = null;
+esconderAvisoOS();
+marcarTudoOK();
+}
+
+function esc(txt){
+return String(txt || '').replace(/[&<>"']/g, function(c){
+return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c];
+});
+}
+</script>
+
+</body>
+</html>
