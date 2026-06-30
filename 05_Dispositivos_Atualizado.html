@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>05_Dispositivos_Atualizado</title>
+
+<style>
+:root{
+--azul-900:#163b5c;--azul-700:#1f5f93;--azul-500:#4f93c8;
+--verde:#21805b;--laranja:#fd7e14;--vermelho:#dc3545;--cinza-950:#17202a;
+--cinza-700:#4b5563;--cinza-200:#e5e7eb;--cinza-100:#f3f4f6;--branco:#fff;
+--raio:8px;--sombra:0 10px 26px rgba(17,24,39,.10);
+}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;color:var(--cinza-950);background:#f5f7fa}
+button,input,select,textarea{font:inherit}
+button{border:0;border-radius:var(--raio);cursor:pointer;font-weight:800}
+header{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;color:#fff;background:var(--azul-700);box-shadow:0 4px 16px rgba(15,23,42,.18)}
+.titulo-app{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:800;min-width:0}
+.marca{display:grid;place-items:center;width:36px;height:36px;border-radius:var(--raio);color:var(--azul-900);background:#fff;font-size:21px;flex:0 0 auto}
+.acoes-topo{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+.container{width:min(1320px,100%);margin:0 auto;padding:14px}
+.card{background:#fff;padding:12px;margin-bottom:14px;border:1px solid var(--cinza-200);border-radius:var(--raio);box-shadow:var(--sombra)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;align-items:end}
+.ind{display:block;color:var(--azul-900);font-size:26px;font-weight:800;line-height:1.1;margin-top:4px}
+.card .grid>div{min-height:54px}
+.card .grid>div>label,.card .grid>div:first-child{font-weight:800;color:var(--cinza-700)}
+input,select{width:100%;min-height:38px;padding:8px 10px;border:1px solid var(--cinza-200);border-radius:var(--raio);background:#fff;color:var(--cinza-950);outline:none;font-size:14px}
+input:focus,select:focus{border-color:var(--azul-500);box-shadow:0 0 0 3px rgba(79,147,200,.18)}
+button{min-height:38px;padding:9px 12px;color:#fff;transition:transform .16s ease,background .16s ease}
+button:hover{transform:translateY(-1px)}
+.b1{background:var(--azul-900)}.b2{background:var(--verde)}.b3{background:var(--laranja)}.b4{background:#343a40}.b5{background:var(--vermelho)}
+.msg{display:none;padding:9px 10px;background:#d1e7dd;color:#0f5132;border-radius:var(--raio);margin-top:8px;font-weight:700}
+.tabela-wrap{width:100%;overflow:auto;border:1px solid var(--cinza-200);border-radius:var(--raio)}
+table{width:100%;min-width:1100px;border-collapse:collapse;table-layout:fixed;font-size:13px;background:#fff}
+th,td{border-bottom:1px solid #d1d5db;border-right:1px solid #d1d5db;padding:9px 8px;text-align:left;vertical-align:middle}
+th:last-child,td:last-child{border-right:0}
+th{position:sticky;top:0;z-index:2;background:var(--azul-900);color:#fff;text-transform:uppercase;font-size:12px;letter-spacing:.02em;text-align:center}
+tbody tr:nth-child(even){background:#f8fafc}
+tbody tr:nth-child(odd){background:#fff}
+tbody tr:hover{background:#eaf2f9}
+td input,td select{border:0;background:transparent;box-shadow:none!important;min-height:30px;padding:5px 6px;font-size:13px}
+td input:focus,td select:focus{background:#fff;border:1px solid var(--azul-500)}
+.c1{width:48px;text-align:center}.c2{width:160px}.c3{width:270px}.c4{width:210px}.c5{width:115px}.c6{width:auto}.c7{width:78px;text-align:center}
+#thExcluir,.td-excluir{text-align:center;width:76px}
+.btn-excluir{width:44px;min-height:34px;padding:6px;background:var(--vermelho);border-radius:7px;color:#fff;font-weight:900}
+.preview-import{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:none;align-items:center;justify-content:center;padding:18px}
+.preview-card{background:white;border-radius:10px;box-shadow:0 18px 50px rgba(0,0,0,.35);width:min(1200px,96vw);max-height:88vh;overflow:auto;padding:14px}
+.preview-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}.preview-top h2{margin:0;color:var(--azul-900)}
+.import-resumo{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:10px 0}.import-resumo div{background:#f8fafc;border:1px solid #ddd;border-radius:8px;padding:10px;font-weight:bold;text-align:center}.import-resumo b{display:block;font-size:22px;color:var(--azul-900)}
+.preview-table{max-height:430px;overflow:auto;border:1px solid #ccc;border-radius:8px}.preview-table table{min-width:950px;table-layout:auto}.linha-erro{background:#fff0f0!important}.linha-duplicada{background:#fff8e1!important}.dica-import{background:#eef6ff;border:1px solid #b6d4fe;color:#084298;border-radius:8px;padding:8px;font-weight:bold;margin:8px 0}
+@media(max-width:760px){header{align-items:flex-start;flex-direction:column}.acoes-topo,button{width:100%}.container{padding:10px}.grid{grid-template-columns:1fr}.titulo-app{font-size:19px}}
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script src="permissoes.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+</head>
+
+<body>
+
+
+<header>
+  <div class="titulo-app">
+    <span class="marca">🛠</span>
+    <span>Cadastro de Dispositivos Atualizado</span>
+  </div>
+  <div class="acoes-topo">
+    <button type="button" class="b1" onclick="window.location.href='00_Sistema_Manutencao_V25.html'">← Menu</button>
+    <button type="button" class="b2" onclick="location.reload()">🔄 Atualizar</button>
+  </div>
+</header>
+
+<div class="container">
+
+<div class="card">
+<div class="grid">
+
+<div>
+Total de Dispositivos
+<div class="ind" id="tot">0</div>
+</div>
+
+<div>
+Ativos
+<div class="ind" id="ativos">0</div>
+</div>
+
+<div>
+Manutenção
+<div class="ind" id="manut">0</div>
+</div>
+
+</div>
+</div>
+
+<div class="card">
+
+<div class="grid">
+
+<div>
+<label>Pesquisa</label>
+<input id="pesquisa" placeholder="Pesquisar...">
+</div>
+
+<div>
+<label>Status</label>
+<select id="fStatus">
+<option value="">Todos</option>
+<option>Ativo</option>
+<option>Manutenção</option>
+<option>Inativo</option>
+</select>
+</div>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<button id="btNovoDispositivo" class="b1" onclick="novo()">Novo Dispositivo</button>
+
+<button id="btSalvarDispositivo" class="b2" onclick="salvarManual()">Salvar</button>
+
+<button id="btImportarDispositivo" class="b2" onclick="document.getElementById('importarDispositivos').click()">
+📂 Importar Excel / ODS
+</button>
+
+<input
+id="importarDispositivos"
+type="file"
+accept=".xlsx,.xls,.ods,.csv"
+style="display:none"
+onchange="lerArquivoImportacaoDispositivos(this)"
+>
+
+
+
+<button id="btDuplicados" class="b3" onclick="verificarDuplicados()">
+🔍 Verificar Duplicados
+</button>
+
+<button class="b3" onclick="exportarExcel()">📊 Exportar Excel</button>
+
+<button class="b4" onclick="window.print()">Imprimir</button>
+
+<div id="msg" class="msg"></div>
+
+</div>
+
+<div class="card">
+<div class="tabela-wrap">
+<table id="tb">
+
+<thead>
+<tr>
+<th class="c1">Nº</th>
+<th class="c2">Código</th>
+<th class="c3">Dispositivo</th>
+<th class="c4">Máquina Vinculada</th>
+<th class="c5">Status</th>
+<th class="c6">Observação</th>
+<th id="thExcluir" class="c7">Excluir</th>
+</tr>
+</thead>
+
+<tbody></tbody>
+
+</table>
+</div>
+</div>
+
+</div>
+
+
+<div id="previewImportDispositivos" class="preview-import">
+<div class="preview-card">
+<div class="preview-top">
+<h2>📂 Pré-visualização da importação de dispositivos</h2>
+<button class="b4" onclick="fecharPreviewImportDispositivos()">Fechar</button>
+</div>
+
+<div id="resumoImportDispositivos" class="import-resumo"></div>
+
+<div class="dica-import">
+Linhas amarelas = já existem e serão ignoradas. Linhas vermelhas = inválidas. Somente dispositivos válidos serão importados depois da confirmação.
+</div>
+
+<div id="tabelaPreviewDispositivos" class="preview-table"></div>
+
+<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+<button class="b2" id="btConfirmarImportDispositivos" onclick="confirmarImportacaoDispositivos()">✔ Importar dispositivos válidos</button>
+<button class="b4" onclick="fecharPreviewImportDispositivos()">Cancelar</button>
+</div>
+</div>
+</div>
+
+
+<script>
+
+const SUPABASE_URL = 'https://wzcrqzbwcsmfwenzcxkf.supabase.co';
+
+const SUPABASE_KEY = 'sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu';
+
+const bancoSupabase = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+if(typeof registrarLog !== "function"){
+
+function registrarLog(acao){
+
+let logs =
+JSON.parse(
+localStorage.getItem("logs_auditoria") || "[]"
+);
+
+logs.unshift({
+data:new Date().toLocaleString(),
+usuario:localStorage.getItem("usuarioLogado") || "Sistema",
+acao:acao
+});
+
+localStorage.setItem(
+"logs_auditoria",
+JSON.stringify(logs)
+);
+
+}
+
+}
+
+if(typeof somenteLeitura !== "function"){
+
+function somenteLeitura(){
+
+let usuario =
+localStorage.getItem("usuarioLogado");
+
+return (
+usuario === "PCP" ||
+usuario === "Engenharia"
+);
+
+}
+
+}
+
+if(typeof verificarPermissao !== "function"){
+
+function verificarPermissao(){
+
+return true;
+
+}
+
+}
+
+/* BLOQUEIO DE ACESSO DIRETO
+   Permitidos: Alexandre e Diretoria
+*/
+let usuarioLogado =
+localStorage.getItem(
+"usuarioLogado"
+);
+
+if(
+  usuarioLogado !== "Alexandre" &&
+  usuarioLogado !== "Diretoria"
+){
+  alert("Acesso bloqueado. Cadastro de Dispositivos Atualizado é permitido somente para Alexandre e Diretoria.");
+  window.location.href = "00_Sistema_Manutencao_V25.html";
+}
+
+if(usuarioLogado !== "Alexandre"){
+  setTimeout(function(){
+    const th = document.getElementById('thExcluir');
+    if(th) th.style.display = 'none';
+    document.querySelectorAll('.td-excluir').forEach(td=>td.style.display='none');
+  },0);
+}
+
+
+function aviso(t){
+msg.innerText=t;
+msg.style.display='block';
+setTimeout(()=>msg.style.display='none',2500);
+}
+
+function listaMaquinas(){
+
+let maquinas=JSON.parse(
+localStorage.getItem('cadastro_maquinas_v24')||'[]'
+);
+
+return maquinas;
+
+}
+
+function selectMaquinas(selecionada=""){
+
+let maquinas=listaMaquinas();
+
+let html=`<option value="">Selecione</option>`;
+
+maquinas.forEach(m=>{
+
+html+=`
+<option ${m.maquina==selecionada?'selected':''}>
+${m.maquina}
+</option>
+`;
+
+});
+
+return html;
+
+}
+
+function novo(d={}){
+
+let r=tb.tBodies[0].insertRow();
+
+r.innerHTML=`
+
+<td></td>
+
+<td>
+<input value="${d.codigo||''}">
+</td>
+
+<td>
+<input value="${d.dispositivo||''}">
+</td>
+
+<td>
+<select>
+${selectMaquinas(d.maquina||'')}
+</select>
+</td>
+
+<td>
+<select>
+<option ${d.status=="Ativo"?"selected":""}>Ativo</option>
+<option ${d.status=="Manutenção"?"selected":""}>Manutenção</option>
+<option ${d.status=="Inativo"?"selected":""}>Inativo</option>
+</select>
+</td>
+
+<td>
+<input value="${d.obs||''}">
+</td>
+
+<td class="td-excluir" style="display:${usuarioLogado==="Alexandre" ? "table-cell" : "none"};">
+<button class="btn-excluir" onclick="excluir(this)">X</button>
+</td>
+
+`;
+
+r.querySelectorAll("input,select").forEach(e=>{
+e.oninput=()=>{
+
+let dispositivo =
+r.cells[2].querySelector('input')
+.value
+.trim()
+.toLowerCase();
+
+let repetidos = 0;
+
+[...tb.tBodies[0].rows].forEach(l=>{
+
+let nome =
+l.cells[2].querySelector('input')
+.value
+.trim()
+.toLowerCase();
+
+if(nome && nome===dispositivo){
+repetidos++;
+}
+
+});
+
+if(repetidos>1){
+
+alert("⚠ Dispositivo já cadastrado.");
+
+r.cells[2].querySelector('input').value='';
+
+return;
+
+}
+
+salvarLocal();
+filtrar();
+
+};
+});
+
+if(
+somenteLeitura()
+){
+
+r.querySelectorAll(
+"input,select"
+).forEach(e=>{
+
+e.disabled = true;
+
+});
+
+}
+
+renum();
+
+}
+
+function gerarQR(botao){
+
+const linha =
+botao.parentNode.parentNode;
+
+const dispositivo =
+linha.cells[2]
+.querySelector('input')
+.value;
+
+const maquina =
+linha.cells[3]
+.querySelector('select')
+.value;
+
+window.open(
+'31_QR_Registro.html?id=' +
+encodeURIComponent(dispositivo) +
+'&maq=' +
+encodeURIComponent(maquina),
+'_blank'
+);
+
+}
+
+function excluir(btn){
+
+let usuario =
+localStorage.getItem(
+"usuarioLogado"
+);
+
+if(
+usuario !== "Alexandre"
+){
+
+registrarLog(
+"Tentou excluir dispositivo"
+);
+
+alert(
+"Somente Alexandre pode excluir dispositivos."
+);
+
+return;
+
+}
+
+if(!confirm("Excluir dispositivo?")) return;
+
+registrarLog(
+"Excluiu dispositivo"
+);
+
+btn.closest("tr").remove();
+
+renum();
+salvarLocal();
+
+}
+
+function renum(){
+
+[...tb.tBodies[0].rows].forEach((r,i)=>{
+r.cells[0].innerText=i+1;
+});
+
+indicadores();
+
+}
+
+function dados(){
+
+return [...tb.tBodies[0].rows].map(r=>({
+
+codigo:r.cells[1].querySelector('input').value,
+dispositivo:r.cells[2].querySelector('input').value,
+maquina:r.cells[3].querySelector('select').value,
+status:r.cells[4].querySelector('select').value,
+obs:r.cells[5].querySelector('input').value
+
+}));
+
+}
+
+function salvarLocal(){
+
+localStorage.setItem(
+'cadastro_dispositivos_atualizado_v1',
+JSON.stringify(dados())
+);
+
+indicadores();
+
+}
+
+async function salvar(){
+
+const lista = dados();
+
+salvarLocal();
+
+const { error: erroDelete } =
+await bancoSupabase
+.from('dispositivos_atualizado')
+.delete()
+.gte('id',1);
+
+if(erroDelete){
+
+console.error(erroDelete);
+
+alert(
+'Erro ao sincronizar'
+);
+
+return false;
+
+}
+
+if(lista.length > 0){
+
+const { error } =
+await bancoSupabase
+.from('dispositivos_atualizado')
+.insert(lista);
+
+if(error){
+
+console.error(error);
+
+alert(
+'Erro ao sincronizar'
+);
+
+return false;
+
+}
+
+}
+
+indicadores();
+
+return true;
+
+}
+
+async function salvarManual(){
+
+const ok =
+await salvar();
+
+if(ok){
+
+aviso("Dados salvos com sucesso.");
+
+}
+
+}
+
+async function carregar(){
+
+tb.tBodies[0].innerHTML = '';
+
+const { data, error } =
+await bancoSupabase
+.from('dispositivos_atualizado')
+.select('*');
+
+if(
+!error &&
+data &&
+data.length > 0
+){
+
+const unicos = [];
+
+data.forEach(x=>{
+
+let existe = unicos.some(u =>
+u.codigo === x.codigo
+);
+
+if(!existe){
+unicos.push(x);
+}
+
+});
+
+unicos.forEach(x=>novo(x));
+
+}
+else
+{
+
+let local = JSON.parse(
+localStorage.getItem(
+'cadastro_dispositivos_atualizado_v1'
+) || '[]'
+);
+
+local.forEach(x=>novo(x));
+
+}
+
+indicadores();
+
+}
+
+function indicadores(){
+
+let d=dados();
+
+tot.innerText=d.length;
+
+ativos.innerText=
+d.filter(x=>x.status=="Ativo").length;
+
+manut.innerText=
+d.filter(x=>x.status=="Manutenção").length;
+
+}
+
+function filtrar(){
+
+let txt=
+pesquisa.value.toLowerCase().trim();
+
+[...tb.tBodies[0].rows].forEach(r=>{
+
+let codigo =
+r.cells[1].querySelector('input')
+.value.toLowerCase();
+
+let dispositivo =
+r.cells[2].querySelector('input')
+.value.toLowerCase();
+
+let maquina =
+r.cells[3].querySelector('select')
+.value.toLowerCase();
+
+let obs =
+r.cells[5].querySelector('input')
+.value.toLowerCase();
+
+let ok = false;
+
+if(!txt){
+
+    ok = true;
+
+}else{
+
+    ok =
+    codigo === txt ||
+    dispositivo.includes(txt) ||
+    maquina.includes(txt) ||
+    obs.includes(txt);
+
+}
+
+if(fStatus.value){
+
+    ok = ok &&
+    r.cells[4].querySelector('select').value === fStatus.value;
+
+}
+
+r.style.display = ok ? '' : 'none';
+
+});
+
+}
+function exportarCSV(){
+
+
+
+let linhas=[[
+"N",
+"Codigo",
+"Dispositivo",
+"Maquina",
+"Status",
+"Observacao"
+]];
+
+dados().forEach((d,i)=>{
+
+linhas.push([
+i+1,
+d.codigo,
+d.dispositivo,
+d.maquina,
+d.status,
+d.obs
+]);
+
+});
+
+let csv=
+linhas.map(r=>
+r.map(c=>`"${c}"`).join(";")
+).join("\n");
+
+let a=document.createElement("a");
+
+a.href=URL.createObjectURL(
+new Blob([csv],{type:"text/csv"})
+);
+
+a.download="Cadastro_Dispositivos.csv";
+
+a.click();
+
+aviso("CSV exportado com sucesso.");
+
+}
+
+function exportarExcel(){
+
+let linhas=[[
+"N",
+"Codigo",
+"Dispositivo",
+"Maquina",
+"Status",
+"Observacao"
+]];
+
+dados().forEach((d,i)=>{
+
+linhas.push([
+i+1,
+d.codigo,
+d.dispositivo,
+d.maquina,
+d.status,
+d.obs
+]);
+
+});
+
+let ws =
+XLSX.utils.aoa_to_sheet(linhas);
+
+ws['!autofilter'] = {
+ref:"A1:F1"
+};
+
+ws['!cols'] = [
+{wch:6},
+{wch:15},
+{wch:30},
+{wch:20},
+{wch:15},
+{wch:50}
+];
+
+let wb =
+XLSX.utils.book_new();
+
+XLSX.utils.book_append_sheet(
+wb,
+ws,
+"Dispositivos"
+);
+
+XLSX.writeFile(
+wb,
+"Cadastro_Dispositivos.xlsx"
+);
+
+aviso("Excel exportado com sucesso.");
+
+}
+
+function verificarDuplicados(){
+
+let lista = {};
+
+let repetidos = [];
+
+dados().forEach(x=>{
+
+let nome =
+(x.dispositivo||'')
+.trim()
+.toLowerCase();
+
+if(!nome) return;
+
+if(lista[nome]){
+
+if(!repetidos.includes(x.dispositivo)){
+repetidos.push(x.dispositivo);
+}
+
+}else{
+
+lista[nome]=true;
+
+}
+
+});
+
+if(repetidos.length){
+
+alert(
+"⚠ Dispositivos duplicados:\n\n" +
+repetidos.join("\n")
+);
+
+}else{
+
+alert(
+"✅ Nenhum dispositivo duplicado encontrado."
+);
+
+}
+
+}
+
+
+
+let listaImportacaoDispositivos = [];
+
+function normalizarTextoImportacao(txt){
+return String(txt||'')
+.normalize('NFD')
+.replace(/[\u0300-\u036f]/g,'')
+.toLowerCase()
+.trim();
+}
+
+function valorCampoImportacao(obj, nomes){
+for(let nome of nomes){
+let alvo = normalizarTextoImportacao(nome);
+let chave = Object.keys(obj).find(k=>normalizarTextoImportacao(k)===alvo);
+if(chave !== undefined && obj[chave] !== undefined && obj[chave] !== null){
+return String(obj[chave]).trim();
+}
+}
+return '';
+}
+
+function detectarLinhaCabecalhoDispositivos(linhas){
+for(let i=0;i<Math.min(linhas.length,20);i++){
+let linha = (linhas[i]||[]).map(normalizarTextoImportacao).join('|');
+if(
+linha.includes('dispositivo') ||
+linha.includes('descricao / operacao') ||
+(linha.includes('armario') && linha.includes('secao') && linha.includes('prateleira'))
+){
+return i;
+}
+}
+return 0;
+}
+
+function montarObjetoImportacaoDispositivo(row){
+let armario = valorCampoImportacao(row,['Armário','Armario']);
+let secao = valorCampoImportacao(row,['Seção','Secao']);
+let prateleira = valorCampoImportacao(row,['Prateleira']);
+let descricaoOperacao = valorCampoImportacao(row,['Descrição / Operação','Descricao / Operacao','Descrição','Descricao','Operação','Operacao']);
+
+let codigo = valorCampoImportacao(row,['Código','Codigo','CODIGO','CODIFICAÇÃO','Codificação']);
+let dispositivo = valorCampoImportacao(row,['Dispositivo','Ferramenta','Equipamento','Descrição / Operação','Descricao / Operacao','Descrição','Descricao']);
+let maquina = valorCampoImportacao(row,['Máquina','Maquina','Máquina Vinculada','Maquina Vinculada','Equipamento Vinculado']);
+let status = valorCampoImportacao(row,['Status','Situação','Situacao']) || 'Ativo';
+let obs = valorCampoImportacao(row,['Observação','Observacao','Obs']);
+
+if(!codigo && (armario || secao || prateleira)){
+codigo = ['ARM',armario,secao,prateleira].filter(Boolean).join('-');
+}
+
+if(descricaoOperacao){
+dispositivo = descricaoOperacao;
+let local = [
+armario ? 'Armário: '+armario : '',
+secao ? 'Seção: '+secao : '',
+prateleira ? 'Prateleira: '+prateleira : ''
+].filter(Boolean).join(' | ');
+obs = [local, obs].filter(Boolean).join(' | ');
+}
+
+return {
+codigo:codigo,
+dispositivo:dispositivo,
+maquina:maquina,
+status:status,
+obs:obs
+};
+}
+
+function lerArquivoImportacaoDispositivos(input){
+let arquivo = input.files && input.files[0];
+if(!arquivo)return;
+
+let leitor = new FileReader();
+
+leitor.onload = function(e){
+try{
+let dadosArquivo = new Uint8Array(e.target.result);
+let wb = XLSX.read(dadosArquivo,{type:'array'});
+let ws = wb.Sheets[wb.SheetNames[0]];
+let linhas = XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+
+let headerIndex = detectarLinhaCabecalhoDispositivos(linhas);
+let cabecalho = linhas[headerIndex] || [];
+let dados = linhas.slice(headerIndex+1);
+
+let objetos = dados
+.map(linha=>{
+let obj = {};
+cabecalho.forEach((h,i)=>{
+if(String(h||'').trim()){
+obj[String(h).trim()] = linha[i];
+}
+});
+return montarObjetoImportacaoDispositivo(obj);
+})
+.filter(x=>Object.values(x).some(v=>String(v||'').trim()));
+
+prepararPreviewImportacaoDispositivos(objetos);
+
+}catch(erro){
+console.error(erro);
+alert('Erro ao ler o arquivo. Verifique se é Excel, ODS ou CSV válido.');
+}
+
+input.value='';
+};
+
+leitor.readAsArrayBuffer(arquivo);
+}
+
+function prepararPreviewImportacaoDispositivos(lista){
+let atuais = dados();
+
+listaImportacaoDispositivos = lista.map((x,i)=>{
+let codigo = String(x.codigo||'').trim();
+let dispositivo = String(x.dispositivo||'').trim();
+
+let duplicada = atuais.some(a=>
+(codigo && String(a.codigo||'').trim().toLowerCase()===codigo.toLowerCase()) ||
+(dispositivo && String(a.dispositivo||'').trim().toLowerCase()===dispositivo.toLowerCase())
+);
+
+let erro = '';
+if(!dispositivo) erro = 'Inválido: sem dispositivo';
+
+return Object.assign({},x,{
+linha:i+1,
+duplicada:duplicada,
+erro:erro,
+valida:!duplicada && !erro
+});
+});
+
+renderPreviewImportacaoDispositivos();
+document.getElementById('previewImportDispositivos').style.display='flex';
+}
+
+function renderPreviewImportacaoDispositivos(){
+let total = listaImportacaoDispositivos.length;
+let validas = listaImportacaoDispositivos.filter(x=>x.valida).length;
+let duplicadas = listaImportacaoDispositivos.filter(x=>x.duplicada).length;
+let invalidas = listaImportacaoDispositivos.filter(x=>x.erro).length;
+
+document.getElementById('resumoImportDispositivos').innerHTML = `
+<div><b>${total}</b>Linhas lidas</div>
+<div><b>${validas}</b>Válidas</div>
+<div><b>${duplicadas}</b>Duplicadas</div>
+<div><b>${invalidas}</b>Inválidas</div>
+`;
+
+let html = `
+<table>
+<thead>
+<tr>
+<th>Linha</th>
+<th>Código</th>
+<th>Dispositivo</th>
+<th>Máquina</th>
+<th>Status</th>
+<th>Observação</th>
+<th>Status Importação</th>
+</tr>
+</thead>
+<tbody>
+`;
+
+listaImportacaoDispositivos.forEach(x=>{
+let classe = x.erro ? 'linha-erro' : x.duplicada ? 'linha-duplicada' : '';
+let statusImp = x.erro || (x.duplicada ? 'Duplicado: será ignorado' : 'Válido');
+html += `
+<tr class="${classe}">
+<td>${x.linha}</td>
+<td>${x.codigo||''}</td>
+<td>${x.dispositivo||''}</td>
+<td>${x.maquina||''}</td>
+<td>${x.status||''}</td>
+<td>${x.obs||''}</td>
+<td>${statusImp}</td>
+</tr>`;
+});
+
+html += '</tbody></table>';
+
+document.getElementById('tabelaPreviewDispositivos').innerHTML = html;
+document.getElementById('btConfirmarImportDispositivos').innerText =
+'✔ Importar '+validas+' dispositivos válidos';
+}
+
+function fecharPreviewImportDispositivos(){
+document.getElementById('previewImportDispositivos').style.display='none';
+}
+
+function fecharPreviewImportacaoDispositivos(){
+fecharPreviewImportDispositivos();
+}
+
+async function confirmarImportacaoDispositivos(){
+let validas = listaImportacaoDispositivos.filter(x=>x.valida);
+
+if(!validas.length){
+alert('Não existem dispositivos válidos para importar.');
+return;
+}
+
+validas.forEach(x=>{
+novo({
+codigo:x.codigo,
+dispositivo:x.dispositivo,
+maquina:x.maquina,
+status:x.status || 'Ativo',
+obs:x.obs
+});
+});
+
+salvarLocal();
+
+let ok = await salvar();
+
+if(ok){
+registrarLog('Importou '+validas.length+' dispositivos por Excel/ODS/CSV');
+aviso(validas.length+' dispositivos importados com sucesso.');
+fecharPreviewImportDispositivos();
+}else{
+alert('Os dispositivos foram adicionados na tela, mas houve erro ao sincronizar com o Supabase.');
+}
+}
+
+
+pesquisa.oninput=filtrar;
+fStatus.onchange=filtrar;
+
+carregar();
+
+if(
+somenteLeitura()
+){
+
+btNovoDispositivo.style.display =
+"none";
+
+btSalvarDispositivo.style.display =
+"none";
+
+btDuplicados.style.display =
+"none";
+
+btImportarDispositivo.style.display =
+"none";
+
+document
+.querySelectorAll(".b5")
+.forEach(btn=>{
+
+btn.style.display =
+"none";
+
+});
+
+}
+</script>
+
+</body>
+</html>
