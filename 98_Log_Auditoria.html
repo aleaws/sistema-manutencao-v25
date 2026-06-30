@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>98_Log_Auditoria</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="permissoes.js"></script>
+
+<style>
+
+body{
+font-family:Arial;
+margin:0;
+background:#f4f6f9;
+}
+
+header{
+background:#1f4e79;
+color:white;
+padding:15px;
+text-align:center;
+font-size:26px;
+font-weight:bold;
+}
+
+.container{
+padding:10px;
+}
+
+.card{
+background:white;
+padding:10px;
+margin-bottom:10px;
+border-radius:8px;
+box-shadow:0 1px 4px rgba(0,0,0,.15);
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+gap:10px;
+}
+
+.ind{
+font-size:28px;
+font-weight:bold;
+color:#1f4e79;
+}
+
+button{
+border:none;
+padding:8px 12px;
+border-radius:6px;
+cursor:pointer;
+font-weight:bold;
+}
+
+.b1{background:#198754;color:white;}
+.b2{background:#0d6efd;color:white;}
+.b3{background:#6c757d;color:white;}
+.b4{background:#dc3545;color:white;}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th,td{
+border:1px solid #ccc;
+padding:6px;
+font-size:12px;
+}
+
+th{
+background:#1f4e79;
+color:white;
+position:sticky;
+top:0;
+}
+
+input,select{
+padding:6px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+📋 LOG DE AUDITORIA
+</header>
+
+<div class="container">
+
+<div class="card">
+
+<button class="b1"
+onclick="window.location.href='00_Sistema_Manutencao_V25.html'">
+⬅ Menu
+</button>
+
+<button class="b2"
+onclick="carregarLogs()">
+🔄 Atualizar
+</button>
+
+<button class="b3"
+onclick="exportarExcel()">
+📊 Exportar Excel
+</button>
+
+<button
+id="btLimpar"
+class="b4"
+onclick="limparLogs()">
+🧹 Limpar Logs
+</button>
+
+</div>
+
+<div class="card">
+
+<div class="grid">
+
+<div>
+Total Logs
+<div class="ind" id="tot">0</div>
+</div>
+
+<div>
+Logins
+<div class="ind" id="logins">0</div>
+</div>
+
+<div>
+Eventos Críticos
+<div class="ind" id="criticos">0</div>
+</div>
+
+<div>
+Hoje
+<div class="ind" id="hoje">0</div>
+</div>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<input
+id="pesquisa"
+placeholder="Pesquisar..."
+oninput="filtrar()">
+
+<select
+id="fUsuario"
+onchange="filtrar()">
+
+<option value="">
+Todos Usuários
+</option>
+
+</select>
+
+</div>
+
+<div class="card">
+
+<table id="tb">
+
+<thead>
+
+<tr>
+<th>Data/Hora</th>
+<th>Usuário</th>
+<th>Ação</th>
+</tr>
+
+</thead>
+
+<tbody></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<script>
+
+const supabaseUrl='https://wzcrqzbwcsmfwenzcxkf.supabase.co';
+const supabaseKey='sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu';
+const bancoSupabase=supabase.createClient(supabaseUrl,supabaseKey);
+
+
+verificarPermissao(
+"98_Log_Auditoria.html"
+);
+
+let usuario =
+localStorage.getItem(
+"usuarioLogado"
+);
+
+if(
+usuario !== "Alexandre" &&
+usuario !== "Diretoria"
+){
+
+alert(
+"Acesso negado"
+);
+
+window.location.href =
+"00_Sistema_Manutencao_V25.html";
+
+}
+
+if(
+usuario !== "Alexandre"
+){
+
+btLimpar.style.display =
+"none";
+
+}
+
+
+async function obterLogs(){
+ const {data,error}=await bancoSupabase
+ .from('logs_auditoria')
+ .select('*')
+ .order('created_at',{ascending:false});
+ if(error){
+   console.error(error);
+   return [];
+ }
+ return data||[];
+}
+
+async function carregarLogs(){
+
+
+let logs =
+await obterLogs();
+
+let tbody =
+tb.tBodies[0];
+
+tbody.innerHTML="";
+
+let usuarios =
+new Set();
+
+logs.forEach(log=>{
+
+usuarios.add(
+log.usuario || ""
+);
+
+let r =
+tbody.insertRow();
+
+r.insertCell().innerText =
+log.data || "";
+
+r.insertCell().innerText =
+log.usuario || "";
+
+r.insertCell().innerText =
+log.acao || "";
+
+});
+
+fUsuario.innerHTML =
+'<option value="">Todos Usuários</option>';
+
+[...usuarios]
+.sort()
+.forEach(u=>{
+
+fUsuario.innerHTML +=
+`<option>${u}</option>`;
+
+});
+
+await indicadores();
+
+}
+
+async function indicadores(){
+
+let logs =
+await obterLogs();
+
+tot.innerText =
+logs.length;
+
+logins.innerText =
+logs.filter(x=>
+(x.acao||"")
+.includes("Login")
+).length;
+
+criticos.innerText =
+logs.filter(x=>{
+
+let a =
+(x.acao||"")
+.toLowerCase();
+
+return (
+a.includes("tentou") ||
+a.includes("negado")
+);
+
+}).length;
+
+let hojeTxt =
+new Date()
+.toLocaleDateString();
+
+hoje.innerText =
+logs.filter(x=>
+(x.data||"")
+.includes(hojeTxt)
+).length;
+
+}
+
+function filtrar(){
+
+let txt =
+pesquisa.value
+.toLowerCase();
+
+let usu =
+fUsuario.value;
+
+[...tb.tBodies[0].rows]
+.forEach(r=>{
+
+let texto =
+r.innerText
+.toLowerCase();
+
+let ok =
+texto.includes(txt);
+
+if(usu){
+
+ok =
+ok &&
+r.cells[1]
+.innerText===usu;
+
+}
+
+r.style.display =
+ok ? "" : "none";
+
+});
+
+}
+
+function exportarExcel(){
+
+let dados=[[
+"Data/Hora",
+"Usuário",
+"Ação"
+]];
+
+[...tb.tBodies[0].rows]
+.forEach(r=>{
+
+dados.push([
+
+r.cells[0].innerText,
+r.cells[1].innerText,
+r.cells[2].innerText
+
+]);
+
+});
+
+let ws =
+XLSX.utils.aoa_to_sheet(
+dados
+);
+
+let wb =
+XLSX.utils.book_new();
+
+XLSX.utils.book_append_sheet(
+wb,
+ws,
+"Auditoria"
+);
+
+XLSX.writeFile(
+wb,
+"logs_auditoria.xlsx"
+);
+
+}
+
+function limparLogs(){
+
+if(
+usuario !== "Alexandre"
+){
+return;
+}
+
+if(
+!confirm(
+"Excluir todos os logs?"
+)
+){
+return;
+}
+
+localStorage.removeItem(
+"logs_auditoria"
+);
+
+carregarLogs();
+
+}
+
+carregarLogs();
+
+</script>
+
+</body>
+</html>
