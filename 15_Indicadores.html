@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-BR" translate="no" class="notranslate">
+<head>
+<meta charset="UTF-8">
+<meta name="google" content="notranslate">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>15_Indicadores</title>
+<style>
+*{box-sizing:border-box}
+:root{--azul:#1f4e79;--azul2:#123f63;--fundo:#f4f6f8;--linha:#d8e0ea;--verde:#138a36;--amarelo:#b77900;--vermelho:#b42318;--muted:#666}
+body{font-family:Arial,sans-serif;background:var(--fundo);margin:0;color:#17212f}
+header{background:var(--azul);color:#fff;padding:12px;text-align:center;position:relative}
+.headerBtns{position:absolute;left:10px;top:50%;transform:translateY(-50%);display:flex;gap:8px}
+button{padding:9px 14px;background:var(--azul);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:bold}
+.btnMenu{background:#28a745}.btnAtualizar{background:#17a2b8}.titulo{font-size:28px;font-weight:bold}
+.container{padding:12px;max-width:1550px;margin:auto}
+.painel{display:grid;grid-template-columns:1.1fr 2fr;gap:10px;margin-bottom:12px}
+.statusGeral,.acao,.card,.detalhes,.diag{background:#fff;border:1px solid var(--linha);border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.10)}
+.statusGeral{padding:15px;border-left:8px solid var(--verde)}
+.statusGeral.atencao{border-left-color:var(--amarelo)}.statusGeral.problema{border-left-color:var(--vermelho)}
+.statusGeral small{color:var(--muted);font-weight:bold;text-transform:uppercase}
+.status{font-size:34px;font-weight:bold;margin-top:8px;color:var(--verde)}
+.statusGeral.atencao .status{color:var(--amarelo)}.statusGeral.problema .status{color:var(--vermelho)}
+.acao{padding:15px}.acao h3{margin:0 0 8px;color:var(--azul2)}.acao p{margin:0;font-size:14px;line-height:1.45}
+.diag{padding:12px;margin-bottom:12px;border-left:6px solid var(--azul);font-size:13px;line-height:1.55}
+.diag.alerta{border-left-color:var(--amarelo);background:#fffdf4}
+.blocoTitulo{margin:14px 0 8px;color:var(--azul2);font-size:17px;font-weight:bold;border-left:6px solid var(--azul);padding-left:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px}
+.card{padding:13px;text-align:left;position:relative;min-height:112px;overflow:hidden;cursor:pointer}
+.card:before{content:"";position:absolute;left:0;top:0;width:6px;height:100%;background:var(--azul)}
+.card.ok:before{background:var(--verde)}.card.atencao:before{background:var(--amarelo)}.card.problema:before{background:var(--vermelho)}
+.card h3{margin:0;font-size:15px}.valor{font-size:32px;font-weight:bold;margin-top:10px;color:var(--azul)}
+.card.ok .valor{color:var(--verde)}.card.atencao .valor{color:var(--amarelo)}.card.problema .valor{color:var(--vermelho)}
+.sub{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.35}
+.semaforo{position:absolute;right:10px;top:10px;width:12px;height:12px;border-radius:50%;background:var(--verde)}
+.card.atencao .semaforo{background:var(--amarelo)}.card.problema .semaforo{background:var(--vermelho)}
+.detalhes{margin-top:14px;overflow:hidden}.detalhes h2{margin:0;background:#fff;border-bottom:1px solid var(--linha);padding:12px;color:var(--azul2);font-size:18px;display:flex;justify-content:space-between;align-items:center}.detalhes .corpo{padding:12px}
+table{width:100%;border-collapse:collapse;font-size:12px}th,td{border-bottom:1px solid var(--linha);padding:8px;vertical-align:top;text-align:left}th{background:#f9fbfd;color:#475467;text-transform:uppercase;font-size:11px}
+.tag{display:inline-block;background:#eef3f8;color:var(--azul2);border-radius:20px;padding:3px 8px;font-weight:bold;font-size:11px}.vazio{padding:15px;color:#666}
+@media(max-width:900px){header{text-align:right}.titulo{font-size:20px}.painel{grid-template-columns:1fr}}
+@media(max-width:650px){.headerBtns{position:static;transform:none;margin-bottom:8px}header{text-align:center}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="permissoes.js"></script>
+</head>
+<body>
+<header>
+<div class="headerBtns">
+<button class="btnMenu" onclick="window.location.href='00_Sistema_Manutencao_V25.html'">⬅ Menu</button>
+<button class="btnAtualizar" onclick="location.reload()">🔄 Atualizar</button>
+</div>
+<span class="titulo">📊 INDICADORES</span>
+</header>
+
+<div class="container">
+<div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap">
+<button onclick="atualizar()">Atualizar Indicadores</button>
+<button onclick="mostrarDiagnostico()">Ver Diagnóstico</button>
+</div>
+
+<div id="diag" class="diag">
+<b>Diagnóstico:</b><br>
+<span id="diagEndereco">Endereço: -</span><br>
+<span id="diagLocal">localStorage: -</span><br>
+<span id="diagSupa">Supabase: -</span><br>
+<span id="diagFinal">Conclusão: -</span>
+</div>
+
+<div class="painel">
+<div id="boxStatus" class="statusGeral ok">
+<small>Situação para treinamento</small>
+<div id="statusTexto" class="status">ESTÁVEL</div>
+<div id="statusSub" class="sub">Sem volume crítico de erros operacionais.</div>
+<div class="sub">Clique nos cards de erro para ver a origem dos registros.</div>
+</div>
+<div class="acao">
+<h3>Plano de ação sugerido</h3>
+<p id="acaoTexto">Acompanhar os registros e reforçar boas práticas na rotina.</p>
+</div>
+</div>
+
+<div class="blocoTitulo">Base do sistema</div>
+<div class="grid">
+<div class="card ok" onclick="mostrarBase('maquinas')"><span class="semaforo"></span><h3>Máquinas</h3><div class="valor" id="maq">0</div><div class="sub">Cadastradas</div></div>
+<div class="card ok" onclick="mostrarBase('dispositivos')"><span class="semaforo"></span><h3>Dispositivos</h3><div class="valor" id="disp">0</div><div class="sub">Cadastrados</div></div>
+<div class="card ok"><span class="semaforo"></span><h3>Lubrificações</h3><div class="valor" id="lub">0</div><div class="sub">Registros</div></div>
+<div class="card atencao"><span class="semaforo"></span><h3>Lubrificações Vencidas</h3><div class="valor" id="lubvenc">0</div><div class="sub">Atenção</div></div>
+<div class="card atencao"><span class="semaforo"></span><h3>Prioridades</h3><div class="valor" id="prioridades">0</div><div class="sub">Planejamento</div></div>
+</div>
+
+<div class="blocoTitulo">Erros básicos para treinamento</div>
+<div class="grid">
+<div class="card problema" id="cardMauUso" onclick="mostrarDetalhes('mauuso')"><span class="semaforo"></span><h3>Mau Uso do Operador</h3><div class="valor" id="mauuso">0</div><div class="sub">Clique para ver quem, onde e por quê</div></div>
+<div class="card problema" id="cardLimpeza" onclick="mostrarDetalhes('limpeza')"><span class="semaforo"></span><h3>Falta de Limpeza</h3><div class="valor" id="limpeza">0</div><div class="sub">Clique para ver registros</div></div>
+<div class="card problema" id="cardLubOp" onclick="mostrarDetalhes('faltalub')"><span class="semaforo"></span><h3>Falta de Lubrificação</h3><div class="valor" id="faltalub">0</div><div class="sub">Clique para ver registros</div></div>
+<div class="card problema" id="cardAjustes" onclick="mostrarDetalhes('ajustes')"><span class="semaforo"></span><h3>Ajustes Incorretos</h3><div class="valor" id="ajustes">0</div><div class="sub">Clique para ver registros</div></div>
+<div class="card problema" id="cardFerramenta" onclick="mostrarDetalhes('ferramenta')"><span class="semaforo"></span><h3>Ferramenta Danificada</h3><div class="valor" id="ferramenta">0</div><div class="sub">Clique para ver registros</div></div>
+<div class="card problema" id="cardColisao" onclick="mostrarDetalhes('colisao')"><span class="semaforo"></span><h3>Batidas / Colisões</h3><div class="valor" id="colisao">0</div><div class="sub">Clique para ver registros</div></div>
+<div class="card problema" id="cardChecklist" onclick="mostrarDetalhes('checklist')"><span class="semaforo"></span><h3>Checklist Não Realizado</h3><div class="valor" id="checklist">0</div><div class="sub">Clique para ver registros</div></div>
+<div class="card problema" id="cardTreinamento" onclick="mostrarDetalhes('todos')"><span class="semaforo"></span><h3>Treinamentos Necessários</h3><div class="valor" id="treinamentos">0</div><div class="sub">Todos os pontos críticos</div></div>
+<div class="card atencao" id="cardReincidencias" onclick="mostrarDetalhes('reincidencias')"><span class="semaforo"></span><h3>Reincidências</h3><div class="valor" id="reincidencias">0</div><div class="sub">Mesmo erro repetido</div></div>
+</div>
+
+<div class="detalhes" id="painelDetalhes">
+<h2><span id="tituloDetalhes">Detalhamento dos registros</span><button onclick="limparDetalhes()">Fechar</button></h2>
+<div class="corpo" id="corpoDetalhes"><div class="vazio">Clique em um card de erro para ver os registros que formam o número.</div></div>
+</div>
+</div>
+
+<script>
+try{verificarPermissao("15_Indicadores.html")}catch(e){}
+
+const SUPABASE_URL="https://wzcrqzbwcsmfwenzcxkf.supabase.co";
+const SUPABASE_KEY="sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu";
+let bancoSupabase=null;
+try{bancoSupabase=window.supabase?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null}catch(e){bancoSupabase=null}
+
+let REGISTROS={mauuso:[],limpeza:[],faltalub:[],ajustes:[],ferramenta:[],colisao:[],checklist:[],todos:[],reincidencias:[]};
+let BASES={maquinas:[],dispositivos:[]};
+let SUPA_STATUS="não testado";
+
+const CATS={
+mauuso:["mau uso","mau-uso","mal uso","uso incorreto","operador"],
+limpeza:["falta de limpeza","limpeza","sujo","sujeira","cavaco acumulado","oleo espalhado"],
+faltalub:["falta de lubrificacao","sem lubrificacao","lubrificacao inadequada","sem oleo","oleo seco"],
+ajustes:["ajuste incorreto","regulagem incorreta","batente","sensor mal","fixacao incorreta","parafuso frouxo"],
+ferramenta:["ferramenta danificada","broca quebrada","macho quebrado","fresa quebrada","puncao","matriz danificada"],
+colisao:["colisao","colisão","batida","bateu","quebrou por impacto"],
+checklist:["checklist nao realizado","checklist não realizado","nao realizou checklist","sem checklist","inspecao nao feita"]
+};
+const NOMES={mauuso:"Mau Uso do Operador",limpeza:"Falta de Limpeza",faltalub:"Falta de Lubrificação",ajustes:"Ajustes Incorretos",ferramenta:"Ferramenta Danificada",colisao:"Batidas / Colisões",checklist:"Checklist Não Realizado",todos:"Treinamentos Necessários",reincidencias:"Reincidências"};
+
+function ler(chave){try{return JSON.parse(localStorage.getItem(chave)||"[]")}catch{return []}}
+function normalizar(s){return String(s||"").toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"")}
+function texto(x){return normalizar(JSON.stringify(x||{}))}
+function contem(x,palavras){let t=texto(x);return palavras.some(p=>t.includes(normalizar(p)))}
+function chaveUnica(x){return normalizar(x.codigo||x.cod||x.id||x.numero||x.nome||x.maquina||x.dispositivo||x.equipamento||JSON.stringify(x)).trim()}
+function unicos(lista){let mapa={};lista.forEach(x=>{let k=chaveUnica(x);if(k)mapa[k]=x});return Object.values(mapa)}
+function localMulti(chaves){let arr=[];chaves.forEach(c=>{let v=ler(c);if(Array.isArray(v))arr=arr.concat(v.map(x=>({...x,_origem:c}))) });return arr}
+
+function timeout(ms){return new Promise(resolve=>setTimeout(()=>resolve("__TIMEOUT__"),ms))}
+async function supa(tabela){
+  if(!bancoSupabase){SUPA_STATUS="biblioteca Supabase não carregou";return []}
+  try{
+    const consulta=bancoSupabase.from(tabela).select("*");
+    const r=await Promise.race([consulta,timeout(3500)]);
+    if(r==="__TIMEOUT__"){SUPA_STATUS="tempo esgotado";return []}
+    if(r.error){SUPA_STATUS="erro: "+r.error.message;return []}
+    SUPA_STATUS="conectado";
+    return (r.data||[]).map(x=>({...x,_origem:"Supabase: "+tabela}));
+  }catch(e){SUPA_STATUS="erro de conexão";return[]}
+}
+async function baseInteligente(tabela,chaves){return unicos((await supa(tabela)).concat(localMulti(chaves)))}
+
+function dataItem(x){return x.data||x.data_registro||x.criado_em||x.created_at||x.dataAbertura||x.data_abertura||""}
+function maquinaItem(x){return x.maquina||x.equipamento||x.dispositivo||x.alvo||x.codigo||x.nome||"-"}
+function respItem(x){return x.operador||x.responsavel||x.solicitante||x.usuario||x.nome_operador||"-"}
+function descItem(x){return x.descricao||x.defeito||x.obs||x.observacao||x.resultado||x.servico||x.pendencia||JSON.stringify(x).slice(0,220)}
+function achouPalavra(x,palavras){let t=texto(x);return palavras.find(p=>t.includes(normalizar(p)))||""}
+
+function extrairRegistros(bases){
+REGISTROS={mauuso:[],limpeza:[],faltalub:[],ajustes:[],ferramenta:[],colisao:[],checklist:[],todos:[],reincidencias:[]};
+bases.forEach(base=>base.forEach(item=>{
+Object.keys(CATS).forEach(cat=>{
+let palavra=achouPalavra(item,CATS[cat]);
+if(palavra){
+let reg={categoria:cat,data:dataItem(item),maquina:maquinaItem(item),responsavel:respItem(item),origem:item._origem||"localStorage",motivo:palavra,descricao:descItem(item),raw:item};
+REGISTROS[cat].push(reg);REGISTROS.todos.push(reg);
+}})
+}));
+let mapa={};
+REGISTROS.todos.forEach(r=>{let k=normalizar(r.maquina)+"_"+r.categoria;if(!mapa[k])mapa[k]=[];mapa[k].push(r)});
+Object.values(mapa).forEach(lista=>{if(lista.length>1)REGISTROS.reincidencias.push(...lista)});
+}
+
+function classeCard(id,valor){let card=document.getElementById(id);if(!card)return;card.classList.remove("ok","atencao","problema");if(valor>=10)card.classList.add("problema");else if(valor>=4)card.classList.add("atencao");else card.classList.add("ok")}
+function setStatus(total){boxStatus.classList.remove("ok","atencao","problema");if(total>=20){boxStatus.classList.add("problema");statusTexto.innerText="TREINAR AGORA";statusSub.innerText="Volume alto de erros operacionais. Priorizar treinamento dos operadores.";acaoTexto.innerText="Foco: atacar as maiores causas do mês. Clique nos cards para ver origem e motivo."}else if(total>=8){boxStatus.classList.add("atencao");statusTexto.innerText="ATENÇÃO";statusSub.innerText="Existem pontos recorrentes que merecem orientação.";acaoTexto.innerText="Use o detalhamento para conversar com dados, sem achismo."}else{boxStatus.classList.add("ok");statusTexto.innerText="ESTÁVEL";statusSub.innerText="Sem volume crítico de erros operacionais.";acaoTexto.innerText="Manter acompanhamento e registrar os desvios para evitar reincidência."}}
+
+function contarChavesLocal(){
+  let qtd=0;
+  for(let i=0;i<localStorage.length;i++){
+    let k=localStorage.key(i), v=localStorage.getItem(k);
+    if(v&&v!=="[]"&&v!=="null"&&v!=="")qtd++;
+  }
+  return qtd;
+}
+function atualizarDiagnostico(){
+  const qtd=contarChavesLocal();
+  diagEndereco.innerHTML="<b>Endereço:</b> "+location.href;
+  diagLocal.innerHTML="<b>localStorage:</b> "+qtd+" chave(s) com dados neste endereço";
+  diagSupa.innerHTML="<b>Supabase:</b> "+SUPA_STATUS;
+  let msg="";
+  diag.classList.remove("alerta");
+  if(location.protocol==="file:"){
+    msg="Arquivo aberto pelo C:/Downloads. Ele só lê dados deste endereço local. Dados do GitHub ficam separados.";
+    diag.classList.add("alerta");
+  }else if(qtd===0 && SUPA_STATUS!=="conectado"){
+    msg="Sem localStorage e sem Supabase. Não há fonte de dados encontrada.";
+    diag.classList.add("alerta");
+  }else if(qtd===0 && SUPA_STATUS==="conectado"){
+    msg="Lendo somente Supabase. Dados salvos apenas no localStorage de outro endereço não aparecem aqui.";
+  }else{
+    msg="Dados encontrados neste endereço. Use Ver Diagnóstico para conferir as chaves.";
+  }
+  diagFinal.innerHTML="<b>Conclusão:</b> "+msg;
+}
+
+async function atualizar(){
+  atualizarDiagnostico();
+
+  let maquinas=await baseInteligente("maquinas",["cadastro_maquinas_v24","cadastro_maquinas_v25","maquinas_v24","maquinas_v25","maquinas"]);
+  let dispositivos=await baseInteligente("dispositivos",["cadastro_dispositivos_v24","cadastro_dispositivos_v25","dispositivos_v24","dispositivos_v25","dispositivos"]);
+  BASES.maquinas=maquinas;BASES.dispositivos=dispositivos;
+
+  let lubrificacoes=unicos(localMulti(["lubrificacao_v24","lubrificacoes_v24","lubrificacao_v25","lubrificacoes_v25"]));
+  let prioridadesDados=unicos(localMulti(["planejamento_prioridades_v24","planejamento_prioridades","prioridades_v24","prioridades_v25"]));
+  maq.innerText=maquinas.length;disp.innerText=dispositivos.length;lub.innerText=lubrificacoes.length;prioridades.innerText=prioridadesDados.length;
+
+  let vencidas=0,hj=new Date();hj.setHours(0,0,0,0);
+  lubrificacoes.forEach(l=>{if(!l.proxima)return;let d=new Date(l.proxima);d.setHours(0,0,0,0);if(d<hj)vencidas++});
+  lubvenc.innerText=vencidas;
+
+  let manutencao=(await supa("manutencao")).concat(localMulti(["manutencao_v24","manutencao_v25"]));
+  let os=(await supa("ordens_servico")).concat(localMulti(["ordens_servico","ordens_servico_v24","os_dispositivos_v24"]));
+  let liberacoes=(await supa("liberacoes")).concat(localMulti(["liberacoes_v24","liberacoes_v25"]));
+  let bases=[manutencao,os,liberacoes,localMulti(["diario_simples_v24","diario_simples_v25"]),localMulti(["diario_inspecao_v24","diario_inspecao_v25"]),localMulti(["nao_conformidades_v24","nao_conformidades_v25"]),localMulti(["historico_preventiva_v2_v25","historico_preventiva_plus_v25","historico_preventiva_executiva_v25","historico_preventiva_essencial_v25","historico_preventiva_gestao_v25"]),localMulti(["servicos_ferramentaria_manutencao_v2_v25","servicos_ferramentaria_manutencao_v25","servicos_ferramentaria_manutencao_v3","servicos_ferramentaria_manutencao_v4"])];
+  extrairRegistros(bases);
+
+  mauuso.innerText=REGISTROS.mauuso.length;limpeza.innerText=REGISTROS.limpeza.length;faltalub.innerText=REGISTROS.faltalub.length;ajustes.innerText=REGISTROS.ajustes.length;ferramenta.innerText=REGISTROS.ferramenta.length;colisao.innerText=REGISTROS.colisao.length;checklist.innerText=REGISTROS.checklist.length;reincidencias.innerText=REGISTROS.reincidencias.length;
+  let total=REGISTROS.todos.length+REGISTROS.reincidencias.length;treinamentos.innerText=total;
+  classeCard("cardMauUso",REGISTROS.mauuso.length);classeCard("cardLimpeza",REGISTROS.limpeza.length);classeCard("cardLubOp",REGISTROS.faltalub.length);classeCard("cardAjustes",REGISTROS.ajustes.length);classeCard("cardFerramenta",REGISTROS.ferramenta.length);classeCard("cardColisao",REGISTROS.colisao.length);classeCard("cardChecklist",REGISTROS.checklist.length);classeCard("cardTreinamento",total);classeCard("cardReincidencias",REGISTROS.reincidencias.length);
+  setStatus(total);
+  atualizarDiagnostico();
+}
+
+function mostrarDetalhes(cat){
+let dados=REGISTROS[cat]||[];
+tituloDetalhes.innerText=(NOMES[cat]||cat)+" - "+dados.length+" registro(s)";
+if(!dados.length){corpoDetalhes.innerHTML='<div class="vazio">Nenhum registro encontrado para este indicador.</div>';painelDetalhes.scrollIntoView({behavior:"smooth"});return}
+corpoDetalhes.innerHTML=`<table><thead><tr><th>Data</th><th>Máquina / Dispositivo</th><th>Responsável / Operador</th><th>Origem</th><th>Motivo encontrado</th><th>Descrição</th></tr></thead><tbody>${dados.map(r=>`<tr><td>${r.data||"-"}</td><td><b>${r.maquina}</b></td><td>${r.responsavel}</td><td><span class="tag">${r.origem}</span></td><td>${r.motivo}</td><td>${r.descricao}</td></tr>`).join("")}</tbody></table>`;
+painelDetalhes.scrollIntoView({behavior:"smooth",block:"start"});
+}
+function mostrarBase(tipo){
+let dados=BASES[tipo]||[];
+tituloDetalhes.innerText=(tipo==="maquinas"?"Máquinas":"Dispositivos")+" - "+dados.length+" registro(s)";
+if(!dados.length){corpoDetalhes.innerHTML='<div class="vazio">Nenhum registro encontrado.</div>';painelDetalhes.scrollIntoView({behavior:"smooth"});return}
+corpoDetalhes.innerHTML=`<table><thead><tr><th>Código</th><th>Nome</th><th>Setor</th><th>Origem</th></tr></thead><tbody>${dados.map(x=>`<tr><td>${x.codigo||x.cod||x.id||"-"}</td><td><b>${x.maquina||x.nome||x.dispositivo||x.equipamento||"-"}</b></td><td>${x.setor||"-"}</td><td><span class="tag">${x._origem||"localStorage"}</span></td></tr>`).join("")}</tbody></table>`;
+painelDetalhes.scrollIntoView({behavior:"smooth",block:"start"});
+}
+function mostrarDiagnostico(){
+let linhas="";
+for(let i=0;i<localStorage.length;i++){
+  const k=localStorage.key(i);
+  let qtd=0,tipo="texto";
+  try{let v=JSON.parse(localStorage.getItem(k)||"[]");if(Array.isArray(v)){qtd=v.length;tipo="lista"}else if(v){qtd=1;tipo=typeof v}}catch(e){qtd=localStorage.getItem(k)?1:0}
+  linhas+=`<tr><td>${k}</td><td>${qtd}</td><td>${tipo}</td></tr>`;
+}
+tituloDetalhes.innerText="Diagnóstico das bases deste endereço";
+corpoDetalhes.innerHTML=`<table><thead><tr><th>Chave</th><th>Qtd</th><th>Tipo</th></tr></thead><tbody>${linhas||"<tr><td colspan='3'>Nenhuma chave encontrada.</td></tr>"}</tbody></table><div class="vazio"><b>Endereço:</b> ${location.href}<br><b>Supabase:</b> ${SUPA_STATUS}</div>`;
+painelDetalhes.scrollIntoView({behavior:"smooth"});
+}
+function limparDetalhes(){tituloDetalhes.innerText="Detalhamento dos registros";corpoDetalhes.innerHTML='<div class="vazio">Clique em um card de erro para ver os registros que formam o número.</div>'}
+document.addEventListener("DOMContentLoaded",function(){document.documentElement.setAttribute("translate","no");document.body.classList.add("notranslate");atualizarDiagnostico();atualizar()});
+</script>
+</body>
+</html>
