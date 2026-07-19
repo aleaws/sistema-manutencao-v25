@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>04_Maquinas</title>
+
+<style>
+:root{
+--azul-900:#163b5c;
+--azul-700:#1f5f93;
+--azul-500:#4f93c8;
+--verde:#21805b;
+--laranja:#b7791f;
+--cinza-950:#17202a;
+--cinza-700:#4b5563;
+--cinza-200:#e5e7eb;
+--cinza-100:#f3f4f6;
+--branco:#fff;
+--raio:8px;
+--sombra:0 10px 26px rgba(17,24,39,.10);
+}
+*{box-sizing:border-box}
+body{font-family:Arial,Helvetica,sans-serif;background:#f5f7fa;margin:0;color:var(--cinza-950)}
+header{
+position:sticky;top:0;z-index:10;
+display:flex;align-items:center;justify-content:space-between;gap:12px;
+background:var(--azul-700);color:#fff;padding:12px 16px;
+box-shadow:0 4px 16px rgba(15,23,42,.18)
+}
+.titulo-topo{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:800}
+.marca{display:grid;place-items:center;width:36px;height:36px;border-radius:var(--raio);background:#fff;color:var(--azul-900)}
+.acoes-topo{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.container{width:min(1320px,100%);margin:0 auto;padding:14px}
+.card{background:#fff;padding:12px;margin-bottom:12px;border:1px solid var(--cinza-200);border-radius:var(--raio);box-shadow:var(--sombra)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.indicador{min-height:82px;padding:12px;border:1px solid var(--cinza-200);border-left:5px solid var(--azul-500);border-radius:var(--raio);background:#fff}
+.ind{font-size:26px;font-weight:800;color:var(--azul-900);line-height:1.1}
+label{display:block;margin-bottom:5px;color:var(--cinza-700);font-size:12px;font-weight:800;text-transform:uppercase}
+button{min-height:38px;padding:9px 12px;border:none;border-radius:var(--raio);color:#fff;font-weight:800;cursor:pointer}
+.b1{background:var(--azul-900)}
+.b2{background:var(--verde)}
+.b3{background:var(--laranja)}
+.b4{background:#4b5563}
+.b5{background:#c53030}
+.btn-claro{background:#fff!important;color:var(--azul-900)!important}
+.barra-acoes{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.msg{display:none;padding:10px;background:#d1e7dd;color:#0f5132;border-radius:var(--raio);margin-top:10px;font-weight:700}
+input{width:100%;min-height:38px;box-sizing:border-box;font-size:14px;border:1px solid var(--cinza-200);border-radius:var(--raio);padding:8px 10px;background:#fff;outline:none}
+input:focus{border-color:var(--azul-500);box-shadow:0 0 0 3px rgba(79,147,200,.18)}
+.tabela-wrap{overflow-x:auto;border:1px solid var(--cinza-200);border-radius:var(--raio);background:#fff}
+table{width:100%;min-width:900px;border-collapse:collapse;background:#fff}
+th,td{border-bottom:1px solid var(--cinza-200);border-right:1px solid #d1d5db;padding:8px 9px;font-size:13px;text-align:left;vertical-align:middle}
+th:last-child,td:last-child{border-right:none}
+th{background:var(--cinza-100);color:var(--azul-900);font-size:12px;text-transform:uppercase;font-weight:800;text-align:center}
+tbody tr:nth-child(even){background:#f8fafc}
+tbody tr:nth-child(odd){background:#fff}
+tbody tr:hover{background:#eef6ff}
+tbody tr:nth-child(even) input,
+tbody tr:nth-child(odd) input,
+tbody tr:hover input{background:transparent}
+td input{border:none;box-shadow:none!important;background:transparent;font-size:13px;padding:6px 4px;min-height:34px}
+td:nth-child(1),td:nth-child(2),td:nth-child(6){text-align:center}
+.col-excluir{width:72px;text-align:center}
+.btn-excluir{min-height:34px;padding:7px 10px;background:#c53030;color:#fff;border-radius:8px}
+.c1{width:55px;text-align:center}
+.c2{width:170px}
+.c3{width:330px}
+.c4{width:200px}
+.c5{width:auto}
+.preview-import{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px}
+.preview-card{background:#fff;width:min(1100px,96vw);max-height:88vh;overflow:auto;border-radius:10px;padding:14px;box-shadow:0 12px 40px rgba(0,0,0,.35)}
+.preview-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.preview-top h2{margin:0;color:var(--azul-900)}
+.import-resumo{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:10px 0}
+.import-resumo div{border:1px solid #ddd;border-radius:8px;padding:8px;background:#f8f9fa;font-weight:bold;text-align:center}
+.import-resumo b{display:block;font-size:22px;color:var(--azul-900)}
+.preview-table{max-height:420px;overflow:auto;border:1px solid #ccc;border-radius:8px}
+.preview-table table{min-width:900px}
+.linha-erro{background:#fde2e2!important}
+.linha-duplicada{background:#fff3cd!important}
+@media(max-width:760px){header{align-items:flex-start;flex-direction:column}.acoes-topo,.acoes-topo button,.barra-acoes button{width:100%}.titulo-topo{font-size:19px}.container{padding:10px}}
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script src="permissoes.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+</head>
+
+<body>
+
+<header>
+  <div class="titulo-topo"><span class="marca">🏭</span><span>Cadastro de Máquinas</span></div>
+  <div class="acoes-topo">
+    <button class="btn-claro" type="button" onclick="window.location.href='00_Sistema_Manutencao_V25.html'">← Menu</button>
+    <button class="btn-claro" type="button" onclick="location.reload()">🔄 Atualizar</button>
+  </div>
+</header>
+
+<div class="container">
+
+<div class="grid">
+<div class="indicador">
+<div class="ind" id="tot">0</div>
+<div>Total de máquinas</div>
+</div>
+</div>
+
+<div class="card">
+
+<div class="grid">
+
+<div>
+<label>Pesquisa</label>
+<input id="pesquisa" placeholder="Pesquisar...">
+</div>
+
+</div>
+
+</div>
+
+<div class="card">
+<div class="barra-acoes">
+
+<button id="btNovaMaquina" class="b1" onclick="novaMaquina()">Nova Máquina</button>
+
+<button id="btSalvarMaquina" class="b2" onclick="salvarManual()">Salvar</button>
+
+<button
+id="btSupabase"
+class="b2"
+onclick="enviarParaSupabase()"
+style="display:none;">
+📤 Enviar para Supabase
+</button>
+
+<button id="btDuplicados" class="b3" onclick="verificarDuplicados()">
+🔍 Verificar Duplicados
+</button>
+
+<button id="btImportarMaquinas" class="b2" onclick="document.getElementById('arquivoImportacaoMaquinas').click()">📂 Importar Excel / ODS</button>
+<input id="arquivoImportacaoMaquinas" type="file" accept=".xlsx,.xls,.ods,.csv" style="display:none" onchange="lerImportacaoMaquinas(this)">
+
+<button class="b3" onclick="exportarExcel()">📊 Exportar Excel</button>
+
+<button class="b4" onclick="window.print()">Imprimir</button>
+
+<div id="msg" class="msg"></div>
+
+</div>
+</div>
+
+<div class="card">
+
+<div class="tabela-wrap">
+<table id="tb">
+
+<thead>
+<tr>
+<th class="c1">Nº</th>
+<th class="c2">Código</th>
+<th class="c3">Máquina</th>
+<th class="c4">Setor</th>
+<th class="c5">Observação</th>
+<th id="thExcluir" class="col-excluir">Excluir</th>
+</tr>
+</thead>
+
+<tbody></tbody>
+
+</table>
+</div>
+
+</div>
+
+</div>
+
+
+<div id="previewImportMaquinas" class="preview-import">
+<div class="preview-card">
+<div class="preview-top">
+<h2>📂 Pré-visualização da importação</h2>
+<button class="b4" onclick="fecharPreviewImportacao()">Fechar</button>
+</div>
+
+<div id="resumoImportMaquinas" class="import-resumo"></div>
+
+<div style="background:#eef6ff;border:1px solid #b6d4fe;color:#084298;padding:8px;border-radius:8px;margin-bottom:8px;font-weight:bold">
+Linhas amarelas = duplicadas e serão ignoradas. Linhas vermelhas = inválidas. Só as válidas entram no cadastro.
+</div>
+
+<div id="tabelaPreviewImportMaquinas" class="preview-table"></div>
+
+<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+<button id="btnConfirmarImportMaquinas" class="b2" onclick="confirmarImportacaoMaquinas()">✔ Importar máquinas válidas</button>
+<button class="b4" onclick="fecharPreviewImportacao()">Cancelar</button>
+</div>
+</div>
+</div>
+
+
+<script>
+
+const SUPABASE_URL = 'https://wzcrqzbwcsmfwenzcxkf.supabase.co';
+
+const SUPABASE_KEY = 'sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu';
+
+const bancoSupabase = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+if(typeof verificarPermissao !== "function"){
+function verificarPermissao(){ return true; }
+}
+
+if(typeof registrarLog !== "function"){
+
+function registrarLog(acao){
+
+let logs =
+JSON.parse(
+localStorage.getItem("logs_auditoria") || "[]"
+);
+
+logs.unshift({
+data:new Date().toLocaleString(),
+usuario:localStorage.getItem("usuarioLogado") || "Sistema",
+acao:acao
+});
+
+localStorage.setItem(
+"logs_auditoria",
+JSON.stringify(logs)
+);
+
+}
+
+}
+
+async function testeSupabase() {
+
+    const { data, error } = await bancoSupabase
+        .from('maquinas')
+        .select('*');
+
+    console.log('DADOS DO SUPABASE:', data);
+
+    if (error) {
+        console.error(error);
+    }
+}
+
+testeSupabase();
+
+verificarPermissao(
+"04_Maquinas.html"
+);
+
+let usuarioLogado =
+localStorage.getItem(
+"usuarioLogado"
+);
+
+if(
+
+usuarioLogado !== "Alexandre" &&
+
+usuarioLogado !== "Diretoria" &&
+
+usuarioLogado !== "PCP" &&
+
+usuarioLogado !== "Engenharia"
+
+){
+
+alert(
+"Acesso negado"
+);
+
+window.location.href =
+"index.html";
+
+}
+
+if(
+usuarioLogado==="PCP" ||
+usuarioLogado==="Engenharia"
+){
+
+btNovaMaquina.style.display =
+"none";
+
+btSalvarMaquina.style.display =
+"none";
+
+btDuplicados.style.display =
+"none";
+
+if(typeof btImportarMaquinas !== "undefined"){
+btImportarMaquinas.style.display =
+"none";
+}
+
+}
+
+if(usuarioLogado==="Alexandre"){
+
+    btSupabase.style.display = "inline-block";
+
+}
+
+
+function aplicarPermissaoExcluir(){
+const thExcluir = document.getElementById('thExcluir');
+if(thExcluir && usuarioLogado !== 'Alexandre'){
+thExcluir.style.display = 'none';
+}
+}
+
+aplicarPermissaoExcluir();
+
+function aviso(t){
+msg.innerText=t;
+msg.style.display='block';
+setTimeout(()=>msg.style.display='none',2500);
+}
+
+function novaMaquina(){
+
+registrarLog(
+"Criou máquina"
+);
+
+novo();
+
+}
+
+function novo(d={}){
+let r=tb.tBodies[0].insertRow();
+
+r.innerHTML=`
+<td></td>
+
+<td>
+<input value="${d.codigo||''}">
+</td>
+
+<td>
+<input value="${d.maquina||''}">
+</td>
+
+<td>
+<input value="${d.setor||''}">
+</td>
+
+<td>
+<input value="${d.obs||''}">
+</td>
+${usuarioLogado === "Alexandre" ? `
+<td class="col-excluir">
+<button class="btn-excluir" type="button" onclick="excluir(this)">X</button>
+</td>` : ``}
+`;
+
+r.querySelectorAll("input").forEach(e=>{
+e.oninput=()=>{
+
+let maquina =
+r.cells[2].querySelector('input')
+.value
+.trim()
+.toLowerCase();
+
+let repetidas = 0;
+
+[...tb.tBodies[0].rows].forEach(l=>{
+
+let nome =
+l.cells[2].querySelector('input')
+.value
+.trim()
+.toLowerCase();
+
+if(nome && nome===maquina){
+repetidas++;
+}
+
+});
+
+if(repetidas>1){
+
+alert("⚠ Máquina já cadastrada.");
+
+r.cells[2].querySelector('input').value='';
+
+return;
+
+}
+
+salvar();
+filtrar();
+
+};
+});
+
+if(
+usuarioLogado==="PCP" ||
+usuarioLogado==="Engenharia"
+){
+
+r.querySelectorAll("input").forEach(e=>{
+
+e.disabled = true;
+
+});
+
+}
+
+renum();
+
+}
+
+
+function excluir(btn){
+
+let usuario = localStorage.getItem("usuarioLogado") || "";
+
+if(usuario !== "Alexandre"){
+registrarLog("Tentou excluir máquina");
+alert("Somente Alexandre pode excluir máquinas.");
+return;
+}
+
+if(!confirm("Excluir máquina?")) return;
+
+registrarLog("Excluiu máquina");
+
+btn.closest("tr").remove();
+renum();
+salvar();
+enviarSupabase();
+
+}
+
+function renum(){
+
+[...tb.tBodies[0].rows].forEach((r,i)=>{
+r.cells[0].innerText=i+1;
+});
+
+indicadores();
+
+}
+
+function dados(){
+
+return [...tb.tBodies[0].rows].map(r=>({
+
+codigo:r.cells[1].querySelector('input').value,
+maquina:r.cells[2].querySelector('input').value,
+setor:r.cells[3].querySelector('input').value,
+obs:r.cells[4].querySelector('input').value
+
+}));
+
+}
+
+
+function prepararRegistrosMaquinas(lista){
+const mapa = {};
+const duplicados = [];
+
+(lista || []).forEach(x=>{
+  let codigo = String(x.codigo || '').trim();
+  let maquina = String(x.maquina || '').trim();
+  let setor = String(x.setor || '').trim();
+  let obs = String(x.obs || '').trim();
+
+  if(!maquina) return;
+
+  if(!codigo){
+    codigo = maquina;
+  }
+
+  const chave = codigo.toLowerCase();
+
+  if(mapa[chave]){
+    duplicados.push(codigo);
+  }
+
+  mapa[chave] = {
+    codigo: codigo,
+    maquina: maquina,
+    setor: setor,
+    obs: obs
+  };
+});
+
+return {
+  registros: Object.values(mapa),
+  duplicados: duplicados
+};
+}
+
+function erroSupabaseTexto(error){
+if(!error)return "Erro desconhecido.";
+return [
+error.message || "",
+error.details || "",
+error.hint || "",
+error.code ? "Código: " + error.code : ""
+].filter(Boolean).join("\\n");
+}
+
+async function sincronizarMaquinasSeguro(registrosOrigem){
+const preparado = prepararRegistrosMaquinas(registrosOrigem);
+const registros = preparado.registros;
+
+if(!registros.length){
+  alert("Não existe nenhuma máquina válida para enviar.");
+  return false;
+}
+
+/*
+  CORREÇÃO DEFINITIVA:
+  - Não apaga a tabela maquinas.
+  - Remove códigos duplicados antes de enviar.
+  - Atualiza se o código já existir.
+  - Cria se o código não existir.
+*/
+const { error } = await bancoSupabase
+  .from('maquinas')
+  .upsert(registros, { onConflict: 'codigo' });
+
+if(error){
+  console.error("Erro real do Supabase:", error);
+  alert("Erro ao enviar para Supabase:\\n\\n" + erroSupabaseTexto(error));
+  return false;
+}
+
+let msg = registros.length + " máquinas sincronizadas com sucesso.";
+
+if(preparado.duplicados.length){
+  msg += "\\n\\nAtenção: " + preparado.duplicados.length + " código(s) duplicado(s) foram ignorados, mantendo apenas um registro por código.";
+}
+
+alert(msg);
+return true;
+}
+
+
+function salvar(){
+
+localStorage.setItem(
+'cadastro_maquinas_v24',
+JSON.stringify(dados())
+);
+
+indicadores();
+
+}
+
+async function salvarManual(){
+
+salvar();
+
+const ok = await sincronizarMaquinasSeguro(dados());
+
+if(ok){
+aviso("Dados salvos e sincronizados com sucesso.");
+}
+
+}
+
+async function enviarSupabase(){
+
+await sincronizarMaquinasSeguro(dados());
+
+}
+
+async function carregar(){
+
+tb.tBodies[0].innerHTML = '';
+
+const { data, error } =
+await bancoSupabase
+.from('maquinas')
+.select('*');
+
+if(error){
+console.error(error);
+aviso('Erro ao carregar máquinas do Supabase: ' + error.message);
+}
+
+if(
+!error &&
+data &&
+data.length > 0
+){
+
+data.sort((a,b)=>
+(a.codigo||'').localeCompare(
+(b.codigo||''),
+undefined,
+{numeric:true}
+)
+);
+
+data.forEach(x=>novo(x));
+
+}
+else
+{
+
+let local = JSON.parse(
+localStorage.getItem(
+'cadastro_maquinas_v24'
+) || '[]'
+);
+
+local.sort((a,b)=>
+(a.codigo||'').localeCompare(
+(b.codigo||''),
+undefined,
+{numeric:true}
+)
+);
+
+local.forEach(x=>novo(x));
+
+}
+
+indicadores();
+
+}
+
+function indicadores(){
+
+tot.innerText=dados().length;
+
+}
+
+function filtrar(){
+
+let txt=
+pesquisa.value.toLowerCase().trim();
+
+[...tb.tBodies[0].rows].forEach(r=>{
+
+let codigo =
+r.cells[1].querySelector('input')
+.value.toLowerCase();
+
+let maquina =
+r.cells[2].querySelector('input')
+.value.toLowerCase();
+
+let setor =
+r.cells[3].querySelector('input')
+.value.toLowerCase();
+
+let obs =
+r.cells[4].querySelector('input')
+.value.toLowerCase();
+
+let ok = false;
+
+if(!txt){
+
+    ok = true;
+
+}else{
+
+    ok =
+    codigo === txt ||
+    maquina.includes(txt) ||
+    setor.includes(txt) ||
+    obs.includes(txt);
+
+}
+
+r.style.display = ok ? '' : '';
+
+if(!ok){
+    r.style.display = 'none';
+}
+
+});
+
+}
+function exportarCSV(){
+
+let linhas=[[
+"N",
+"Codigo",
+"Maquina",
+"Setor",
+"Observacao"
+]];
+
+dados().forEach((d,i)=>{
+
+linhas.push([
+i+1,
+d.codigo,
+d.maquina,
+d.setor,
+d.obs
+]);
+
+});
+
+let csv=
+linhas.map(r=>
+r.map(c=>`"${c}"`).join(";")
+).join("\n");
+
+let a=document.createElement("a");
+
+a.href=URL.createObjectURL(
+new Blob([csv],{type:"text/csv"})
+);
+
+a.download="Cadastro_Maquinas.csv";
+
+a.click();
+
+aviso("CSV exportado com sucesso.");
+
+}
+
+function exportarExcel(){
+
+let linhas=[[
+"N",
+"Codigo",
+"Maquina",
+"Setor",
+"Observacao"
+]];
+
+dados().forEach((d,i)=>{
+
+linhas.push([
+i+1,
+d.codigo,
+d.maquina,
+d.setor,
+d.obs
+]);
+
+});
+
+let ws =
+XLSX.utils.aoa_to_sheet(linhas);
+
+ws['!autofilter'] = {
+ref:"A1:E1"
+};
+
+ws['!cols'] = [
+{wch:6},
+{wch:15},
+{wch:30},
+{wch:20},
+{wch:50}
+];
+
+let wb =
+XLSX.utils.book_new();
+
+XLSX.utils.book_append_sheet(
+wb,
+ws,
+"Maquinas"
+);
+
+XLSX.writeFile(
+wb,
+"Cadastro_Maquinas.xlsx"
+);
+
+aviso("Excel exportado com sucesso.");
+
+}
+
+function verificarDuplicados(){
+
+let lista = {};
+
+let repetidos = [];
+
+dados().forEach(x=>{
+
+let nome =
+(x.maquina||'')
+.trim()
+.toLowerCase();
+
+if(!nome) return;
+
+if(lista[nome]){
+
+if(!repetidos.includes(x.maquina)){
+repetidos.push(x.maquina);
+}
+
+}else{
+
+lista[nome]=true;
+
+}
+
+});
+
+if(repetidos.length){
+
+alert(
+"⚠ Máquinas duplicadas:\n\n" +
+repetidos.join("\n")
+);
+
+}else{
+
+alert(
+"✅ Nenhuma máquina duplicada encontrada."
+);
+
+}
+
+}
+
+async function enviarParaSupabase(){
+
+if(!confirm('Sincronizar máquinas com o Supabase?')){
+    return;
+}
+
+await sincronizarMaquinasSeguro(dados());
+
+}
+
+
+let importacaoMaquinasPreview = [];
+
+function normalizarCabecalho(txt){
+return String(txt||'')
+.normalize('NFD')
+.replace(/[\u0300-\u036f]/g,'')
+.toLowerCase()
+.replace(/[^a-z0-9]/g,'');
+}
+
+function valorImportado(row, mapa, nomes){
+for(let nome of nomes){
+let idx = mapa[normalizarCabecalho(nome)];
+if(idx !== undefined){
+let v = row[idx];
+if(v !== undefined && v !== null) return String(v).trim();
+}
+}
+return '';
+}
+
+function formatarDataImportacao(v){
+if(!v)return '';
+if(typeof v === 'number'){
+try{
+let d = XLSX.SSF.parse_date_code(v);
+if(d && d.y){
+return String(d.d).padStart(2,'0')+'/'+String(d.m).padStart(2,'0')+'/'+d.y;
+}
+}catch(e){}
+}
+let s = String(v).trim();
+return s;
+}
+
+function detectarCabecalho(linhas){
+for(let i=0;i<Math.min(linhas.length,20);i++){
+let normalizados = (linhas[i]||[]).map(normalizarCabecalho);
+let temEquipamento = normalizados.includes('equipamento') || normalizados.includes('maquina') || normalizados.includes('maquinas');
+let temCodigo = normalizados.includes('codificacao') || normalizados.includes('codigo') || normalizados.includes('cod');
+if(temEquipamento && temCodigo) return i;
+}
+return 0;
+}
+
+function lerImportacaoMaquinas(input){
+let arquivo = input.files && input.files[0];
+if(!arquivo)return;
+
+let leitor = new FileReader();
+
+leitor.onload = function(e){
+try{
+let dadosArquivo = new Uint8Array(e.target.result);
+let wb = XLSX.read(dadosArquivo,{type:'array',cellDates:false});
+let aba = wb.Sheets[wb.SheetNames[0]];
+let linhas = XLSX.utils.sheet_to_json(aba,{header:1,defval:''});
+
+if(!linhas.length){
+alert('Planilha vazia.');
+input.value='';
+return;
+}
+
+let headerIndex = detectarCabecalho(linhas);
+let cabecalho = linhas[headerIndex] || [];
+let mapa = {};
+
+cabecalho.forEach((h,i)=>{
+let chave = normalizarCabecalho(h);
+if(chave) mapa[chave]=i;
+});
+
+let existentes = dados().map(x=>({
+codigo:String(x.codigo||'').trim().toLowerCase(),
+maquina:String(x.maquina||'').trim().toLowerCase()
+}));
+
+let vistosImportacao = {};
+let preview = [];
+
+for(let i=headerIndex+1;i<linhas.length;i++){
+let row = linhas[i] || [];
+
+let codigo = valorImportado(row,mapa,['CODIFICAÇÃO','CODIFICACAO','Código','Codigo','COD']);
+let maquina = valorImportado(row,mapa,['EQUIPAMENTO','Máquina','Maquina','MAQUINA']);
+let setor = valorImportado(row,mapa,['LOCALIZAÇÃO','LOCALIZACAO','Setor','Local','Localização']);
+let fabricante = valorImportado(row,mapa,['FABRICANTE']);
+let modelo = valorImportado(row,mapa,['MODELO']);
+let capacidade = valorImportado(row,mapa,['CAPACIDADE']);
+let serie = valorImportado(row,mapa,['NÚMERO DE SÉRIE','NUMERO DE SERIE','Nº SÉRIE','N SERIE','SERIE']);
+let dataAquisicao = formatarDataImportacao(valorImportado(row,mapa,['DATA DE AQUISIÇÃO','DATA AQUISICAO','AQUISIÇÃO','AQUISICAO']));
+let obsPlanilha = valorImportado(row,mapa,['OBS','OBSERVAÇÃO','OBSERVACAO']);
+
+let temAlgumDado = row.some(c=>String(c||'').trim()!=='');
+if(!temAlgumDado) continue;
+
+let obsPartes = [];
+if(obsPlanilha) obsPartes.push(obsPlanilha);
+if(fabricante) obsPartes.push(fabricante);
+if(modelo) obsPartes.push(modelo);
+if(capacidade) obsPartes.push(capacidade);
+if(serie) obsPartes.push('Série: '+serie);
+if(dataAquisicao) obsPartes.push('Aquisição: '+dataAquisicao);
+
+let registro = {
+linha:i+1,
+codigo:codigo,
+maquina:maquina,
+setor:setor,
+obs:obsPartes.join(' | ')
+};
+
+let chaveCodigo = String(codigo||'').trim().toLowerCase();
+let chaveMaquina = String(maquina||'').trim().toLowerCase();
+
+let existe = existentes.some(x=>
+(chaveCodigo && x.codigo===chaveCodigo) ||
+(chaveMaquina && x.maquina===chaveMaquina)
+);
+
+let chaveImport = (chaveCodigo || chaveMaquina || ('linha'+i));
+let duplicadaNaImportacao = vistosImportacao[chaveImport];
+vistosImportacao[chaveImport]=true;
+
+registro.valido = !!maquina && !existe && !duplicadaNaImportacao;
+registro.statusImportacao = !maquina
+? 'Inválida: sem máquina/equipamento'
+: existe
+? 'Duplicada: já cadastrada'
+: duplicadaNaImportacao
+? 'Duplicada na planilha'
+: 'Válida';
+
+preview.push(registro);
+}
+
+importacaoMaquinasPreview = preview;
+renderPreviewImportacaoMaquinas();
+input.value='';
+
+}catch(err){
+console.error(err);
+alert('Erro ao ler planilha: '+err.message);
+input.value='';
+}
+};
+
+leitor.readAsArrayBuffer(arquivo);
+}
+
+function renderPreviewImportacaoMaquinas(){
+let total = importacaoMaquinasPreview.length;
+let validas = importacaoMaquinasPreview.filter(x=>x.valido).length;
+let duplicadas = importacaoMaquinasPreview.filter(x=>String(x.statusImportacao).includes('Duplicada')).length;
+let invalidas = importacaoMaquinasPreview.filter(x=>String(x.statusImportacao).includes('Inválida')).length;
+
+resumoImportMaquinas.innerHTML = `
+<div><b>${total}</b>Linhas lidas</div>
+<div><b>${validas}</b>Válidas</div>
+<div><b>${duplicadas}</b>Duplicadas</div>
+<div><b>${invalidas}</b>Inválidas</div>
+`;
+
+let html = `
+<table>
+<thead>
+<tr>
+<th>Linha</th>
+<th>Código</th>
+<th>Máquina</th>
+<th>Setor</th>
+<th>Observação</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+`;
+
+importacaoMaquinasPreview.forEach(x=>{
+let classe = x.valido ? '' : (String(x.statusImportacao).includes('Duplicada') ? 'linha-duplicada' : 'linha-erro');
+html += `
+<tr class="${classe}">
+<td>${x.linha}</td>
+<td>${x.codigo||''}</td>
+<td>${x.maquina||''}</td>
+<td>${x.setor||''}</td>
+<td>${x.obs||''}</td>
+<td>${x.statusImportacao}</td>
+</tr>
+`;
+});
+
+html += '</tbody></table>';
+
+tabelaPreviewImportMaquinas.innerHTML = html;
+btnConfirmarImportMaquinas.innerText = '✔ Importar '+validas+' máquinas válidas';
+btnConfirmarImportMaquinas.disabled = validas === 0;
+previewImportMaquinas.style.display = 'flex';
+}
+
+function fecharPreviewImportacao(){
+previewImportMaquinas.style.display='none';
+}
+
+async function confirmarImportacaoMaquinas(){
+let validas = importacaoMaquinasPreview.filter(x=>x.valido);
+
+if(!validas.length){
+alert('Não existem máquinas válidas para importar.');
+return;
+}
+
+if(!confirm('Importar '+validas.length+' máquinas para o cadastro?'))return;
+
+validas.forEach(x=>{
+novo({
+codigo:x.codigo,
+maquina:x.maquina,
+setor:x.setor,
+obs:x.obs
+});
+});
+
+salvar();
+
+const ok = await sincronizarMaquinasSeguro(dados());
+
+if(!ok){
+alert("As máquinas foram colocadas na tela, mas não foram sincronizadas.");
+return;
+}
+
+registrarLog('Importou '+validas.length+' máquinas por planilha');
+
+fecharPreviewImportacao();
+
+aviso(validas.length+' máquinas importadas e sincronizadas com sucesso.');
+
+carregar();
+}
+
+pesquisa.oninput=filtrar;
+
+carregar();
+
+</script>
+
+</body>
+</html>

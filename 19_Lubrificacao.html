@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>19_Lubrificacao</title>
+
+<style>
+:root{
+--azul-900:#163b5c;
+--azul-700:#1f5f93;
+--azul-500:#4f93c8;
+--verde:#21805b;
+--laranja:#fd7e14;
+--vermelho:#c53030;
+--cinza-950:#17202a;
+--cinza-700:#4b5563;
+--cinza-200:#d7dde3;
+--cinza-100:#f3f4f6;
+--fundo:#f5f7fa;
+--branco:#fff;
+--raio:8px;
+--sombra:0 10px 26px rgba(17,24,39,.10);
+}
+*{box-sizing:border-box}
+body{font-family:Arial,Helvetica,sans-serif;background:var(--fundo);margin:0;color:var(--cinza-950)}
+header{
+position:sticky;top:0;z-index:10;
+display:flex;align-items:center;justify-content:space-between;gap:10px;
+background:var(--azul-700);color:#fff;padding:8px 14px;
+box-shadow:0 4px 16px rgba(15,23,42,.18)
+}
+.titulo-topo{display:flex;align-items:center;gap:9px;font-size:20px;font-weight:800}
+.marca{display:grid;place-items:center;width:32px;height:32px;border-radius:var(--raio);background:#fff;color:var(--azul-900)}
+.acoes-topo{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.container{width:min(1500px,100%);margin:0 auto;padding:8px 12px}
+.card{background:#fff;padding:7px;margin-bottom:7px;border:1px solid var(--cinza-200);border-radius:var(--raio);box-shadow:var(--sombra)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:7px}
+.indicador{min-height:52px;padding:7px 10px;border:1px solid var(--cinza-200);border-left:5px solid var(--azul-500);border-radius:var(--raio);background:#fff}
+.indicador.vencido-card{border-left-color:var(--vermelho)}
+.indicador.hoje-card{border-left-color:var(--laranja)}
+.indicador.ok-card{border-left-color:var(--verde)}
+.ind{font-size:21px;font-weight:800;color:var(--azul-900);line-height:1.05;margin-top:2px}
+label{display:block;margin-bottom:5px;color:var(--cinza-700);font-size:12px;font-weight:800;text-transform:uppercase}
+button{min-height:32px;padding:7px 10px;border:none;border-radius:var(--raio);color:#fff;font-weight:800;cursor:pointer;font-size:13px}
+button:hover{filter:brightness(.96)}
+.b1{background:var(--azul-900)}
+.b2{background:var(--verde)}
+.b3{background:var(--laranja)}
+.b4{background:#4b5563}
+.b5{background:var(--vermelho)}
+.btn-claro{background:#fff!important;color:var(--azul-900)!important}
+.barra-acoes{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.msg{display:none;padding:10px;background:#d1e7dd;color:#0f5132;border-radius:var(--raio);margin-top:10px;font-weight:700}
+input,select{
+width:100%;min-height:32px;box-sizing:border-box;font-size:13px;
+border:1px solid var(--cinza-200);border-radius:var(--raio);padding:6px 8px;background:#fff;outline:none
+}
+input:focus,select:focus{border-color:var(--azul-500);box-shadow:0 0 0 3px rgba(79,147,200,.18)}
+.tabela-wrap{overflow-x:auto;overflow-y:visible;border:1px solid var(--cinza-200);border-radius:var(--raio);min-height:250px}
+table{width:100%;min-width:1180px;border-collapse:collapse;background:#fff;table-layout:fixed}
+thead th{position:sticky;top:0;z-index:2}
+th,td{
+border-bottom:1px solid var(--cinza-200);
+border-right:1px solid var(--cinza-200);
+padding:6px 7px;font-size:12px;text-align:left;vertical-align:middle
+}
+th:last-child,td:last-child{border-right:0}
+th{background:var(--azul-900);color:#fff;font-size:12px;text-transform:uppercase;font-weight:800;text-align:center;white-space:nowrap}
+tbody tr:nth-child(even){background:#f8fafc}
+tbody tr:nth-child(odd){background:#fff}
+tbody tr:hover{background:#eef6ff}
+tbody tr:nth-child(even) input,tbody tr:nth-child(odd) input,tbody tr:hover input,
+tbody tr:nth-child(even) select,tbody tr:nth-child(odd) select,tbody tr:hover select{background:transparent}
+td input,td select{border:none;box-shadow:none!important;background:transparent;font-size:12px;padding:4px 3px;min-height:28px}
+td:nth-child(3),td:nth-child(4),td:nth-child(7),td:nth-child(8),td:nth-child(9){text-align:center}
+td:nth-child(8) button,td:nth-child(9) button{min-height:30px;padding:6px 8px;border-radius:8px;font-size:12px}
+.vencido{background:#fde2e2!important}
+.hoje{background:#fff8dd!important}
+.emdia{background:#e8f5ee!important}
+.col-maquina{width:230px}
+.col-freq{width:115px}
+.col-data{width:112px}
+.col-nome{width:145px}
+.col-obs{width:230px}
+.col-status{width:105px}
+.col-hoje{width:180px}
+.col-x{width:55px}
+.badge-status{display:inline-flex;align-items:center;justify-content:center;min-height:24px;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800;white-space:nowrap}
+.badge-vencido{background:#fde2e2;color:#842029}
+.badge-hoje{background:#fff3cd;color:#664d03}
+.badge-emdia{background:#d1e7dd;color:#0f5132}
+.badge-semdata{background:#e5e7eb;color:#374151}
+.btn-hoje{background:var(--verde);color:#fff;white-space:normal;width:100%;line-height:1.15;font-size:12px;display:inline-flex;align-items:center;justify-content:center;gap:4px}
+
+.alerta-topo{display:none;margin-bottom:8px;padding:8px 10px;border-radius:8px;border:1px solid #f1c2c2;background:#fff5f5;color:#842029;font-weight:800;font-size:13px}
+.filtro-rapido{display:flex;gap:6px;flex-wrap:wrap;align-items:end}
+.filtro-rapido button{background:#eaf2f9;color:var(--azul-900);border:1px solid var(--cinza-200)}
+.filtro-rapido button.ativo{background:var(--azul-900);color:#fff}
+
+.acoes-lubrificacao{display:grid;grid-template-columns:minmax(120px,1fr);gap:4px;align-items:center}
+.ultima-mini{display:block;color:var(--cinza-700);font-size:10px;font-weight:700;line-height:1.15;margin-top:3px;white-space:normal}
+tr.proximo{box-shadow:inset 4px 0 0 var(--laranja)}
+@media(max-width:760px){
+header{align-items:flex-start;flex-direction:column}
+.acoes-topo,.acoes-topo button,.barra-acoes button{width:100%}
+.titulo-topo{font-size:19px}
+.container{padding:10px}
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script src="permissoes.js"></script>
+
+
+</head>
+<body>
+
+
+<header>
+  <div class="titulo-topo"><span class="marca">🛢</span><span>Plano de Lubrificação</span></div>
+  <div class="acoes-topo">
+    <button class="btn-claro" type="button" onclick="window.location.href='00_Sistema_Manutencao_V25.html'">← Menu</button>
+    <button class="btn-claro" type="button" onclick="location.reload()">🔄 Atualizar</button>
+  </div>
+</header>
+
+<div class="container">
+
+<div id="alertaLub" class="alerta-topo"></div>
+
+<div class="grid">
+<div class="indicador"><div>Total</div><div class="ind" id="tot">0</div></div>
+<div class="indicador vencido-card"><div>Vencidos</div><div class="ind" id="vencidos">0</div></div>
+<div class="indicador hoje-card"><div>Vence Hoje</div><div class="ind" id="hoje">0</div></div>
+<div class="indicador ok-card"><div>Em Dia</div><div class="ind" id="emdia">0</div></div>
+</div>
+
+<div class="card">
+
+<div class="grid">
+
+<div>
+<label>Pesquisa</label>
+<input id="pesquisa" placeholder="Pesquisar máquina ou responsável...">
+</div>
+
+<div>
+<label>Status</label>
+<select id="fStatusLub">
+<option value="">Todos</option>
+<option value="vencido">Vencidos</option>
+<option value="hoje">Vence hoje</option>
+<option value="emdia">Em dia</option>
+<option value="semdata">Sem data</option>
+</select>
+</div>
+
+<div class="filtro-rapido">
+<button type="button" onclick="setFiltroStatus('')">Todos</button>
+<button type="button" onclick="setFiltroStatus('vencido')">Vencidos</button>
+<button type="button" onclick="setFiltroStatus('hoje')">Hoje</button>
+<button type="button" onclick="setFiltroStatus('emdia')">Em dia</button>
+</div>
+
+</div>
+
+</div>
+
+<div class="card">
+<div class="barra-acoes">
+
+<button class="b1" onclick="novo()">Nova Lubrificação</button>
+<button class="b2" onclick="salvarManual()">Salvar</button>
+<button class="b3" onclick="exportarExcel()">📊 Exportar Excel</button>
+<button class="b4" onclick="window.print()">Imprimir</button>
+
+<div id="msg" class="msg"></div>
+
+</div>
+</div>
+
+<div class="card">
+
+<div class="tabela-wrap">
+<table id="tb">
+<colgroup>
+<col class="col-maquina">
+<col class="col-freq">
+<col class="col-data">
+<col class="col-data">
+<col class="col-nome">
+<col class="col-obs">
+<col class="col-status">
+<col class="col-hoje">
+<col id="colExcluirCol" class="col-x">
+</colgroup>
+
+<thead>
+
+<tr>
+
+<th>Máquina</th>
+<th>Frequência</th>
+<th>Última</th>
+<th>Próxima</th>
+<th>Nome</th>
+<th>Última Utilização</th>
+<th>Status</th>
+<th>Ação</th>
+<th id="thExcluir">X</th>
+
+</tr>
+
+</thead>
+
+<tbody></tbody>
+
+</table>
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const SUPABASE_URL = 'https://wzcrqzbwcsmfwenzcxkf.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu';
+const bancoSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const TABELA_LUBRIFICACAO = 'lubrificacao';
+const CHAVE_LUBRIFICACAO_LOCAL = 'lubrificacao_v24';
+
+if(typeof registrarLog!=="function"){function registrarLog(){}}
+if(typeof verificarPermissao!=="function"){function verificarPermissao(){return true;}}
+verificarPermissao(
+"19_Lubrificacao.html"
+);
+
+const usuarioLogado = localStorage.getItem("usuarioLogado") || "Sistema";
+function podeExcluir(){ return usuarioLogado === "Alexandre"; }
+function aplicarPermissaoExcluir(){
+  const th = document.getElementById("thExcluir");
+  if(th && !podeExcluir()) th.style.display = "none";
+  const col = document.getElementById("colExcluirCol");
+  if(col && !podeExcluir()) col.style.display = "none";
+}
+
+aplicarPermissaoExcluir();
+
+function aviso(t){
+
+msg.innerText=t;
+msg.style.display='block';
+
+setTimeout(()=>{
+msg.style.display='none';
+},2500);
+
+}
+
+function maquinas(){
+
+return JSON.parse(
+localStorage.getItem('cadastro_maquinas_v24')||'[]'
+);
+
+}
+
+function comboMaquinas(sel=""){
+
+let html="<option></option>";
+
+maquinas().forEach(m=>{
+
+html+=`
+<option ${m.maquina==sel?'selected':''}>
+${m.maquina}
+</option>
+`;
+
+});
+
+return html;
+
+}
+
+function novo(d={}){
+
+let r=tb.tBodies[0].insertRow();
+
+r.innerHTML=`
+<td>
+<select>
+${comboMaquinas(d.maquina)}
+</select>
+</td>
+
+<td>
+<select>
+<option ${d.freq=="Diária"?"selected":""}>Diária</option>
+<option ${d.freq=="Semanal"?"selected":""}>Semanal</option>
+<option ${d.freq=="Quinzenal"?"selected":""}>Quinzenal</option>
+<option ${d.freq=="Mensal"?"selected":""}>Mensal</option>
+<option ${d.freq=="Trimestral"?"selected":""}>Trimestral</option>
+<option ${d.freq=="Semestral"?"selected":""}>Semestral</option>
+<option ${d.freq=="Anual"?"selected":""}>Anual</option>
+</select>
+</td>
+
+<td>
+<input type="date" value="${d.ultima||''}">
+</td>
+
+<td>
+<input type="date" value="${d.proxima||''}">
+</td>
+
+<td>
+<input value="${d.nome||d.responsavel||''}">
+</td>
+
+<td>
+<input value="${d.ultimaUtilizacao||d.obs||''}">
+</td>
+
+<td>
+<span class="badge-status badge-semdata">Sem data</span>
+</td>
+
+<td>
+<div class="acoes-lubrificacao"><button class="btn-hoje" type="button" onclick="lubrificadoHoje(this)">✅ Registrar hoje</button><span class="ultima-mini"></span></div>
+</td>
+
+${podeExcluir() ? `<td><button class="b5" type="button" onclick="excluir(this)">X</button></td>` : ``}
+`;
+
+r.querySelectorAll("input,select").forEach(e=>{
+e.oninput=()=>{
+if(e.closest('td')===r.cells[1] || e.closest('td')===r.cells[2]){
+calcularProximaLinha(r);
+}
+salvarLocal();
+filtrar();
+};
+});
+
+if(!d.proxima && d.ultima){
+calcularProximaLinha(r);
+}
+
+let mini = r.cells[7].querySelector('.ultima-mini');
+if(mini && (d.ultimaUtilizacao||d.obs)) mini.textContent = String(d.ultimaUtilizacao||d.obs).replace('Lubrificado em ','');
+renum();
+salvarLocal();
+
+}
+
+function excluir(btn){
+
+if(!podeExcluir()){
+alert("Somente Alexandre pode excluir registros de lubrificação.");
+return;
+}
+
+if(!confirm("Excluir registro?")) return;
+
+btn.closest("tr").remove();
+
+renum();
+salvarLocal();
+
+}
+
+function renum(){
+
+indicadores();
+
+}
+
+
+function dataHojeISO(){
+let d = new Date();
+d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+return d.toISOString().slice(0,10);
+}
+
+function adicionarDias(dataISO, dias){
+if(!dataISO) return '';
+let d = new Date(dataISO + 'T00:00:00');
+d.setDate(d.getDate() + dias);
+return d.toISOString().slice(0,10);
+}
+
+function diasFrequencia(freq){
+return {
+'Diária':1,
+'Semanal':7,
+'Quinzenal':15,
+'Mensal':30,
+'Trimestral':90,
+'Semestral':180,
+'Anual':365
+}[freq] || 0;
+}
+
+function calcularProximaLinha(r){
+let freq = r.cells[1].querySelector('select').value;
+let ultima = r.cells[2].querySelector('input').value;
+let dias = diasFrequencia(freq);
+if(ultima && dias){
+r.cells[3].querySelector('input').value = adicionarDias(ultima,dias);
+}
+indicadores();
+}
+
+async function lubrificadoHoje(btn){
+let r = btn.closest('tr');
+r.cells[2].querySelector('input').value = dataHojeISO();
+calcularProximaLinha(r);
+r.cells[5].querySelector('input').value = 'Lubrificado em ' + new Date().toLocaleDateString('pt-BR') + ' por ' + usuarioLogado;
+let mini = r.cells[7].querySelector('.ultima-mini');
+if(mini) mini.textContent = 'Hoje • ' + usuarioLogado;
+await salvar();
+filtrar();
+aviso('Lubrificação atualizada para hoje e sincronizada.');
+}
+
+function statusLinha(r){
+let prox = r.cells[3].querySelector('input').value;
+if(!prox) return {classe:'semdata', texto:'Sem data'};
+let hojeData=new Date();
+hojeData.setHours(0,0,0,0);
+let data=new Date(prox + 'T00:00:00');
+data.setHours(0,0,0,0);
+if(data.getTime()<hojeData.getTime()) return {classe:'vencido', texto:'Vencido'};
+if(data.getTime()==hojeData.getTime()) return {classe:'hoje', texto:'Vence hoje'};
+return {classe:'emdia', texto:'Em dia'};
+}
+
+function atualizarBadgeLinha(r){
+let badge = r.cells[6] ? r.cells[6].querySelector('.badge-status') : null;
+if(!badge) return;
+let st = statusLinha(r);
+badge.className = 'badge-status badge-' + st.classe;
+badge.textContent = st.texto;
+}
+
+function dados(){
+
+return [...tb.tBodies[0].rows].map(r=>({
+
+maquina:r.cells[0].querySelector('select').value,
+freq:r.cells[1].querySelector('select').value,
+ultima:r.cells[2].querySelector('input').value,
+proxima:r.cells[3].querySelector('input').value,
+responsavel:r.cells[4].querySelector('input').value,
+obs:r.cells[5].querySelector('input').value
+
+}));
+
+}
+function salvarLocal(){
+
+localStorage.setItem(
+CHAVE_LUBRIFICACAO_LOCAL,
+JSON.stringify(dados())
+);
+
+indicadores();
+
+}
+
+async function salvar(){
+
+const lista = dados();
+
+salvarLocal();
+
+const { error: erroDelete } = await bancoSupabase
+.from(TABELA_LUBRIFICACAO)
+.delete()
+.neq('id',0);
+
+if(erroDelete){
+console.error(erroDelete);
+aviso('Salvo neste navegador, mas não sincronizou no Supabase: ' + erroDelete.message);
+return false;
+}
+
+if(lista.length){
+const registros = lista.map(x=>({
+maquina:x.maquina || '',
+freq:x.freq || '',
+ultima:x.ultima || null,
+proxima:x.proxima || null,
+responsavel:x.responsavel || '',
+obs:x.obs || '',
+status:calcularStatusRegistro(x),
+atualizado_em:new Date().toISOString()
+}));
+
+const { error } = await bancoSupabase
+.from(TABELA_LUBRIFICACAO)
+.insert(registros);
+
+if(error){
+console.error(error);
+aviso('Salvo neste navegador, mas não sincronizou no Supabase: ' + error.message);
+return false;
+}
+}
+
+return true;
+
+}
+
+async function salvarManual(){
+
+const ok = await salvar();
+
+if(ok){
+aviso("Dados salvos com sucesso no Supabase.");
+}
+
+}
+
+function calcularStatusRegistro(x){
+let prox = x.proxima || '';
+if(!prox) return 'Sem data';
+let hojeData = new Date();
+hojeData.setHours(0,0,0,0);
+let data = new Date(prox + 'T00:00:00');
+data.setHours(0,0,0,0);
+if(data.getTime() < hojeData.getTime()) return 'Vencido';
+if(data.getTime() === hojeData.getTime()) return 'Vence hoje';
+return 'Em dia';
+}
+
+async function carregar(){
+
+tb.tBodies[0].innerHTML = '';
+
+const { data, error } = await bancoSupabase
+.from(TABELA_LUBRIFICACAO)
+.select('*')
+.order('proxima', { ascending:true });
+
+if(!error && data && data.length){
+
+data.forEach(x=>novo({
+maquina:x.maquina,
+freq:x.freq,
+ultima:x.ultima,
+proxima:x.proxima,
+responsavel:x.responsavel,
+obs:x.obs
+}));
+
+localStorage.setItem(CHAVE_LUBRIFICACAO_LOCAL, JSON.stringify(dados()));
+ordenarVisualmente();
+renum();
+return;
+}
+
+if(error){
+console.warn(error.message);
+aviso('Não carregou do Supabase. Usando dados locais: ' + error.message);
+}
+
+let d=[];
+try{
+d=JSON.parse(localStorage.getItem(CHAVE_LUBRIFICACAO_LOCAL)||'[]');
+}catch(e){
+d=[];
+}
+
+if(d.length){
+d.forEach(x=>novo(x));
+ordenarVisualmente();
+renum();
+}
+
+}
+
+function indicadores(){
+
+let d=dados();
+
+let total=0;
+let venc=0;
+let hj=0;
+let ok=0;
+
+[...tb.tBodies[0].rows].forEach(r=>{
+
+r.classList.remove("vencido","hoje","emdia","proximo");
+
+let st = statusLinha(r);
+atualizarBadgeLinha(r);
+
+if(st.classe === 'semdata') return;
+
+total++;
+
+if(st.classe === 'vencido'){
+venc++;
+r.classList.add("vencido");
+}else if(st.classe === 'hoje'){
+hj++;
+r.classList.add("hoje");
+}else{
+ok++;
+r.classList.add("emdia");
+let prox = r.cells[3].querySelector('input').value;
+if(prox){
+let hojeTmp=new Date(); hojeTmp.setHours(0,0,0,0);
+let dataTmp=new Date(prox + 'T00:00:00'); dataTmp.setHours(0,0,0,0);
+let diasRestantes=Math.round((dataTmp-hojeTmp)/86400000);
+if(diasRestantes>0 && diasRestantes<=7) r.classList.add('proximo');
+}
+}
+
+});
+
+tot.innerText=total;
+vencidos.innerText=venc;
+hoje.innerText=hj;
+emdia.innerText=ok;
+atualizarAlertaTopo(venc,hj);
+
+}
+
+function setFiltroStatus(status){
+const campo = document.getElementById('fStatusLub');
+if(campo) campo.value = status;
+document.querySelectorAll('.filtro-rapido button').forEach(b=>b.classList.remove('ativo'));
+let alvo = status || '';
+document.querySelectorAll('.filtro-rapido button').forEach(b=>{
+if((alvo==='' && b.textContent==='Todos') ||
+(alvo==='vencido' && b.textContent==='Vencidos') ||
+(alvo==='hoje' && b.textContent==='Hoje') ||
+(alvo==='emdia' && b.textContent==='Em dia')) b.classList.add('ativo');
+});
+filtrar();
+}
+
+function pesoStatus(classe){
+return {vencido:1, hoje:2, semdata:3, emdia:4}[classe] || 5;
+}
+
+function ordenarVisualmente(){
+const tbody = tb.tBodies[0];
+const linhas = [...tbody.rows];
+linhas.sort((a,b)=>{
+const sa = statusLinha(a);
+const sb = statusLinha(b);
+let p = pesoStatus(sa.classe) - pesoStatus(sb.classe);
+if(p !== 0) return p;
+let da = a.cells[3].querySelector('input').value || '9999-12-31';
+let db = b.cells[3].querySelector('input').value || '9999-12-31';
+return da.localeCompare(db);
+});
+linhas.forEach(l=>tbody.appendChild(l));
+}
+
+function atualizarAlertaTopo(venc,hj){
+const box = document.getElementById('alertaLub');
+if(!box) return;
+if(venc>0){
+box.style.display='block';
+box.innerHTML='⚠ Atenção: '+venc+' lubrificação(ões) vencida(s). Priorize antes de liberar a máquina.';
+}else if(hj>0){
+box.style.display='block';
+box.innerHTML='🟡 Hoje vence(m) '+hj+' lubrificação(ões).';
+}else{
+box.style.display='none';
+box.innerHTML='';
+}
+}
+
+function filtrar(){
+
+let txt=pesquisa.value.toLowerCase();
+let filtro = document.getElementById('fStatusLub') ? document.getElementById('fStatusLub').value : '';
+
+[...tb.tBodies[0].rows].forEach(r=>{
+
+let textoBusca =
+
+r.cells[0].querySelector('select').value + " " +
+r.cells[4].querySelector('input').value + " " +
+r.cells[5].querySelector('input').value;
+
+let st = statusLinha(r).classe;
+let ok = textoBusca.toLowerCase().includes(txt);
+if(filtro) ok = ok && st === filtro;
+
+r.style.display=ok?'':'none';
+
+});
+
+}
+
+function exportarExcel(){
+
+let linhas=[[
+"Máquina",
+"Frequência",
+"Última",
+"Próxima",
+"Nome",
+"Última Utilização",
+"Status"
+]];
+
+dados().forEach((d,i)=>{
+
+linhas.push([
+d.maquina,
+d.freq,
+d.ultima,
+d.proxima,
+d.responsavel,
+d.obs,
+statusLinha([...tb.tBodies[0].rows][i]).texto
+]);
+
+});
+
+let ws =
+XLSX.utils.aoa_to_sheet(linhas);
+
+ws['!autofilter'] = {
+ref:"A1:G1"
+};
+
+ws['!cols'] = [
+{wch:26},
+{wch:15},
+{wch:12},
+{wch:12},
+{wch:20},
+{wch:35},
+{wch:16}
+];
+
+let wb =
+XLSX.utils.book_new();
+
+XLSX.utils.book_append_sheet(
+wb,
+ws,
+"Lubrificacao"
+);
+
+XLSX.writeFile(
+wb,
+"Lubrificacao.xlsx"
+);
+
+aviso("Excel exportado com sucesso.");
+
+}
+pesquisa.oninput=filtrar;
+if(document.getElementById('fStatusLub')) document.getElementById('fStatusLub').onchange=filtrar;
+setFiltroStatus('');
+
+carregar();
+
+</script>
+
+</body>
+</html>
