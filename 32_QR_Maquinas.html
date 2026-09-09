@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QR Code das Máquinas</title>
+  <script>
+    (function () {
+      const usuario = localStorage.getItem('usuarioLogado');
+      if (usuario !== 'Alexandre') {
+        alert('Acesso exclusivo de Alexandre');
+        window.location.replace('00_Sistema_Manutencao_V25.html');
+      }
+    })();
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <style>
+    :root{--azul:#1f5f93;--azul-escuro:#163b5c;--azul-claro:#eaf2f9;--cinza:#66727d;--linha:#dce3e8;--fundo:#f4f7f9;--branco:#fff;--verde:#18794e;--vermelho:#a53f38}
+    *{box-sizing:border-box}body{margin:0;background:var(--fundo);color:#17202a;font-family:Arial,Helvetica,sans-serif}button,input{font:inherit}
+    header{position:sticky;top:0;z-index:10;background:var(--azul);color:#fff;box-shadow:0 4px 14px #0f273b33}.topo{width:min(1260px,100%);margin:auto;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}.marca{display:flex;align-items:center;gap:9px;font-weight:900;font-size:20px;margin-right:auto}.marca img{width:44px;height:44px;object-fit:contain;border-radius:6px;background:#fff}.marca small{display:block;font-size:10px;letter-spacing:1.3px;opacity:.8}.acao{border:0;border-radius:8px;padding:10px 13px;background:var(--azul-escuro);color:#fff;font-weight:800;cursor:pointer}.acao.secundaria{background:#fff;color:var(--azul-escuro)}
+    main{width:min(1260px,100%);margin:auto;padding:16px}.painel{display:grid;grid-template-columns:minmax(220px,1fr) auto;gap:12px;align-items:center;margin-bottom:14px;padding:14px;border:1px solid var(--linha);border-radius:10px;background:#fff}.painel h1{margin:0;color:var(--azul-escuro);font-size:23px}.painel p{margin:5px 0 0;color:var(--cinza);font-size:13px;line-height:1.45}.busca{width:min(390px,100%);min-height:42px;padding:10px 12px;border:1px solid #bcc8d0;border-radius:8px;color:#17202a;background:#fff}.resumo{display:flex;gap:9px;align-items:center;justify-content:flex-end;flex-wrap:wrap}.contador{padding:9px 11px;border-radius:8px;background:var(--azul-claro);color:var(--azul-escuro);font-weight:800;font-size:13px}.controle-selecao{border:1px solid #b9c8d3;border-radius:8px;padding:9px 11px;background:#fff;color:var(--azul-escuro);font-weight:800;cursor:pointer}.imprimir-selecao{border:0;border-radius:8px;padding:10px 12px;background:var(--verde);color:#fff;font-weight:800;cursor:pointer}.aviso{display:none;margin-bottom:14px;padding:12px 14px;border-left:5px solid #ca7b13;border-radius:8px;background:#fff1d6;color:#73470d;font-size:13px}.estado{padding:35px 18px;border:1px dashed #bdc8cf;border-radius:10px;background:#fff;text-align:center;color:var(--cinza)}
+    .grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(295px,1fr));gap:13px}.etiqueta{position:relative;display:grid;grid-template-columns:142px 1fr;gap:13px;min-height:200px;padding:14px;border:1px solid var(--linha);border-radius:11px;background:#fff;box-shadow:0 5px 16px #17202a12}.etiqueta.selecionada{border:2px solid var(--verde);padding:13px;box-shadow:0 5px 18px #18794e2b}.seletor-etiqueta{position:absolute;top:8px;right:8px;z-index:2;display:flex;align-items:center;gap:5px;padding:5px 7px;border:1px solid #cbd6dd;border-radius:7px;background:#fff;color:#34424d;font-size:10px;font-weight:800;cursor:pointer}.seletor-etiqueta input{width:17px;height:17px;margin:0;accent-color:var(--verde)}.qr{display:grid;place-items:center;width:142px;height:142px;padding:5px;border:1px solid #d6dce1;border-radius:7px;background:#fff}.qr img,.qr canvas{width:132px!important;height:132px!important;max-width:132px!important;max-height:132px!important}.dados{min-width:0}.bonier{width:105px;height:45px;overflow:hidden}.bonier img{display:block;width:141px;height:auto;max-width:none}.codigo{margin:6px 0 3px;color:var(--azul-escuro);font-size:28px;line-height:1;font-weight:900}.nome{min-height:32px;color:#34424d;font-size:13px;font-weight:800;line-height:1.25}.setor{margin-top:6px;color:var(--cinza);font-size:11px}.botoes{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}.botao-card{border:0;border-radius:7px;padding:8px 9px;background:var(--azul-escuro);color:#fff;font-size:11px;font-weight:800;cursor:pointer}.botao-card.claro{background:var(--azul-claro);color:var(--azul-escuro)}.botao-card.editar{background:#8a5a08}.botao-card.excluir{background:var(--vermelho)}.instrucao{grid-column:1/-1;margin-top:-5px;padding-top:9px;border-top:1px solid #e7ecef;color:#596874;font-size:10px;text-align:center;font-weight:700}
+    @media(max-width:700px){.painel{grid-template-columns:1fr}.resumo{justify-content:flex-start;flex-wrap:wrap}.busca{width:100%}.grade{grid-template-columns:1fr}.etiqueta{grid-template-columns:122px 1fr}.qr{width:122px;height:122px}.qr img,.qr canvas{max-width:112px!important;max-height:112px!important}.codigo{font-size:24px}}
+    @page{size:A4 portrait;margin:7mm}@media print{body{background:#fff}header,.painel,.aviso,.estado,.botoes,.seletor-etiqueta{display:none!important}body.imprimir-selecionados .etiqueta:not(.selecionada){display:none!important}main{width:auto;padding:0}.grade{display:grid;grid-template-columns:repeat(3,62mm);gap:3mm;align-content:start}.etiqueta{display:grid!important;grid-template-columns:30mm 1fr;gap:2mm;width:62mm;height:49mm;min-height:0;padding:3mm!important;border:1px solid #777!important;border-radius:1.5mm;box-shadow:none!important;break-inside:avoid;overflow:hidden}.qr{width:30mm;height:30mm;padding:.7mm;border-radius:1mm}.qr img,.qr canvas{width:28.6mm!important;height:28.6mm!important;max-width:none!important;max-height:none!important}.bonier{width:24mm;height:10.3mm;overflow:hidden}.bonier img{width:32.2mm;height:auto;max-width:none}.codigo{margin:1mm 0 .5mm;font-size:16pt;line-height:.95}.nome{min-height:0;font-size:7.2pt;line-height:1.12}.setor{margin-top:1mm;font-size:6.4pt}.instrucao{font-size:5.5pt;line-height:1.15;padding-top:1.2mm;margin-top:0;white-space:nowrap}}
+  </style>
+</head>
+<body>
+  <header><div class="topo"><div class="marca"><img src="logo-bonier.png" alt="BONIER"><div><small>SISTEMA DE MANUTENÇÃO</small>QR Code das Máquinas</div></div><button class="acao secundaria" type="button" onclick="voltar()">← Voltar</button><button class="acao" type="button" onclick="window.print()">🖨 Imprimir etiquetas</button></div></header>
+  <main>
+    <section class="painel"><div><h1>Etiquetas vinculadas ao seu sistema</h1><p>Marque apenas as etiquetas que deseja e clique em <b>Imprimir selecionados</b>. Impressão compacta: 15 etiquetas por folha A4.</p></div><div class="resumo"><input class="busca" id="busca" type="search" placeholder="Buscar código, máquina ou setor"><button class="controle-selecao" id="selecionarVisiveis" type="button">Selecionar visíveis</button><button class="imprimir-selecao" id="imprimirSelecionados" type="button">🖨 Imprimir selecionados (0)</button><span class="contador" id="contador">Carregando…</span></div></section>
+    <div class="aviso" id="avisoLocal"><b>Atenção:</b> abra esta página pelo GitHub antes de imprimir. Um endereço iniciado por <i>file://</i> não abre em outros celulares.</div>
+    <div class="estado" id="estado">Buscando as máquinas cadastradas…</div>
+    <section class="grade" id="grade" aria-live="polite"></section>
+  </main>
+  <script>
+    const SUPABASE_URL='https://wzcrqzbwcsmfwenzcxkf.supabase.co';
+    const SUPABASE_KEY='sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu';
+    const banco=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+    const grade=document.getElementById('grade'),estado=document.getElementById('estado'),contador=document.getElementById('contador'),busca=document.getElementById('busca');
+    const botaoSelecionar=document.getElementById('selecionarVisiveis'),botaoImprimirSelecionados=document.getElementById('imprimirSelecionados');
+    let maquinas=[];const selecionados=new Set();
+
+    function normalizar(valor){return String(valor||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'')}
+    function texto(valor,padrao){const v=String(valor??'').trim();return v||padrao||'Não informado'}
+    function codigoDa(maquina){return texto(maquina.maquina||maquina.equipamento||maquina.codigo,'SEM-CODIGO')}
+    function chaveDa(maquina){return maquina.id!=null?'ID:'+maquina.id:'CODIGO:'+normalizar(codigoDa(maquina))}
+    function urlConsulta(codigo){const url=new URL('33_Consulta_Maquina.html',window.location.href);url.searchParams.set('maquina',codigo);return url.href}
+    function voltar(){if(history.length>1)history.back();else location.href='00_Sistema_Manutencao_V25(20260905-144940).html'}
+    function usuarioPodeGerenciar(){
+      const bruto=localStorage.getItem('usuarioLogado');
+      if(!bruto)return false;
+      let usuario=bruto;
+      try{usuario=JSON.parse(bruto)}catch(e){}
+      const partes=[];
+      function coletar(valor){
+        if(valor==null)return;
+        if(typeof valor==='string'||typeof valor==='number')partes.push(String(valor));
+        else if(typeof valor==='object')Object.keys(valor).forEach(chave=>{if(/nome|name|usuario|user|login|email/i.test(chave))coletar(valor[chave])});
+      }
+      coletar(usuario);
+      return partes.some(valor=>normalizar(valor).includes('ALEXANDRE'));
+    }
+
+    function criarEtiqueta(maquina){
+      const codigo=codigoDa(maquina),url=urlConsulta(codigo),chave=chaveDa(maquina);
+      const artigo=document.createElement('article');artigo.className='etiqueta'+(selecionados.has(chave)?' selecionada':'');artigo.dataset.filtro=normalizar([codigo,maquina.codigo,maquina.equipamento,maquina.setor].join(' '));
+      const seletor=document.createElement('label');seletor.className='seletor-etiqueta';
+      const marcar=document.createElement('input');marcar.type='checkbox';marcar.checked=selecionados.has(chave);marcar.setAttribute('aria-label','Selecionar QR '+codigo);
+      const rotuloMarcar=document.createElement('span');rotuloMarcar.textContent='Selecionar';seletor.append(marcar,rotuloMarcar);
+      marcar.onchange=()=>{if(marcar.checked)selecionados.add(chave);else selecionados.delete(chave);artigo.classList.toggle('selecionada',marcar.checked);atualizarSelecao()};
+      const qr=document.createElement('div');qr.className='qr';
+      const dados=document.createElement('div');dados.className='dados';
+      const bonier=document.createElement('div');bonier.className='bonier';const logo=document.createElement('img');logo.src='logo-bonier.png';logo.alt='BONIER';bonier.appendChild(logo);
+      const cod=document.createElement('div');cod.className='codigo';cod.textContent=codigo;
+      const nome=document.createElement('div');nome.className='nome';nome.textContent=texto(maquina.codigo||maquina.equipamento,'Máquina');
+      const setor=document.createElement('div');setor.className='setor';setor.textContent=texto(maquina.setor,'Setor não informado');
+      const botoes=document.createElement('div');botoes.className='botoes';
+      const abrir=document.createElement('button');abrir.type='button';abrir.className='botao-card';abrir.textContent='Abrir ficha';abrir.onclick=()=>window.open(url,'_blank','noopener');
+      const baixar=document.createElement('button');baixar.type='button';baixar.className='botao-card claro';baixar.textContent='Baixar QR';baixar.onclick=()=>baixarQR(artigo,codigo);
+      botoes.append(abrir,baixar);
+      if(usuarioPodeGerenciar()){
+        const editar=document.createElement('button');editar.type='button';editar.className='botao-card editar';editar.textContent='Editar';editar.onclick=()=>editarMaquina(maquina);
+        const excluir=document.createElement('button');excluir.type='button';excluir.className='botao-card excluir';excluir.textContent='Excluir';excluir.onclick=()=>excluirMaquina(maquina);
+        botoes.append(editar,excluir);
+      }
+      dados.append(bonier,cod,nome,setor,botoes);
+      const instrucao=document.createElement('div');instrucao.className='instrucao';instrucao.textContent='Escaneie para consultar Histórico • Preventivas • Ordens de Serviço';
+      artigo.append(seletor,qr,dados,instrucao);
+      new QRCode(qr,{text:url,width:240,height:240,colorDark:'#101820',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+      return artigo;
+    }
+
+    function baixarQR(artigo,codigo){
+      const canvas=artigo.querySelector('.qr canvas'),imagem=artigo.querySelector('.qr img');
+      const link=document.createElement('a');link.download='QR_'+normalizar(codigo)+'.png';
+      if(canvas)link.href=canvas.toDataURL('image/png');else if(imagem)link.href=imagem.src;else return alert('O QR Code ainda está sendo gerado.');
+      link.click();
+    }
+
+    async function editarMaquina(maquina){
+      if(!usuarioPodeGerenciar())return alert('Somente Alexandre pode editar os QR Codes.');
+      if(maquina.id==null)return alert('Não foi possível identificar este cadastro para editar com segurança.');
+      const codigoAtual=codigoDa(maquina);
+      const novoCodigo=prompt('Código da máquina:',codigoAtual);if(novoCodigo===null)return;
+      const novoNome=prompt('Nome ou descrição da máquina:',texto(maquina.codigo||maquina.equipamento,''));if(novoNome===null)return;
+      const novoSetor=prompt('Setor:',texto(maquina.setor,''));if(novoSetor===null)return;
+      if(!novoCodigo.trim())return alert('O código da máquina não pode ficar vazio.');
+      const alteracoes={setor:novoSetor.trim()};
+      if(Object.prototype.hasOwnProperty.call(maquina,'maquina'))alteracoes.maquina=novoCodigo.trim();
+      else if(Object.prototype.hasOwnProperty.call(maquina,'equipamento'))alteracoes.equipamento=novoCodigo.trim();
+      else alteracoes.codigo=novoCodigo.trim();
+      if(Object.prototype.hasOwnProperty.call(maquina,'codigo')&&Object.prototype.hasOwnProperty.call(maquina,'maquina'))alteracoes.codigo=novoNome.trim();
+      else if(Object.prototype.hasOwnProperty.call(maquina,'equipamento')&&Object.prototype.hasOwnProperty.call(maquina,'codigo'))alteracoes.equipamento=novoNome.trim();
+      const {data,error}=await banco.from('maquinas').update(alteracoes).eq('id',maquina.id).select();
+      if(error)return alert('Não foi possível editar: '+error.message);
+      if(!data||!data.length)return alert('A alteração não foi autorizada pelo banco de dados.');
+      Object.assign(maquina,data[0]);renderizar();
+    }
+
+    async function excluirMaquina(maquina){
+      if(!usuarioPodeGerenciar())return alert('Somente Alexandre pode excluir os QR Codes.');
+      if(maquina.id==null)return alert('Não foi possível identificar este cadastro para excluir com segurança.');
+      const codigo=codigoDa(maquina);
+      if(!confirm('Excluir o QR de '+codigo+'?\n\nIsso também exclui o cadastro correspondente da lista de máquinas.'))return;
+      const confirmacao=prompt('Para confirmar, digite exatamente o código '+codigo+':','');
+      if(confirmacao!==codigo)return alert('Código diferente. Exclusão cancelada.');
+      const {data,error}=await banco.from('maquinas').delete().eq('id',maquina.id).select();
+      if(error)return alert('Não foi possível excluir: '+error.message);
+      if(!data||!data.length)return alert('A exclusão não foi autorizada pelo banco de dados.');
+      selecionados.delete(chaveDa(maquina));maquinas=maquinas.filter(item=>item.id!==maquina.id);renderizar();
+    }
+
+    function atualizarSelecao(){
+      botaoImprimirSelecionados.textContent='🖨 Imprimir selecionados ('+selecionados.size+')';
+      const visiveis=[...grade.querySelectorAll('.etiqueta')];
+      botaoSelecionar.textContent=visiveis.length&&visiveis.every(item=>item.classList.contains('selecionada'))?'Desmarcar visíveis':'Selecionar visíveis';
+    }
+
+    function alternarVisiveis(){
+      const visiveis=maquinas.filter(m=>{const termo=normalizar(busca.value);return !termo||normalizar([m.maquina,m.codigo,m.equipamento,m.setor].join(' ')).includes(termo)});
+      const marcar=visiveis.some(m=>!selecionados.has(chaveDa(m)));
+      visiveis.forEach(m=>{const chave=chaveDa(m);if(marcar)selecionados.add(chave);else selecionados.delete(chave)});
+      renderizar();
+    }
+
+    function imprimirSomenteSelecionados(){
+      if(!selecionados.size)return alert('Selecione pelo menos uma etiqueta para imprimir.');
+      document.body.classList.add('imprimir-selecionados');window.print();
+    }
+
+    function renderizar(){
+      const termo=normalizar(busca.value);grade.textContent='';
+      const visiveis=maquinas.filter(m=>!termo||normalizar([m.maquina,m.codigo,m.equipamento,m.setor].join(' ')).includes(termo));
+      visiveis.forEach(m=>grade.appendChild(criarEtiqueta(m)));
+      contador.textContent=visiveis.length+' de '+maquinas.length+' máquinas';
+      estado.style.display=visiveis.length?'none':'block';if(!visiveis.length)estado.textContent='Nenhuma máquina encontrada.';
+      atualizarSelecao();
+    }
+
+    async function carregar(){
+      if(location.protocol==='file:')document.getElementById('avisoLocal').style.display='block';
+      if(!window.QRCode){estado.textContent='Não foi possível carregar o gerador de QR Code. Verifique a internet e atualize a página.';return}
+      const {data,error}=await banco.from('maquinas').select('*').limit(2000);
+      if(error){estado.textContent='Erro ao buscar as máquinas: '+error.message;contador.textContent='Erro';return}
+      maquinas=(data||[]).filter(m=>codigoDa(m)!=='SEM-CODIGO').sort((a,b)=>codigoDa(a).localeCompare(codigoDa(b),'pt-BR',{numeric:true}));
+      renderizar();
+    }
+    busca.addEventListener('input',renderizar);botaoSelecionar.addEventListener('click',alternarVisiveis);botaoImprimirSelecionados.addEventListener('click',imprimirSomenteSelecionados);window.addEventListener('afterprint',()=>document.body.classList.remove('imprimir-selecionados'));carregar();
+  </script>
+</body>
+</html>
