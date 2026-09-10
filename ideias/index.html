@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Bonier | Canal de Ideias e Melhorias</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{--azul:#174d76;--azul2:#2376ad;--verde:#137a52;--fundo:#eef3f7;--texto:#17212b;--cinza:#64717d;--linha:#d4dee6;--branco:#fff;--vermelho:#b53535}
+    *{box-sizing:border-box}body{margin:0;background:var(--fundo);color:var(--texto);font-family:Arial,Helvetica,sans-serif}.topo{position:relative;isolation:isolate;min-height:310px;display:flex;align-items:flex-end;color:#fff;padding:42px 18px;background:linear-gradient(90deg,#061523ed 0%,#092740ca 47%,#0615234d 100%),url('bonier3d.png') center 47%/cover no-repeat;border-bottom:4px solid #1978c8}.topo>div{width:100%;max-width:920px;margin:auto}.topo small{font-weight:900;letter-spacing:2px;color:#74bbff}.topo h1{margin:8px 0;font-size:clamp(28px,5vw,44px);text-shadow:0 3px 12px #000}.topo p{max-width:650px;margin:0;line-height:1.5;opacity:.95;text-shadow:0 2px 8px #000}.conteudo{max-width:820px;margin:18px auto;padding:0 14px 30px}.card{background:#fff;border:1px solid var(--linha);border-radius:14px;padding:22px;box-shadow:0 10px 30px #17344b12}.orientacao{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:16px}.orientacao div{padding:12px;border-radius:9px;background:#eaf3f9;color:var(--azul);font-size:12px;line-height:1.4}.orientacao b{display:block;margin-bottom:3px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.span2{grid-column:1/-1}.campo{display:grid;gap:6px}.campo label{font-size:12px;font-weight:800;color:#40505e}.campo input,.campo select,.campo textarea{width:100%;padding:12px;border:1px solid #becbd5;border-radius:8px;background:#fff;font:inherit}.campo textarea{min-height:105px;resize:vertical}.campo small{color:var(--cinza);line-height:1.35}.obrigatorio{color:var(--vermelho)}.foto-box{padding:13px;border:1px dashed #aebdca;border-radius:9px;background:#f8fafb}.preview{display:none;max-width:100%;max-height:280px;margin-top:10px;border-radius:8px}.btn{width:100%;margin-top:18px;padding:14px;border:0;border-radius:9px;background:linear-gradient(135deg,#0d548c,#147bc1);color:#fff;font-weight:900;font-size:16px;cursor:pointer}.btn:disabled{opacity:.55;cursor:wait}.msg{display:none;margin-top:14px;padding:13px;border-radius:8px;line-height:1.45;font-size:13px}.msg.ok{display:block;background:#e5f6ee;color:#0c5d3c;border:1px solid #a9dfc7}.msg.erro{display:block;background:#fff0f0;color:#8d2020;border:1px solid #ecc2c2}.privacidade{margin:14px 0 0;color:var(--cinza);font-size:11px;line-height:1.5}.rodape{text-align:center;padding:18px;color:var(--cinza);font-size:11px}.armadilha{position:absolute;left:-9999px}
+    @media(max-width:650px){.orientacao,.grid{grid-template-columns:1fr}.span2{grid-column:auto}.card{padding:16px}.topo{padding:22px 14px}}
+  </style>
+</head>
+<body>
+  <header class="topo"><div><small>BONIER • PARTICIPAÇÃO E MELHORIA CONTÍNUA</small><h1>Canal de Ideias e Melhorias</h1><p>Viu uma oportunidade para trabalhar melhor, com mais segurança, qualidade ou agilidade? Registre aqui. Toda boa melhoria começa com alguém prestando atenção.</p></div></header>
+  <main class="conteudo">
+    <div class="orientacao"><div><b>1. Mostre o problema</b>Explique o que acontece hoje.</div><div><b>2. Conte sua ideia</b>Diga como poderia melhorar.</div><div><b>3. Envie</b>Você receberá um protocolo.</div></div>
+    <form id="formSugestao" class="card">
+      <div class="grid">
+        <div class="campo"><label>Seu nome <span class="obrigatorio">*</span></label><input id="nome" required minlength="3" maxlength="100" autocomplete="name" placeholder="Nome e sobrenome"></div>
+        <div class="campo"><label>Setor <span class="obrigatorio">*</span></label><input id="setor" required maxlength="70" placeholder="Ex.: Prensas, Ferramentaria, Montagem"></div>
+        <div class="campo"><label>Máquina, dispositivo ou processo</label><input id="equipamento" maxlength="100" placeholder="Ex.: PH-05, dispositivo de repuxo"></div>
+        <div class="campo"><label>Tipo da sugestão</label><select id="categoria"><option>Melhoria de processo</option><option>Segurança</option><option>Qualidade</option><option>Ferramenta ou dispositivo</option><option>Manutenção</option><option>Redução de tempo</option><option>Redução de custo</option><option>Organização</option><option>Outra ideia</option></select></div>
+        <div class="campo span2"><label>O que acontece hoje? <span class="obrigatorio">*</span></label><textarea id="problema" required minlength="10" maxlength="1500" placeholder="Descreva o problema, dificuldade, desperdício ou oportunidade que você observou."></textarea></div>
+        <div class="campo span2"><label>Qual é a sua ideia ou melhoria? <span class="obrigatorio">*</span></label><textarea id="sugestao" required minlength="10" maxlength="2000" placeholder="Explique sua sugestão com suas palavras. Não precisa usar termos técnicos."></textarea></div>
+        <div class="campo span2"><label>Que benefício essa ideia pode trazer?</label><textarea id="beneficio" maxlength="1000" placeholder="Ex.: mais segurança, menos esforço, menor tempo, melhor qualidade."></textarea></div>
+        <div class="campo span2 foto-box"><label>Foto opcional</label><input id="foto" type="file" accept="image/jpeg,image/png,image/webp" capture="environment"><small>A foto será reduzida automaticamente antes do envio. Máximo permitido: 8 MB.</small><img id="preview" class="preview" alt="Prévia da foto"></div>
+        <label class="armadilha">Não preencha<input id="website" tabindex="-1" autocomplete="off"></label>
+      </div>
+      <button id="enviar" class="btn" type="submit">Enviar ideia ou melhoria</button>
+      <div id="mensagem" class="msg"></div>
+      <p class="privacidade">Seu nome, setor, data, hora e tipo geral de dispositivo serão registrados para permitir contato sobre a sugestão. Esta página não acessa seu número de telefone, seus contatos nem outras informações do aparelho.</p>
+    </form>
+  </main>
+  <footer class="rodape"><b>Bonier • Canal de Ideias e Melhorias</b><br>Desenvolvido por Alexandre Willian</footer>
+  <script>
+    const URL_BANCO='https://azjyonasnexfzpxxzupn.supabase.co';
+    const CHAVE_PUBLICA='sb_publishable_epsY2jlWkHHtY_wl8xzscg_8m8_rwMp';
+    const banco=window.supabase.createClient(URL_BANCO,CHAVE_PUBLICA,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+    const $=id=>document.getElementById(id);let fotoComprimida='';
+    const dispositivo=()=>/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)?'Celular/tablet':'Computador';
+    const protocolo=()=>`IDEIA-${new Date().getFullYear()}-${String(Date.now()).slice(-7)}`;
+    function mensagem(texto,tipo){$('mensagem').className='msg '+tipo;$('mensagem').innerHTML=texto}
+    $('foto').addEventListener('change',async()=>{const arq=$('foto').files[0];fotoComprimida='';$('preview').style.display='none';if(!arq)return;if(arq.size>8*1024*1024){$('foto').value='';mensagem('A foto ultrapassa 8 MB. Escolha uma imagem menor.','erro');return}try{fotoComprimida=await comprimir(arq);$('preview').src=fotoComprimida;$('preview').style.display='block';$('mensagem').className='msg'}catch{mensagem('Não foi possível preparar essa foto. Tente outra imagem.','erro')}});
+    function comprimir(arq){return new Promise((resolve,reject)=>{const img=new Image(),url=URL.createObjectURL(arq);img.onload=()=>{let w=img.width,h=img.height,max=1024;if(w>max||h>max){const r=Math.min(max/w,max/h);w=Math.round(w*r);h=Math.round(h*r)}const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);URL.revokeObjectURL(url);resolve(c.toDataURL('image/jpeg',.65))};img.onerror=()=>{URL.revokeObjectURL(url);reject()};img.src=url})}
+    $('formSugestao').addEventListener('submit',async e=>{e.preventDefault();if($('website').value)return;const ultimo=Number(localStorage.getItem('ultima_sugestao')||0);if(Date.now()-ultimo<30000){mensagem('Aguarde alguns segundos antes de enviar outra sugestão.','erro');return}const cod=protocolo(),payload={protocolo:cod,nome:$('nome').value.trim(),setor:$('setor').value.trim(),equipamento:$('equipamento').value.trim(),categoria:$('categoria').value,problema:$('problema').value.trim(),sugestao:$('sugestao').value.trim(),beneficio:$('beneficio').value.trim(),foto_data:fotoComprimida||null,dispositivo:dispositivo()};$('enviar').disabled=true;$('enviar').textContent='Enviando...';const {error}=await banco.from('sugestoes_funcionarios').insert(payload);$('enviar').disabled=false;$('enviar').textContent='Enviar ideia ou melhoria';if(error){mensagem('Não foi possível enviar agora. Confira sua internet e tente novamente. Se continuar, informe o responsável pela Central.','erro');return}localStorage.setItem('ultima_sugestao',Date.now());$('formSugestao').reset();fotoComprimida='';$('preview').style.display='none';mensagem(`<b>Sugestão enviada com sucesso.</b><br>Seu protocolo é <b>${cod}</b>. Faça uma foto ou anote esse número.`,'ok')});
+  </script>
+</body>
+</html>
