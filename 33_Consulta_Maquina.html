@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#163b5c">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Consulta da Máquina</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{--azul:#1f5f93;--azul-escuro:#163b5c;--azul-claro:#eaf2f9;--fundo:#f4f7f9;--branco:#fff;--texto:#17202a;--cinza:#66727d;--linha:#dce3e8;--verde:#18794e;--verde-bg:#e8f5ee;--amarelo:#a96408;--amarelo-bg:#fff2d7;--vermelho:#a53f38;--vermelho-bg:#faeae7;--sombra:0 8px 24px #17324714}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--fundo);color:var(--texto);font-family:Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased}button{font:inherit}
+    .cabecalho{padding:18px 0 64px;background:linear-gradient(135deg,var(--azul-escuro),#1f5f93);color:#fff}.limite{width:min(1050px,100%);margin:auto;padding:0 16px}.topo{display:flex;align-items:center;justify-content:space-between;gap:12px}.marca{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:900;letter-spacing:.4px}.marca img{width:46px;height:46px;object-fit:contain;border-radius:6px;background:#fff}.somente{padding:7px 9px;border:1px solid #ffffff4d;border-radius:999px;background:#ffffff14;font-size:10px;font-weight:800;text-transform:uppercase}.hero{margin-top:40px}.hero small{font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;opacity:.8}.hero h1{margin:8px 0 8px;font-size:clamp(48px,12vw,84px);line-height:.9;letter-spacing:-3px}.hero p{max-width:700px;margin:0;color:#dceaf2;font-size:14px;line-height:1.5}.acoes-hero{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:15px}.atualizar{border:1px solid #ffffff55;border-radius:8px;padding:9px 11px;background:#ffffff14;color:#fff;font-size:12px;font-weight:800;cursor:pointer}.atualizar:disabled{opacity:.55;cursor:wait}.assinatura{display:flex;align-items:center;gap:9px;min-height:39px;padding:7px 13px;border:1px solid #f3ca69;border-radius:8px;background:linear-gradient(135deg,#fff3c91f,#f0b83a2b);box-shadow:0 5px 16px #0b263b26;color:#fff}.assinatura::before{content:'★';color:#ffd56f;font-size:16px}.assinatura span{display:block;color:#dceaf2;font-size:8px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase}.assinatura strong{display:block;margin-top:2px;color:#fff;font-size:13px;letter-spacing:.25px}
+    main{position:relative;margin-top:-39px;padding-bottom:52px}.status{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 17px;border:1px solid #bfdfce;border-left:6px solid var(--verde);border-radius:11px;background:var(--verde-bg);box-shadow:var(--sombra)}.status.atencao{border-color:#edce94;border-left-color:var(--amarelo);background:var(--amarelo-bg)}.status.erro{border-color:#e8b8b2;border-left-color:var(--vermelho);background:var(--vermelho-bg)}.status strong{display:block;color:#245d43;font-size:14px}.status.atencao strong{color:#75490b}.status.erro strong{color:#7d312b}.status span{display:block;margin-top:4px;color:#5b7165;font-size:11px}.sincronizacao{flex:0 0 auto;color:#607168;font-size:10px;font-weight:700}
+    .atalhos{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:13px}.atalho{padding:13px;border:1px solid var(--linha);border-radius:10px;background:#fff;box-shadow:0 4px 14px #1732470c;text-align:center}.atalho b{display:block;color:var(--azul-escuro);font-size:24px}.atalho span{display:block;margin-top:4px;color:var(--cinza);font-size:10px;font-weight:800;text-transform:uppercase}
+    .secao{margin-top:14px;padding:20px;border:1px solid var(--linha);border-radius:12px;background:#fff;box-shadow:var(--sombra)}.secao-titulo{display:flex;align-items:end;justify-content:space-between;gap:10px;margin-bottom:15px}.secao-titulo small{display:block;color:var(--azul);font-size:10px;font-weight:900;letter-spacing:1.2px;text-transform:uppercase}.secao-titulo h2{margin:5px 0 0;color:var(--azul-escuro);font-size:21px}.quantidade{padding:6px 8px;border-radius:7px;background:var(--azul-claro);color:var(--azul)!important;letter-spacing:0!important;white-space:nowrap}.cadastro{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.campo{min-height:80px;padding:12px;border:1px solid var(--linha);border-radius:9px;background:#fbfcfd}.campo small,.campo strong{display:block}.campo small{color:var(--cinza);font-size:9px;font-weight:800;text-transform:uppercase}.campo strong{margin-top:7px;color:var(--azul-escuro);font-size:13px;line-height:1.35}.observacao{grid-column:1/-1;min-height:auto;background:var(--azul-claro)}
+    .registro{margin-bottom:10px;border:1px solid var(--linha);border-radius:10px;overflow:hidden}.registro:last-child{margin-bottom:0}.registro-topo{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;background:#f5f8fa}.registro-topo strong{color:var(--azul-escuro);font-size:13px}.etiquetas{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}.etiqueta{padding:5px 7px;border-radius:6px;background:#e9eef1;color:#53636e;font-size:9px;font-weight:900;text-transform:uppercase}.etiqueta.aberta{background:var(--amarelo-bg);color:var(--amarelo)}.etiqueta.concluida{background:var(--verde-bg);color:var(--verde)}.registro-corpo{padding:13px}.registro-corpo h3{margin:0;color:#273c4a;font-size:14px}.registro-corpo p{margin:7px 0 0;color:#53636e;font-size:12px;line-height:1.5;white-space:pre-line}.meta{display:flex;gap:13px;flex-wrap:wrap;margin-top:10px;padding-top:9px;border-top:1px solid var(--linha);color:var(--cinza);font-size:10px}.vazio{padding:25px 15px;border:1px dashed #c5d0d7;border-radius:9px;color:var(--cinza);text-align:center;font-size:12px}.rodape{padding:22px 14px 32px;color:#77848d;text-align:center;font-size:10px;line-height:1.5}
+    @media(max-width:700px){.limite{padding:0 11px}.cabecalho{padding-top:13px}.hero{margin-top:34px}.acoes-hero{align-items:stretch}.assinatura{flex:1 1 210px}.status{align-items:flex-start;flex-direction:column}.sincronizacao{align-self:flex-end}.secao{padding:16px 13px}.cadastro{grid-template-columns:1fr 1fr}.secao-titulo{align-items:flex-start}.registro-topo{align-items:flex-start;flex-direction:column}.etiquetas{justify-content:flex-start}}@media(max-width:380px){.cadastro{grid-template-columns:1fr}.atalho{padding:10px 5px}.atalho b{font-size:19px}.somente{font-size:8px}}
+    @media print{body{background:#fff}.cabecalho{padding:10px 0 25px}.hero{margin-top:22px}.hero h1{font-size:48px}.atualizar,.somente{display:none}main{margin-top:-12px}.status,.secao,.atalho{box-shadow:none;break-inside:avoid}.rodape{padding-bottom:0}}
+  </style>
+</head>
+<body>
+  <header class="cabecalho"><div class="limite"><div class="topo"><div class="marca"><img src="logo-bonier.png" alt="BONIER"><span>SISTEMA DE MANUTENÇÃO</span></div><div class="somente">Consulta • somente leitura</div></div><div class="hero"><small id="subtitulo">Carregando cadastro</small><h1 id="codigoMaquina">•••</h1><p id="nomeMaquina">Consultando histórico, preventivas e ordens de serviço.</p><div class="acoes-hero"><button class="atualizar" id="botaoAtualizar" type="button">↻ Atualizar agora</button><div class="assinatura" aria-label="Desenvolvido por Alexandre Willian"><div><span>Desenvolvido por</span><strong>Alexandre Willian</strong></div></div></div></div></div></header>
+  <main class="limite">
+    <section class="status" id="status"><div><strong id="statusTitulo">Consultando informações…</strong><span id="statusTexto">Aguarde alguns segundos.</span></div><div class="sincronizacao" id="sincronizacao"></div></section>
+    <section class="atalhos"><div class="atalho"><b id="totalHistorico">0</b><span>Histórico</span></div><div class="atalho"><b id="totalPreventivas">0</b><span>Preventivas</span></div><div class="atalho"><b id="totalOS">0</b><span>Ordens de serviço</span></div></section>
+    <section class="secao"><div class="secao-titulo"><div><small>Identificação</small><h2>Cadastro da máquina</h2></div></div><div class="cadastro" id="cadastro"><div class="vazio observacao">Carregando cadastro…</div></div></section>
+    <section class="secao" id="secaoPreventivas"><div class="secao-titulo"><div><small>Manutenção programada</small><h2>Preventivas</h2></div><small class="quantidade" id="qtdPreventivas">0 registros</small></div><div id="preventivas"><div class="vazio">Carregando preventivas…</div></div></section>
+    <section class="secao"><div class="secao-titulo"><div><small>Acompanhamento</small><h2>Ordens de serviço</h2></div><small class="quantidade" id="qtdOS">0 registros</small></div><div id="ordens"><div class="vazio">Carregando ordens de serviço…</div></div></section>
+    <section class="secao"><div class="secao-titulo"><div><small>Serviços realizados</small><h2>Histórico de manutenção</h2></div><small class="quantidade" id="qtdHistorico">0 registros</small></div><div id="historico"><div class="vazio">Carregando histórico…</div></div></section>
+  </main>
+  <footer class="rodape"><b id="codigoRodape">Consulta da máquina</b><br>As informações são atualizadas diretamente pelo sistema de manutenção.</footer>
+  <script>
+    const SUPABASE_URL='https://wzcrqzbwcsmfwenzcxkf.supabase.co';
+    const SUPABASE_KEY='sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu';
+    const banco=window.supabase&&window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+    const parametros=new URLSearchParams(location.search),codigoSolicitado=parametros.get('maquina')||parametros.get('codigo')||'';
+    const ids=['subtitulo','codigoMaquina','nomeMaquina','botaoAtualizar','status','statusTitulo','statusTexto','sincronizacao','totalHistorico','totalPreventivas','totalOS','cadastro','qtdPreventivas','preventivas','qtdOS','ordens','qtdHistorico','historico','codigoRodape'];
+    const e=Object.fromEntries(ids.map(id=>[id,document.getElementById(id)]));let carregando=false,ultimaCarga=0;
+
+    function normalizar(valor){return String(valor||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'')}
+    function texto(valor,padrao='Não informado'){const v=String(valor??'').trim();return v||padrao}
+    function escapar(valor){return texto(valor,'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+    function dataBR(valor){if(!valor)return'Data não informada';const p=String(valor).slice(0,10).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:texto(valor)}
+    function formatarCodigo(valor){const limpo=normalizar(valor);return limpo.replace(/^([A-Z]+)(\d+)$/,'$1-$2')||texto(valor)}
+    function normalizarStatus(valor){return texto(valor,'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim()}
+    function encerrada(valor){return['CONCLUIDA','CONCLUIDO','CANCELADA','CANCELADO'].includes(normalizarStatus(valor))}
+    function maisNova(a,b){const da=texto(a.data_conclusao||a.data_inicio||a.data,''),db=texto(b.data_conclusao||b.data_inicio||b.data,'');return db.localeCompare(da)||Number(b.id||0)-Number(a.id||0)}
+    function preventiva(row){return normalizarStatus([row.servico,row.defeito,row.obs,row.tipo,row.descricao].join(' ')).includes('PREVENTIV')}
+    function vazio(mensagem){return '<div class="vazio">'+escapar(mensagem)+'</div>'}
+    function etiqueta(valor){const classe=encerrada(valor)?'concluida':'aberta';return '<span class="etiqueta '+classe+'">'+escapar(texto(valor,'Registrada'))+'</span>'}
+
+    function renderCadastro(maquina,codigo){
+      const campos=[['Código',codigo],['Equipamento',maquina.codigo||maquina.equipamento],['Setor',maquina.setor],['Fabricante',maquina.fabricante],['Modelo',maquina.modelo],['Capacidade',maquina.capacidade],['Número de série',maquina.numero_serie],['Aquisição',maquina.data_aquisicao?dataBR(maquina.data_aquisicao):'Não informada']];
+      e.cadastro.innerHTML=campos.map(c=>'<div class="campo"><small>'+escapar(c[0])+'</small><strong>'+escapar(texto(c[1]))+'</strong></div>').join('')+'<div class="campo observacao"><small>Observações</small><strong>'+escapar(texto(maquina.obs,'Nenhuma observação cadastrada.'))+'</strong></div>';
+    }
+
+    function renderManutencoes(rows,destino,mensagem){
+      if(!rows.length){destino.innerHTML=vazio(mensagem);return}
+      destino.innerHTML=rows.map(row=>{
+        const titulo=texto(row.servico||row.defeito,'Serviço de manutenção'),detalhe=texto(row.defeito||row.obs,'Sem detalhamento cadastrado.');
+        return '<article class="registro"><div class="registro-topo"><strong>'+escapar(texto(row.os,'Registro de manutenção'))+'</strong><div class="etiquetas">'+etiqueta(row.status)+'</div></div><div class="registro-corpo"><h3>'+escapar(titulo)+'</h3><p>'+escapar(detalhe)+'</p><div class="meta"><span>📅 '+dataBR(row.data)+'</span><span>👤 '+escapar(texto(row.responsavel))+'</span><span>Tipo: '+escapar(texto(row.tipo||row.servico))+'</span></div></div></article>';
+      }).join('');
+    }
+
+    function renderOrdens(rows){
+      if(!rows.length){e.ordens.innerHTML=vazio('Nenhuma ordem de serviço registrada para esta máquina.');return}
+      e.ordens.innerHTML=rows.map(row=>'<article class="registro"><div class="registro-topo"><strong>'+escapar(texto(row.numero,'OS sem número'))+'</strong><div class="etiquetas"><span class="etiqueta">'+escapar(texto(row.prioridade,'Sem prioridade'))+'</span>'+etiqueta(row.status)+'</div></div><div class="registro-corpo"><h3>'+escapar(texto(row.tipo,'Ordem de serviço'))+'</h3><p>'+escapar(texto(row.descricao,'Sem descrição cadastrada.'))+'</p><div class="meta"><span>📅 '+dataBR(row.data||row.data_inicio||row.data_conclusao)+'</span><span>👤 '+escapar(texto(row.responsavel))+'</span><span>Solicitante: '+escapar(texto(row.solicitante))+'</span></div></div></article>').join('');
+    }
+
+    function mostrarErro(mensagem){e.status.className='status erro';e.statusTitulo.textContent='Consulta indisponível';e.statusTexto.textContent=mensagem;e.sincronizacao.textContent='Tente atualizar';e.codigoMaquina.textContent=formatarCodigo(codigoSolicitado)||'ERRO';e.nomeMaquina.textContent='Não foi possível carregar os dados desta máquina.';e.cadastro.innerHTML=vazio(mensagem);e.preventivas.innerHTML=vazio('Dados não carregados.');e.ordens.innerHTML=vazio('Dados não carregados.');e.historico.innerHTML=vazio('Dados não carregados.')}
+
+    async function carregar(forcar=false){
+      if(carregando||(!forcar&&Date.now()-ultimaCarga<5000))return;
+      const alvo=normalizar(codigoSolicitado);if(!/^[A-Z]{1,8}\d{1,5}$/.test(alvo)){mostrarErro('O QR Code não possui um código de máquina válido.');return}if(!banco){mostrarErro('Falha ao iniciar a conexão com o sistema.');return}
+      carregando=true;e.botaoAtualizar.disabled=true;e.botaoAtualizar.textContent='↻ Atualizando…';
+      try{
+        const resultados=await Promise.all([banco.from('maquinas').select('*').limit(2000),banco.from('manutencao').select('*').limit(5000),banco.from('ordens_servico').select('*').limit(5000)]);
+        const erro=resultados.find(r=>r.error);if(erro)throw new Error(erro.error.message);
+        const maquina=(resultados[0].data||[]).find(m=>normalizar(m.maquina)===alvo);if(!maquina)throw new Error('Máquina não encontrada no cadastro.');
+        const manutencoes=(resultados[1].data||[]).filter(r=>normalizar(r.maquina)===alvo).sort(maisNova),ordens=(resultados[2].data||[]).filter(r=>normalizar(r.maquina)===alvo).sort(maisNova),preventivas=manutencoes.filter(preventiva),abertas=ordens.filter(r=>!encerrada(r.status));
+        const codigo=formatarCodigo(maquina.maquina||codigoSolicitado),nome=texto(maquina.codigo||maquina.equipamento,'Máquina');document.title=codigo+' • Consulta da Máquina';e.codigoMaquina.textContent=codigo;e.nomeMaquina.textContent=nome+' — histórico, preventivas e ordens de serviço.';e.subtitulo.textContent=texto(maquina.setor)+' • '+texto(maquina.status,'Status não informado');e.codigoRodape.textContent=codigo+' • Consulta pelo QR Code';
+        renderCadastro(maquina,codigo);renderManutencoes(preventivas,e.preventivas,'Nenhuma manutenção preventiva registrada para esta máquina.');renderOrdens(ordens);renderManutencoes(manutencoes,e.historico,'Nenhuma manutenção registrada para esta máquina.');
+        e.totalHistorico.textContent=manutencoes.length;e.totalPreventivas.textContent=preventivas.length;e.totalOS.textContent=ordens.length;e.qtdPreventivas.textContent=preventivas.length+' '+(preventivas.length===1?'registro':'registros');e.qtdOS.textContent=ordens.length+' '+(ordens.length===1?'registro':'registros');e.qtdHistorico.textContent=manutencoes.length+' '+(manutencoes.length===1?'registro':'registros');
+        e.status.className='status'+(abertas.length?' atencao':'');e.statusTitulo.textContent=abertas.length?abertas.length+' '+(abertas.length===1?'OS aberta':'OS abertas'):'Nenhuma OS aberta';e.statusTexto.textContent=abertas.length?'Consulte abaixo as ordens que ainda precisam de acompanhamento.':'A máquina não possui ordem de serviço pendente.';e.sincronizacao.textContent='Atualizado às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});ultimaCarga=Date.now();
+      }catch(erro){mostrarErro(erro.message||'Falha ao consultar o sistema.')}finally{carregando=false;e.botaoAtualizar.disabled=false;e.botaoAtualizar.textContent='↻ Atualizar agora'}
+    }
+    e.botaoAtualizar.addEventListener('click',()=>carregar(true));window.addEventListener('pageshow',()=>carregar());window.addEventListener('focus',()=>carregar());window.addEventListener('online',()=>carregar(true));document.addEventListener('visibilitychange',()=>{if(!document.hidden)carregar()});setInterval(()=>{if(!document.hidden)carregar(true)},60000);carregar(true);
+  </script>
+</body>
+</html>
