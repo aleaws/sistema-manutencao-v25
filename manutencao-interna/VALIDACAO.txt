@@ -1,0 +1,50 @@
+VALIDACAO DA ENTREGA — 27/09/2026
+
+Testes realizados em ambiente isolado, sem alterar o projeto Supabase real:
+
+1. SQL executado em PostgreSQL via PGlite:
+- usuario sem permissao bloqueado;
+- perfil de manutencao sem permissao administrativa;
+- acesso direto as tabelas bloqueado para authenticated;
+- descricao original protegida contra alteracao;
+- transferencia de responsavel com aviso;
+- mesma operacao repetida sem duplicar a OS;
+- revisao antiga gera conflito, sem sobrescrever;
+- fechamento exige conclusao;
+- custo 2,5 x 12,34 = 30,85;
+- plano preventivo sem duas OS abertas;
+- proxima data avanca ao fechar;
+- conferencia ERP bloqueia gastos do mes ate reabertura.
+
+2. IndexedDB e sincronizacao:
+- perda de resposta DEPOIS do servidor confirmar mantem o envio local;
+- repetir esse envio nao duplica a OS;
+- fila preservada em conflito;
+- fila separada por conta;
+- snapshot antigo nao substitui o mais recente;
+- copia/restauracao de pendencias mantem IDs;
+- backup de outra conta e rejeitado.
+
+3. Navegador Chromium, com API de teste usando o SQL real:
+- login e cadastro de equipamento;
+- abertura de OS em modo offline;
+- fechar a pagina, abrir novamente sem internet e recuperar a OS;
+- voltar online e confirmar uma unica OS no servidor;
+- atualizar diagnostico/especialidade;
+- lancar custo com virgula decimal;
+- imagens revisadas em 1440 px e 390 px;
+- sem rolagem horizontal indevida ou erros JavaScript nesse fluxo.
+
+4. XLSX:
+- oito abas, pacote ZIP valido, aberto com openpyxl.
+
+NAO EXECUTADO:
+- instalacao dos objetos mi_ no Supabase da fabrica;
+- publicacao no GitHub do usuario;
+- teste nos tres aparelhos reais;
+- notificacao push com tela bloqueada (nao faz parte desta versao).
+
+Nenhum registro de teste, token ou senha esta incluido no pacote.
+A URL e chave PUBLICAVEL do config.js vieram do arquivo atual do V25.
+Os testes automatizados de desenvolvimento exigem dependencias e nao sao
+necessarios para operar o aplicativo, por isso nao acompanham o pacote.

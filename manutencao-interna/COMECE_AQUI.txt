@@ -1,0 +1,24 @@
+MANUTENCAO INTERNA — GITHUB + SUPABASE + OFFLINE
+
+Esta versao NAO usa Python e NAO depende do notebook ligado.
+Ela ainda precisa ser publicada no seu GitHub e ter a base preparada no Supabase.
+
+1. Extraia o ZIP.
+2. Leia GUIA_INSTALACAO.html no navegador.
+3. No Supabase do V25, execute INSTALAR_BANCO.sql.
+4. Crie sua conta em Authentication > Users; preencha seu email em
+   PRIMEIRO_ACESSO.sql e execute esse segundo arquivo.
+5. No GitHub, envie a pasta manutencao-interna para o mesmo local onde
+   o GitHub Pages publica o V25. Nao substitua o index.html antigo.
+6. Abra o novo endereco .../manutencao-interna/ com internet e entre.
+7. Espere Sincronizado. Instale/adicone a tela inicial do celular.
+8. Teste no modo aviao: abra uma OS, feche e reabra, reconecte e espere
+   a fila ficar zerada. Confira a OS no notebook.
+
+O pacote usa a URL e a chave PUBLICAVEL encontradas no arquivo do V25.
+Nao inclui senha, chave secreta nem acesso de administrador ao Supabase.
+As novas tabelas e funcoes com prefixo mi_ sao separadas do V25.
+Nenhum dado antigo sera importado automaticamente.
+
+Se algo falhar, nao apague dados do navegador nem a fila pendente.
+Use Sincronizacao > Baixar copia de seguranca.
