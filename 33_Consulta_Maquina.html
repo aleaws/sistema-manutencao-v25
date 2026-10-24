@@ -1,0 +1,132 @@
+<!DOCTYPE html><html lang="pt-BR" translate="no"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="google" content="notranslate"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#163b5c"><title>Consulta da Máquina</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><style>
+:root{--azul:#1f5f93;--azul-escuro:#163b5c;--azul-claro:#edf3f8;--fundo:#f3f5f7;--texto:#172b3a;--cinza:#62717d;--linha:#dce3e8;--verde:#18794e;--verde-bg:#e8f5ee;--amarelo:#875407;--amarelo-bg:#fff3dc;--vermelho:#a53f38;--vermelho-bg:#faeae7}
+*{box-sizing:border-box}body{margin:0;background:var(--fundo);color:var(--texto);font:16px Arial,Helvetica,sans-serif;line-height:1.5}.limite{width:min(960px,100%);margin:auto;padding:0 20px}.cabecalho{background:white;border-top:5px solid var(--azul-escuro);border-bottom:1px solid var(--linha);padding:20px 0}.topo,.identificacao,.secao-titulo,.registro-topo,.status{display:flex;justify-content:space-between;align-items:center;gap:12px}.marca{display:flex;gap:10px;align-items:center;font-weight:bold;color:var(--cinza);font-size:12px;letter-spacing:1px}.marca img{width:42px;height:42px;object-fit:contain}.somente{font-size:12px;color:var(--cinza)}.identificacao{margin-top:20px}.hero h1{font-size:42px;line-height:1.1;margin:0 0 5px;letter-spacing:-1px}.hero p{font-size:18px;margin:0}.hero small{font-size:12px;color:var(--cinza);display:block;margin-top:5px}button,input,select{font:inherit}button{cursor:pointer}.atualizar{background:white;border:1px solid #a9bac6;border-radius:8px;padding:10px 14px;color:var(--azul-escuro);font-size:14px;font-weight:bold}button:disabled{opacity:.5;cursor:wait}main{padding-top:18px!important;padding-bottom:30px!important}.status{font-size:13px;margin-bottom:18px;padding:12px 14px;border-radius:8px;background:#eaf1f5;color:#344e60}.status strong{display:block}.status span{display:block;margin-top:2px}.status.atencao{background:var(--amarelo-bg)}.status.erro{background:var(--vermelho-bg)}.sincronizacao{white-space:nowrap;font-size:12px;color:var(--cinza)}.secao{margin-bottom:16px}.secao-titulo{margin-bottom:14px}.secao-titulo h2{font-size:24px;margin:0}.quantidade{font-size:13px;color:var(--cinza)}.filtros{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;margin-bottom:12px}.filtros label{font-size:12px;font-weight:bold;color:var(--cinza)}input,select{width:100%;min-width:0;display:block;margin-top:5px;border:1px solid #b8c5ce;border-radius:7px;background:white;padding:11px;color:var(--texto);font-size:15px}button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #659dcc;outline-offset:3px}.ajuda{font-size:12px;color:var(--cinza);margin:10px 0 16px}.registro{background:white;border:1px solid var(--linha);border-radius:10px;margin-bottom:12px;overflow:hidden}.registro-topo{padding:13px 16px;border-bottom:1px solid #edf0f2}.registro-topo strong{font-size:16px}.etiquetas{display:flex;flex-wrap:wrap;gap:6px}.etiqueta{padding:4px 8px;font-size:12px;border-radius:5px;background:#edf1f4;color:#50616d;font-weight:bold}.etiqueta.aberta{background:var(--amarelo-bg);color:var(--amarelo)}.etiqueta.concluida{background:var(--verde-bg);color:var(--verde)}.registro-corpo{padding:15px 16px}.registro-corpo h3{margin:0 0 9px;font-size:17px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}.registro-corpo p{white-space:pre-wrap;overflow-wrap:anywhere}.meta{font-size:12px;color:var(--cinza);display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:10px}.resultado{border-left:3px solid var(--verde);padding-left:12px;margin:12px 0;font-size:14px}.resultado b{color:var(--verde);font-size:12px}.resultado p{margin:3px 0}.registro details{margin-top:13px;border-top:1px solid var(--linha);padding-top:10px}summary{cursor:pointer;color:var(--azul-escuro);font-size:14px;font-weight:bold}.detalhe-servico{margin-top:12px}.detalhe-servico small{color:var(--cinza);font-size:12px;font-weight:bold}.detalhe-servico p{margin:3px 0;font-size:14px}.complementar{border:1px solid var(--linha);background:white;border-radius:10px;padding:16px;margin-top:12px}.complementar>summary{font-size:16px}.complementar>div{margin-top:15px}.cadastro{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.campo small,.campo strong{display:block}.campo small{font-size:12px;color:var(--cinza)}.campo strong{font-size:14px;overflow-wrap:anywhere}.observacao{grid-column:1/-1}.vazio{padding:28px 18px;border:1px dashed #bdcad3;border-radius:9px;color:var(--cinza);text-align:center;background:white;font-size:14px}.aviso{color:var(--amarelo);font-size:13px}.rodape{text-align:center;color:var(--cinza);padding:20px;font-size:12px}[hidden]{display:none!important}
+@media(max-width:600px){.limite{padding:0 14px}.hero h1{font-size:34px}.hero p{font-size:16px}.identificacao{align-items:flex-start}.atualizar{font-size:12px;padding:9px}.somente{font-size:10px}.marca{font-size:10px;letter-spacing:.4px}.marca img{width:34px;height:34px}.filtros{grid-template-columns:1fr 1fr}.busca{grid-column:1/-1}.status{align-items:flex-start;flex-direction:column;gap:5px}.registro-topo{align-items:flex-start;flex-wrap:wrap}.secao-titulo h2{font-size:22px}.cadastro{grid-template-columns:1fr 1fr}.registro-corpo h3{font-size:16px}.quantidade{font-size:12px}}
+@media print{body{background:white}.atualizar,.filtros,.ajuda,.somente,.sincronizacao{display:none!important}.limite{width:100%;padding:0}.cabecalho{padding:10px 0}.registro{break-inside:avoid}.status{background:white;border:1px solid #aaa}.rodape{font-size:10px}.complementar:not([open]){display:none}summary{list-style:none}}
+</style></head><body>
+<header class="cabecalho"><div class="limite"><div class="topo"><div class="marca"><img src="logo-bonier.png" alt="Bonier"><span>MANUTENÇÃO DE MÁQUINAS</span></div><span class="somente">Consulta pelo QR • somente leitura</span></div><div class="identificacao"><div class="hero"><h1 id="codigoMaquina">…</h1><p id="nomeMaquina">Carregando máquina…</p><small id="subtitulo"></small></div><button class="atualizar" id="botaoAtualizar" type="button">Atualizar</button></div></div></header>
+<main class="limite">
+<section class="status" id="status" role="status"><div><strong id="statusTitulo">Consultando informações…</strong><span id="statusTexto">Aguarde alguns segundos.</span></div><div class="sincronizacao" id="sincronizacao"></div></section>
+<section class="secao" aria-labelledby="tituloHistorico"><div class="secao-titulo"><h2 id="tituloHistorico">Manutenções</h2><span class="quantidade" id="qtdHistorico">Carregando…</span></div>
+<div class="filtros"><label class="busca">Buscar no histórico<input id="buscaHistorico" type="search" placeholder="Serviço, responsável ou observação"></label><label>Tipo<select id="filtroTipo"><option value="">Todos</option><option>Corretiva</option><option>Preventiva</option><option>Preditiva</option><option value="Outro">Outros / não informado</option></select></label><label>Situação<select id="filtroSituacao"><option value="">Todas</option><option value="pendente">Em aberto / andamento</option><option value="concluida">Concluída</option><option value="cancelada">Cancelada</option></select></label></div>
+<p class="ajuda">Mais recentes primeiro. Abra “Ver detalhes” para consultar observações, testes e outras informações.</p><p id="avisoServicos" class="aviso" hidden></p><div id="historico"><div class="vazio">Carregando manutenções…</div></div>
+</section>
+<details class="complementar" id="painelOrdens"><summary>Ordens de serviço <span class="quantidade" id="qtdOS"></span></summary><div id="ordens"></div></details>
+<details class="complementar"><summary>Dados da máquina</summary><div class="cadastro" id="cadastro"></div></details>
+<div hidden aria-hidden="true"><span id="totalHistorico"></span><span id="totalPreventivas"></span><span id="totalOS"></span><span id="qtdPreventivas"></span><div id="preventivas"></div><span id="qtdServicos"></span><div id="servicos"></div></div>
+</main><footer class="rodape"><span id="codigoRodape">Consulta da máquina</span><br>Desenvolvido por Alexandre Willian</footer>
+<script>
+    const SUPABASE_URL='https://wzcrqzbwcsmfwenzcxkf.supabase.co';
+    const SUPABASE_KEY='sb_publishable_5gNNMdy4TrqEoSga1Uq4zg_8Iq7MIGu';
+    const banco=window.supabase&&window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+    const parametros=new URLSearchParams(location.search),codigoSolicitado=parametros.get('maquina')||parametros.get('codigo')||'';
+    const ids=['subtitulo','codigoMaquina','nomeMaquina','botaoAtualizar','status','statusTitulo','statusTexto','sincronizacao','totalHistorico','totalPreventivas','totalOS','cadastro','qtdPreventivas','preventivas','qtdOS','ordens','qtdHistorico','historico','codigoRodape','servicos','qtdServicos','avisoServicos'];
+    const e=Object.fromEntries(ids.map(id=>[id,document.getElementById(id)]));let carregando=false,ultimaCarga=0;
+
+    function normalizar(valor){return String(valor||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'')}
+    const MARCADOR_META='[[M25META:';
+    function decodificarMeta(obs){const bruto=String(obs||''),i=bruto.lastIndexOf(MARCADOR_META);if(i<0)return{obs:bruto.trim(),meta:{}};const fim=bruto.indexOf(']]',i);if(fim<0)return{obs:bruto.trim(),meta:{}};try{return{obs:(bruto.slice(0,i)+bruto.slice(fim+2)).trim(),meta:JSON.parse(decodeURIComponent(escape(atob(bruto.slice(i+MARCADOR_META.length,fim)))))} }catch{return{obs:bruto.trim(),meta:{}}}}
+    function pertenceMaquina(valor,alvo){
+      if(!alvo)return false;
+      if(normalizar(valor)===alvo)return true;
+      const codigos=String(valor||'').toUpperCase().match(/[A-Z]{1,8}\s*[-–—]?\s*\d{1,5}/g)||[];
+      return codigos.some(c=>normalizar(c)===alvo);
+    }
+    // Mesma sala compartilhada usada na página 03; QR pode informar ?sala=...
+    const SALA_SERVICOS_PADRAO='DEMO-ALEXANDRE';
+    function salaConsulta(){return (parametros.get('sala')||SALA_SERVICOS_PADRAO).trim()||SALA_SERVICOS_PADRAO}
+    function eventosDoServico(s,eventos){return eventos.filter(ev=>ev&&(ev.servicoId?String(ev.servicoId)===String(s.id):ev.servico===s.codigo)&&ev.tipo==='TRABALHO REGISTRADO').sort((a,b)=>String(a.data||'').localeCompare(String(b.data||'')))}
+    function selecionarServicos(dados,alvo,manutencoes,sala){
+      const itens=Array.isArray(dados.servicos)?dados.servicos:[],eventos=Array.isArray(dados.eventos)?dados.eventos:[],vistos=new Set();
+      return itens.filter(s=>{
+        if(!s||s.tipo!=='MANUTENCAO'||!pertenceMaquina(s.ativo,alvo))return false;
+        const chave=s.id||s.codigo;if(chave&&vistos.has(String(chave)))return false;if(chave)vistos.add(String(chave));
+        return !manutencoes.some(r=>{const m=decodificarMeta(r.obs).meta;return m.origemSala===sala&&((m.origemServicoId&&s.id&&String(m.origemServicoId)===String(s.id))||(m.origemCodigo&&s.codigo&&m.origemCodigo===s.codigo))});
+      }).map(s=>{const etapas=eventosDoServico(s,eventos);return {...s,etapas,dataConsulta:(etapas.at(-1)||{}).data||s.inicioTrabalho||s.abertoEm||''}}).sort((a,b)=>String(b.dataConsulta).localeCompare(String(a.dataConsulta)));
+    }
+    function duracaoServico(segundos){const minutos=Math.round(Math.max(0,Number(segundos)||0)/60);return Math.floor(minutos/60)+' h '+(minutos%60)+' min'}
+    function detalheServico(titulo,conteudo,classe=''){return '<div class="detalhe-servico '+classe+'"><small>'+escapar(titulo)+'</small><p>'+escapar(texto(conteudo))+'</p></div>'}
+    function renderServicos(rows){
+      e.qtdServicos.textContent=rows.length+' registros';
+      e.servicos.innerHTML=rows.map(s=>{
+        const f=s.finalizacao||{},etapas=s.etapas||[];
+        const detalhes=[detalheOpcional('Condição encontrada',f.encontrado),detalheOpcional('Causa registrada',f.causa),detalheOpcional('Resultado final',f.resultado),detalheOpcional('Referência',s.codigo),detalheOpcional('Origem','Controle da Manutenção'),detalheOpcional('Tempo de trabalho',s.tempoTrabalho!=null?duracaoServico(s.tempoTrabalho):'')].join('')+(etapas.length?detalheOpcional('Etapas registradas',etapas.map(ev=>dataBR(ev.data)+' • '+(ev.semDuracao?'Tempo não informado':duracaoServico(ev.duracao))+' — '+texto(ev.motivo)).join('\n')):'');
+        return cartao('st-'+(s.id||s.codigo),s.dataConsulta,tipoServico(s),s.estado,s.descricao,f.executado,'',detalhes);
+      }).join('');
+    }
+    function texto(valor,padrao='Não informado'){const v=String(valor??'').trim();return v||padrao}
+    function escapar(valor){return texto(valor,'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+    function dataBR(valor){if(!valor)return'Data não informada';const p=String(valor).slice(0,10).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:texto(valor)}
+    function formatarCodigo(valor){const limpo=normalizar(valor);return limpo.replace(/^([A-Z]+)(\d+)$/,'$1-$2')||texto(valor)}
+    function normalizarStatus(valor){return texto(valor,'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim()}
+    function encerrada(valor){return['CONCLUIDA','CONCLUIDO','CANCELADA','CANCELADO','FINALIZADO','FINALIZADA','ENCERRADO','ENCERRADA'].includes(normalizarStatus(valor))}
+    function maisNova(a,b){const da=texto(a.data_conclusao||a.data_inicio||a.data,''),db=texto(b.data_conclusao||b.data_inicio||b.data,'');return db.localeCompare(da)||Number(b.id||0)-Number(a.id||0)}
+    function preventiva(row){const d=decodificarMeta(row.obs);return normalizarStatus([d.meta.categoria,row.servico,row.defeito,d.obs,row.tipo,row.descricao].join(' ')).includes('PREVENTIV')}
+    function vazio(mensagem){return '<div class="vazio">'+escapar(mensagem)+'</div>'}
+    function etiqueta(valor){const st=normalizarStatus(valor),classe=['CONCLUIDA','CONCLUIDO','FINALIZADO','FINALIZADA','ENCERRADO','ENCERRADA'].includes(st)?'concluida':['CANCELADA','CANCELADO',''].includes(st)?'':'aberta';return '<span class="etiqueta '+classe+'">'+escapar(texto(valor,'Registrada'))+'</span>'}
+
+    function renderCadastro(maquina,codigo){
+      const campos=[['Código',codigo],['Equipamento',maquina.codigo||maquina.equipamento],['Setor',maquina.setor],['Fabricante',maquina.fabricante],['Modelo',maquina.modelo],['Capacidade',maquina.capacidade],['Número de série',maquina.numero_serie],['Aquisição',maquina.data_aquisicao?dataBR(maquina.data_aquisicao):'Não informada']];
+      e.cadastro.innerHTML=campos.filter(c=>c[1]&&c[1]!=='Não informada').map(c=>'<div class="campo"><small>'+escapar(c[0])+'</small><strong>'+escapar(texto(c[1]))+'</strong></div>').join('')+(maquina.obs?'<div class="campo observacao"><small>Observações</small><strong>'+escapar(maquina.obs)+'</strong></div>':'');
+    }
+
+    let historicoAtual=[],servicosAtuais=[];
+    function tipoManutencao(row){const m=decodificarMeta(row.obs).meta,t=normalizarStatus(m.categoria||row.tipo_servico);return ['CORRETIVA','PREVENTIVA','PREDITIVA'].includes(t)?t[0]+t.slice(1).toLowerCase():'Outro'}
+    function tipoServico(s){const t=normalizarStatus(s.tipoManutencao||s.categoria);return ['CORRETIVA','PREVENTIVA','PREDITIVA'].includes(t)?t[0]+t.slice(1).toLowerCase():'Outro'}
+    function detalheOpcional(t,v){return String(v??'').trim()?detalheServico(t,v):''}
+    function cartao(id,data,tipo,status,descricao,conclusao,responsavel,detalhes){
+      const resultado=String(conclusao||'').trim(),servico=texto(descricao,'Serviço sem descrição.');
+      return '<article class="registro" data-data="'+escapar(String(data||''))+'" data-chave="'+escapar(id)+'"><div class="registro-topo"><strong>'+escapar(dataBR(data))+'</strong><div class="etiquetas"><span class="etiqueta">'+escapar(tipo==='Outro'?'Manutenção':tipo)+'</span>'+etiqueta(status)+'</div></div><div class="registro-corpo"><h3>'+escapar(servico)+'</h3>'+(resultado&&resultado!==servico?'<div class="resultado"><b>O que foi feito / conclusão</b><p>'+escapar(resultado)+'</p></div>':'')+(responsavel?'<div class="meta">Responsável: '+escapar(responsavel)+'</div>':'')+'<details><summary>Ver detalhes</summary>'+detalhes+'</details></div></article>';
+    }
+    function renderManutencoes(rows,destino,mensagem){
+      destino.innerHTML=rows.length?rows.map(row=>{
+        const d=decodificarMeta(row.obs),m=d.meta||{},descricao=row.defeito||row.descricao||row.servico;
+        const origem=m.origemDiario?'Diário de produção':m.origemApp?'App de voz':m.origemServicoId||m.origemCodigo?'Controle da Manutenção':/Ficha por foto/i.test(d.obs)?'Ficha por foto':'Registro manual';
+        const detalhes=detalheOpcional('Observações',d.obs&&d.obs!==descricao&&d.obs!==m.conclusao?d.obs:'')+detalheOpcional('Serviço registrado',row.servico&&row.servico!==descricao&&row.servico!==m.conclusao?row.servico:'')+detalheOpcional('Teste',m.teste&&m.teste!=='Não informado'?m.teste:'')+detalheOpcional('Detalhes do teste',m.testeDetalhe)+detalheOpcional('Referência',m.origemDiario?'DP-'+String(row.id).padStart(6,'0'):m.origemAppCodigo||row.os)+detalheOpcional('Origem',origem)+detalheOpcional('Vínculo com o diário',m.diarioRetirado?m.diarioMotivo:'');
+        return cartao('m-'+row.id,row.data,tipoManutencao(row),row.status,descricao,m.conclusao,row.responsavel,detalhes);
+      }).join(''):vazio(mensagem);
+    }
+    function atualizarHistorico(){
+      const abertos=new Set([...e.historico.querySelectorAll('article')].filter(n=>n.querySelector('details[open]')).map(n=>n.dataset.chave));
+      const busca=normalizar(document.getElementById('buscaHistorico').value),tipo=document.getElementById('filtroTipo').value,situacao=document.getElementById('filtroSituacao').value;
+      const combina=(r,t,status)=>{const st=normalizarStatus(status),cancelada=['CANCELADA','CANCELADO'].includes(st),concluida=['CONCLUIDA','CONCLUIDO','FINALIZADO','FINALIZADA','ENCERRADO','ENCERRADA'].includes(st);return (!busca||normalizar(JSON.stringify(r)).includes(busca))&&(!tipo||t===tipo)&&(!situacao||(situacao==='cancelada'?cancelada:situacao==='concluida'?concluida:!!st&&!cancelada&&!concluida));};
+      const rows=historicoAtual.filter(r=>combina({...r,obs:decodificarMeta(r.obs).obs,meta:decodificarMeta(r.obs).meta},tipoManutencao(r),r.status)),st=servicosAtuais.filter(r=>combina(r,tipoServico(r),r.estado));
+      renderManutencoes(rows,e.historico,'Nenhuma manutenção encontrada para esta seleção.');renderServicos(st);
+      const cards=[...e.historico.querySelectorAll('article'),...e.servicos.querySelectorAll('article')].sort((a,b)=>b.dataset.data.localeCompare(a.dataset.data));
+      if(cards.length)e.historico.replaceChildren(...cards);
+      for(const card of cards)if(abertos.has(card.dataset.chave))card.querySelector('details').open=true;
+      e.qtdHistorico.textContent=cards.length+' de '+(historicoAtual.length+servicosAtuais.length)+' registros';
+    }
+    function renderOrdens(rows){
+      if(!rows.length){e.ordens.innerHTML=vazio('Nenhuma ordem de serviço registrada para esta máquina.');return}
+      e.ordens.innerHTML=rows.map(row=>'<article class="registro"><div class="registro-topo"><strong>'+escapar(texto(row.numero,'OS sem número'))+'</strong><div class="etiquetas"><span class="etiqueta">'+escapar(texto(row.prioridade,'Sem prioridade'))+'</span>'+etiqueta(row.status)+'</div></div><div class="registro-corpo"><h3>'+escapar(texto(row.tipo,'Ordem de serviço'))+'</h3><p>'+escapar(texto(row.descricao,'Sem descrição cadastrada.'))+'</p><div class="meta"><span>📅 '+escapar(dataBR(row.data||row.data_inicio||row.data_conclusao))+'</span><span>👤 '+escapar(texto(row.responsavel))+'</span><span>Solicitante: '+escapar(texto(row.solicitante))+'</span></div></div></article>').join('');
+    }
+
+    function mostrarErro(mensagem){historicoAtual=[];servicosAtuais=[];e.qtdHistorico.textContent='Indisponível';e.status.className='status erro';e.statusTitulo.textContent='Consulta indisponível';e.statusTexto.textContent=mensagem;e.sincronizacao.textContent='Tente atualizar';e.codigoMaquina.textContent=formatarCodigo(codigoSolicitado)||'ERRO';e.nomeMaquina.textContent='Não foi possível carregar os dados desta máquina.';e.cadastro.innerHTML=vazio(mensagem);e.preventivas.innerHTML=vazio('Dados não carregados.');e.ordens.innerHTML=vazio('Dados não carregados.');e.historico.innerHTML=vazio('Dados não carregados.');e.servicos.innerHTML=vazio('Dados não carregados.');e.qtdServicos.textContent='0 registros';e.avisoServicos.textContent='';['totalHistorico','totalPreventivas','totalOS'].forEach(id=>e[id].textContent='0')}
+
+    async function carregar(forcar=false){
+      if(carregando||(!forcar&&Date.now()-ultimaCarga<5000))return;
+      const alvo=normalizar(codigoSolicitado);if(!/^[A-Z]{1,8}\d{1,5}$/.test(alvo)){mostrarErro('O QR Code não possui um código de máquina válido.');return}if(!banco){mostrarErro('Falha ao iniciar a conexão com o sistema.');return}
+      carregando=true;e.botaoAtualizar.disabled=true;e.botaoAtualizar.textContent='↻ Atualizando…';
+      try{
+        const resultados=await Promise.all([banco.from('maquinas').select('*').limit(2000),banco.from('manutencao').select('*').eq('tipo','Máquina').order('id',{ascending:false}),banco.from('ordens_servico').select('*').limit(5000),Promise.resolve().then(()=>banco.from('demo_servicos_estado').select('dados').eq('sala',salaConsulta()).maybeSingle()).catch(error=>({error}))]);
+        const erro=resultados.slice(0,3).find(r=>r.error);if(erro)throw new Error(erro.error.message);
+        const maquina=(resultados[0].data||[]).find(m=>normalizar(m.maquina)===alvo);if(!maquina)throw new Error('Máquina não encontrada no cadastro.');
+        const manutencoes=(resultados[1].data||[]).filter(r=>r.tipo==='Máquina'&&pertenceMaquina(r.maquina,alvo)).sort(maisNova),ordens=(resultados[2].data||[]).filter(r=>pertenceMaquina(r.maquina,alvo)).sort(maisNova),preventivas=manutencoes.filter(preventiva),abertas=ordens.filter(r=>!encerrada(r.status));
+        const controle=resultados[3],dados=controle.data&&controle.data.dados;
+        const falhaControle=controle.error||!dados||!Array.isArray(dados.servicos);
+        const servicos=falhaControle?[]:selecionarServicos(dados,alvo,manutencoes,salaConsulta());
+        e.avisoServicos.hidden=!falhaControle;e.avisoServicos.textContent=falhaControle?'Os serviços do Controle da Manutenção não puderam ser consultados nesta atualização. O histórico da página 03 está exibido.':'';
+        const codigo=formatarCodigo(maquina.maquina||codigoSolicitado),nome=texto(maquina.codigo||maquina.equipamento,'Máquina');document.title=codigo+' • Consulta da Máquina';e.codigoMaquina.textContent=codigo;e.nomeMaquina.textContent=nome;e.subtitulo.textContent=[maquina.setor,maquina.status].filter(Boolean).join(' • ');e.codigoRodape.textContent=codigo+' • Consulta pelo QR Code';
+        renderCadastro(maquina,codigo);renderOrdens(ordens);
+        e.totalHistorico.textContent=manutencoes.length+servicos.length;e.totalPreventivas.textContent=preventivas.length;e.totalOS.textContent=ordens.length;e.qtdPreventivas.textContent=preventivas.length+' '+(preventivas.length===1?'registro':'registros');e.qtdOS.textContent=ordens.length+' '+(ordens.length===1?'registro':'registros');e.qtdHistorico.textContent=manutencoes.length+' '+(manutencoes.length===1?'registro':'registros');
+        historicoAtual=manutencoes;servicosAtuais=servicos;atualizarHistorico();
+        e.status.className='status'+(falhaControle||abertas.length?' atencao':'');e.statusTitulo.textContent=falhaControle?'Consulta parcial':(manutencoes.length+servicos.length)+' manutenção(ões) registradas';e.statusTexto.textContent=falhaControle?'Parte do histórico está indisponível. Tente atualizar.':abertas.length?abertas.length+' ordem(ns) de serviço em aberto. Consulte a seção abaixo.':'Histórico da máquina, do mais recente ao mais antigo.';
+        e.sincronizacao.textContent='Atualizado às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});ultimaCarga=Date.now();
+
+      }catch(erro){mostrarErro(erro.message||'Falha ao consultar o sistema.')}finally{carregando=false;e.botaoAtualizar.disabled=false;e.botaoAtualizar.textContent='↻ Atualizar agora'}
+    }
+    for(const id of ['buscaHistorico','filtroTipo','filtroSituacao'])document.getElementById(id).addEventListener(id==='buscaHistorico'?'input':'change',atualizarHistorico);
+    e.botaoAtualizar.addEventListener('click',()=>carregar(true));window.addEventListener('pageshow',()=>carregar());window.addEventListener('focus',()=>carregar());window.addEventListener('online',()=>carregar(true));document.addEventListener('visibilitychange',()=>{if(!document.hidden)carregar()});setInterval(()=>{if(!document.hidden)carregar(true)},60000);carregar(true);
+
+</script></body></html>
